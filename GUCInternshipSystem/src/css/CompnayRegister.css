@@ -1,0 +1,46 @@
+.company-register-container {
+    max-width: 500px;
+    margin: auto;
+    padding: 2rem;
+    background: #BFD7ED;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .company-register-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .company-register-form label {
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
+  
+  .company-register-form input,
+  .company-register-form select {
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .company-register-form button {
+    padding: 0.75rem;
+    background: #003b73;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .company-register-form button:hover {
+    background: #0074B7;
+  }
+  
+  .logo-preview img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 1rem;
+  }
+  
