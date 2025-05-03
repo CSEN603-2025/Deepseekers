@@ -1,5 +1,6 @@
 
 import React, {useState } from "react";
+import { Link } from "react-router-dom";
 
 import { Container, Card, Form, Button, Nav } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -28,8 +29,11 @@ export default function LoginPage() {
     const user = dummyUsers[role];
     if (email === user.email && password === user.password) {
       setMessage(`Welcome, ${role}!`);
-      //  // ✅ Redirect based on role
+        // ✅ Redirect based on role
         if (role === 'student') navigate('/student/home');
+      else if (role === 'company') navigate('/company/home');
+      else if (role === 'admin') navigate('/admin/home');
+      else if (role === 'faculty') navigate('/faculty/home');
     } else {
       setMessage("Invalid credentials");
     }
@@ -67,7 +71,9 @@ export default function LoginPage() {
 
       {role === 'company' && (
         <div className="text-center mt-3">
-          <a href="/register" className="register-link">New company? Register here</a>
+         <Link to="/register" className="register-link">
+              New company? Register here
+            </Link>
         </div>
       )}
 

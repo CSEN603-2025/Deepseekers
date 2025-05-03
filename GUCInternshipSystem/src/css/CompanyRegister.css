@@ -1,0 +1,79 @@
+/* CompanyRegister.css */
+
+.company-register-container {
+    background-color: #bfd7ed; /* Baby Blue */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .company-register-form {
+    background-color: #ffffff;
+    border: 2px solid #60a3d9; /* Blue Grotto */
+    border-radius: 12px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 59, 115, 0.2); /* Navy Blue shadow */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .company-register-container h2 {
+    text-align: center;
+    font-weight: bold;
+    color: #003b73; /* Navy Blue */
+    margin-bottom: 1.5rem;
+  }
+  
+  .company-register-form label {
+    color: #003b73;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .company-register-form input,
+  .company-register-form select {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #60a3d9;
+    border-radius: 6px;
+    outline: none;
+    font-size: 1rem;
+  }
+  
+  .company-register-form input:focus,
+  .company-register-form select:focus {
+    border-color: #0074b7;
+    box-shadow: 0 0 0 2px rgba(0, 116, 183, 0.2);
+  }
+  
+  .company-register-form button {
+    background-color: #0074b7;
+    color: white;
+    padding: 0.6rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .company-register-form button:hover {
+    background-color: #003b73;
+  }
+  
+  .logo-preview {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .logo-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border: 1px solid #60a3d9;
+    border-radius: 8px;
+  }
+  

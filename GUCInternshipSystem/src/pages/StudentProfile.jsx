@@ -1,5 +1,5 @@
 // /pages/StudentProfile.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NavigationBar from '../components/NavigationBar';
 import '../css/studentProfile.css'; // Assuming you have a CSS file for styling
 
@@ -12,6 +12,7 @@ const majors = [
   { name: 'Pharmacy', semesters: 10 },
   { name: 'Management', semesters: 8 },
   { name: 'Business', semesters: 8 },
+  {name: 'Law', semesters: 8}
 ];
 
 const StudentProfile = () => {
@@ -23,6 +24,19 @@ const StudentProfile = () => {
     semester: '',
   });
 
+  // Load from localStorage when component mounts
+useEffect(() => {
+  const savedProfile = localStorage.getItem('studentProfile');
+  if (savedProfile) {
+    setProfile(JSON.parse(savedProfile));
+    // Also generate semester options if major exists
+    const majorObj = majors.find((m) => m.name === JSON.parse(savedProfile).major);
+    if (majorObj) {
+      const semesters = [...Array(majorObj.semesters)].map((_, i) => i + 1);
+      setSemesterOptions(semesters);
+    }
+  }
+}, []);
     
   const [semesterOptions, setSemesterOptions] = useState([]);
 
@@ -46,10 +60,25 @@ const StudentProfile = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Profile submitted:', profile);
+    localStorage.setItem('studentProfile', JSON.stringify(profile));
     alert("Profile saved successfully!");
   };
 
+  const handleClear = () => {
+    const confirmed = window.confirm("Are you sure you want to clear your profile?");
+    if (confirmed) {
+      localStorage.removeItem('studentProfile');
+      setProfile({
+        jobInterests: '',
+        internships: '',
+        activities: '',
+        major: '',
+        semester: '',
+      });
+      setSemesterOptions([]);
+    }
+  };
+  
   return (
  
       <div className="student-profile-container">
@@ -114,7 +143,12 @@ const StudentProfile = () => {
             </label>
           )}
           
-          <button type="submit">Save Profile</button>
+          <div className="button-row">
+  <button type="submit">Save Profile</button>
+  <div className="right-button">
+    <button type="button" onClick={handleClear}>Clear Profile</button>
+  </div>
+</div>
         </form>
       </div>
   );
