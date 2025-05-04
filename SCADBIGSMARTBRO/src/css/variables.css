@@ -1,0 +1,41 @@
+:root {
+    /* Speckled Eggs Color Palette */
+    --egg-blue: #a7c5eb;
+    --egg-light-blue: #c9ddff;
+    --egg-teal: #8ecae6;
+    --egg-green: #89b0ae;
+    --egg-mint: #bee3db;
+    --egg-cream: #faf9f9;
+    --egg-beige: #f9f7f3;
+    --egg-brown: #9e7b73;
+    --egg-gray: #555b6e;
+    --egg-dark: #2b2d42;
+    
+    /* Functional Colors */
+    --primary: var(--egg-teal);
+    --primary-dark: #5ca6c9;
+    --secondary: var(--egg-green);
+    --accent: var(--egg-brown);
+    --background: var(--egg-beige);
+    --card-bg: var(--egg-cream);
+    --text-primary: var(--egg-dark);
+    --text-secondary: var(--egg-gray);
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-round: 50%;
+  }

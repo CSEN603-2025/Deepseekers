@@ -1,0 +1,107 @@
+/* /pages/StudentProfile.css */
+.student-profile-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #bfd7ed; /* Baby Blue */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(50, 60, 70, 0.1);
+    font-family: 'Segoe UI', sans-serif;
+    color: #2e3c40;
+  }
+  
+  .student-profile-container h2 {
+    color: #003b73;
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  
+  .student-profile-container p {
+    margin-bottom: 20px;
+    font-size: 16px;
+  }
+  
+  .profile-form label {
+    display: block;
+    margin-bottom: 15px;
+    font-weight: 500;
+  }
+  
+  .profile-form textarea,
+  .profile-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #c8d6d4;
+    border-radius: 8px;
+    background-color: #ffffff;
+    resize: vertical;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  
+  .profile-form textarea {
+    height: 100px;
+  }
+  
+  .profile-form select {
+    height: 40px;
+  }
+  
+  .profile-form button {
+    background-color: #a8c3bc; /* soft green-gray */
+    color: #2e3c40;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .profile-form button:hover {
+    background-color: #89ada4;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .button-group button {
+    background-color: #a8c3bc; /* Same soft green-gray */
+    color: #2e3c40;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .button-group button:hover {
+    background-color: #89ada4;
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .right-button button {
+    background-color: #a8c3bc;
+    color: #2e3c40;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .right-button button:hover {
+    background-color: #89ada4;
+  }
+  

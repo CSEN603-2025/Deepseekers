@@ -1,0 +1,53 @@
+/* login.css */
+
+.login-container {
+    background-color: #bfd7ed; /* Baby Blue */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .login-card {
+    background-color: #ffffff;
+    border: 2px solid #60a3d9; /* Blue Grotto */
+    border-radius: 12px;
+    padding: 2rem;
+     width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 59, 115, 0.2); /* Navy Blue shadow */
+  }
+  
+  .login-title {
+    text-align: center;
+    font-weight: bold;
+    color: #003b73; /* Navy Blue */
+  }
+  
+  .custom-tabs .nav-link.active {
+    background-color: #0074b7 !important; /* Royal Blue */
+    color: white !important;
+  }
+  
+  .custom-tabs .nav-link {
+    color: #003b73 !important;
+  }
+  
+  .btn-login {
+    background-color: #0074b7;
+    border-color: #0074b7;
+  }
+  
+  .btn-login:hover {
+    background-color: #003b73;
+    border-color: #003b73;
+  }
+  
+  .register-link {
+    color: #0074b7;
+    text-decoration: none;
+  }
+  
+  .register-link:hover {
+    text-decoration: underline;
+  }
+  

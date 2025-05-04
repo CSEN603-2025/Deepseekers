@@ -1,0 +1,24 @@
+/* /css/navigationBar.css */
+
+.custom-navbar {
+    background-color: #003b73;
+    padding: 0.8rem 1rem;
+  }
+  
+  .custom-navbar .navbar-nav .nav-link {
+    color: #bfd7ed;
+    font-weight: 500;
+    transition: color 0.3s;
+  }
+  
+  .custom-navbar .navbar-nav .nav-link:hover {
+    color: #60a3d9;
+  }
+  
+  .custom-navbar .brand-text {
+    color: #bfd7ed;
+    font-size: 1.4rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  
