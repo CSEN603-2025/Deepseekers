@@ -2,7 +2,8 @@
 
 .student-home {
     padding: 2rem;
-    background-color: #bfd7ed; /* Baby Blue */
+    padding-bottom: 3rem;
+    background-color: #f8f9fa; /* Light Gray */
     min-height: 100vh;
     
   }
@@ -36,4 +37,46 @@
     border-left: 5px solid #0074b7;
     border-radius: 5px;
   }
-  
+
+  .internships-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-top: 1rem;
+  }
+
+  .page-title {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Custom styling for search and filter controls */
+  .input-group .input-group-text {
+    background-color: white;
+    border-right: none;
+  }
+
+  .input-group .form-control {
+    border-left: none;
+  }
+
+  .input-group .form-control:focus {
+    box-shadow: none;
+    border-color: #ced4da;
+  }
+
+  .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .internships-container {
+      padding: 1rem;
+    }
+    
+    .page-title {
+      font-size: 1.75rem;
+    }
+  }

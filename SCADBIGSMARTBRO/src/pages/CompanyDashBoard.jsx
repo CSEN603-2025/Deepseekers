@@ -3,15 +3,29 @@ import Profile from "../components/Profile";
 import LogoutButton from "../components/LogoutButton";
 import PostInternship from "../components/PostInternship";
 import { Card, Badge, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 function CompanyDashBoard() {
     const [postedInternships, setPostedInternships] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
+    const navigate = useNavigate();
     
-    // Load posted internships from localStorage
+    // Load company data and posted internships from localStorage
     useEffect(() => {
+        // Get user data
+        const userData = localStorage.getItem('currentUser');
+        
+        if (userData) {
+            setCurrentUser(JSON.parse(userData));
+        } else {
+            // Redirect to login if no user data is found
+            navigate('/');
+        }
+        
+        // Get internships data
         const internships = JSON.parse(localStorage.getItem('postedInternships')) || [];
         setPostedInternships(internships);
-    }, []);
+    }, [navigate]);
     
     // Listen for changes to localStorage
     useEffect(() => {
@@ -24,12 +38,16 @@ function CompanyDashBoard() {
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
     
+    if (!currentUser) {
+        return <div>Loading profile...</div>;
+    }
+    
     return (
         <div>
             <div className="logout-container" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
                 <LogoutButton />
             </div>
-            <Profile name="Company Name" navigateTo="/company/edit-profile" showEditButton={false} />
+            <Profile name={currentUser.name} navigateTo="/company/edit-profile" showEditButton={false} />
             
             {/* Post Internship Component */}
             <div style={{ marginTop: '-50px' }}>
