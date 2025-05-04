@@ -268,6 +268,102 @@
     background-color: #f8f9fa;
   }
   
+  /* Filter system styles */
+  .filter-section-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .filter-count-badge {
+    background-color: var(--accent);
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 50%;
+  }
+  
+  .clear-filters-btn {
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .clear-filters-btn:hover {
+    color: var(--primary-dark);
+    text-decoration: underline !important;
+  }
+  
+  .filter-accordion {
+    margin-top: 1rem;
+  }
+  
+  .filter-accordion .accordion-item {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+  
+  .filter-accordion .accordion-header button {
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    color: var(--text-primary);
+  }
+  
+  .filter-accordion .accordion-header button:not(.collapsed) {
+    background-color: #f0f0f0;
+    color: var(--text-primary);
+    box-shadow: none;
+  }
+  
+  .filter-accordion .accordion-body {
+    padding: 1rem;
+  }
+  
+  .filter-accordion .form-check-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+  
+  .filter-accordion .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .industry-filters {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .results-summary {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-md);
+  }
+  
+  .results-count {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+  
+  .no-results-container {
+    background-color: #f8f9fa;
+    border-radius: var(--radius-md);
+    padding: 2rem;
+  }
+  
+  /* Internships list */
+  .internships-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .scad-internships-container {
