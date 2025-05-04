@@ -19,11 +19,37 @@
   padding: var(--spacing-md, 16px) var(--spacing-lg, 24px);
 }
 
-.post-title {
+/* Company name styling */
+.company-name-container {
+  border-bottom: 1px dashed var(--egg-teal, #8ecae6);
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.company-name {
   margin: 0;
+  font-weight: 700;
+  color: var(--accent, #9e7b73);
+  font-size: 1.5rem;
+}
+
+/* Internship title styling */
+.internship-title-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.internship-label {
+  font-weight: 600;
+  color: var(--text-secondary, #555b6e);
+}
+
+.post-title {
   font-weight: 600;
   color: var(--text-primary, #2b2d42);
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 
 .company-name {
@@ -209,6 +235,32 @@
   color: var(--text-primary, #2b2d42);
 }
 
+/* Posting info section */
+.posting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.posting-date, .applicants-count {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #555b6e);
+}
+
+.applicants-count-value {
+  font-weight: 600;
+  color: var(--accent, #9e7b73);
+}
+
+/* Already applied button */
+.already-applied-button {
+  background-color: var(--egg-green, #89b0ae);
+  border-color: var(--egg-green, #89b0ae);
+  color: white;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .dates-section {
@@ -223,5 +275,9 @@
   .internship-post .card-header,
   .internship-post .card-footer {
     padding: var(--spacing-md, 16px);
+  }
+  
+  .company-name {
+    font-size: 1.25rem;
   }
 }

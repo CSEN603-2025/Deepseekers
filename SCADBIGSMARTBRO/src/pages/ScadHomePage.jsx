@@ -31,9 +31,8 @@ export default function ScadHomePage() {
     const filteredAndSortedInternships = internships
         .filter(internship => 
             searchTerm === '' || 
-            internship.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-            (internship.description && internship.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (internship.department && internship.department.toLowerCase().includes(searchTerm.toLowerCase()))
+            (internship.title && internship.title.toLowerCase().includes(searchTerm.toLowerCase())) || 
+            (internship.companyName && internship.companyName.toLowerCase().includes(searchTerm.toLowerCase()))
         )
         .sort((a, b) => {
             if (sortBy === 'newest') {
@@ -70,10 +69,11 @@ export default function ScadHomePage() {
                                 <i className="bi bi-search"></i>
                             </InputGroup.Text>
                             <Form.Control
-                                placeholder="Search internships"
+                                placeholder="Search by job title or company name"
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 value={searchTerm}
                             />
+                        
                         </InputGroup>
                     </Col>
                     <Col md={4}>

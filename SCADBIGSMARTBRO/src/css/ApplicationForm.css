@@ -1,0 +1,122 @@
+.application-form-modal .modal-content {
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.application-form-modal .modal-header {
+  background-color: var(--egg-light-blue, #c9ddff);
+  border-bottom: 1px solid var(--egg-teal, #8ecae6);
+  padding: 1.25rem 1.5rem;
+}
+
+.application-form-modal .modal-title {
+  color: var(--text-primary, #2b2d42);
+  font-weight: 700;
+}
+
+.application-form-modal .internship-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary, #555b6e);
+  margin-top: 0.25rem;
+}
+
+.application-form-modal .modal-body {
+  padding: 1.5rem;
+  background-color: var(--egg-cream, #faf9f9);
+}
+
+.application-form-modal .modal-footer {
+  border-top: 1px solid var(--egg-mint, #bee3db);
+  padding: 1rem 1.5rem;
+  background-color: var(--egg-beige, #f9f7f3);
+}
+
+.application-form-modal .form-label {
+  font-weight: 600;
+  color: var(--text-primary, #2b2d42);
+}
+
+.application-form-modal .form-control {
+  border: 1px solid var(--egg-mint, #bee3db);
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.application-form-modal .form-control:focus {
+  border-color: var(--egg-teal, #8ecae6);
+  box-shadow: 0 0 0 0.2rem rgba(142, 202, 230, 0.25);
+}
+
+.application-form-modal hr {
+  border-color: var(--egg-mint, #bee3db);
+  opacity: 0.5;
+}
+
+.application-form-modal h5 {
+  color: var(--text-primary, #2b2d42);
+  font-weight: 600;
+}
+
+.document-upload {
+  margin-bottom: 1rem;
+}
+
+.document-upload .input-group {
+  display: flex;
+  align-items: center;
+}
+
+.document-upload .form-control {
+  padding: 0.5rem;
+}
+
+.document-upload .clear-file {
+  color: var(--text-secondary, #555b6e);
+  background: white;
+  border-color: var(--egg-mint, #bee3db);
+  border-left: none;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.document-upload .clear-file:hover {
+  background-color: var(--egg-light-blue, #c9ddff);
+}
+
+.document-upload .selected-file {
+  font-size: 0.85rem;
+  color: var(--text-primary, #2b2d42);
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.application-form-modal .btn-primary {
+  background-color: var(--egg-teal, #8ecae6);
+  border-color: var(--egg-teal, #8ecae6);
+  color: var(--text-primary, #2b2d42);
+  font-weight: 600;
+}
+
+.application-form-modal .btn-primary:hover {
+  background-color: var(--primary-dark, #5ca6c9);
+  border-color: var(--primary-dark, #5ca6c9);
+  color: white;
+}
+
+.application-form-modal .btn-secondary {
+  background-color: var(--text-secondary, #555b6e);
+  border-color: var(--text-secondary, #555b6e);
+  color: white;
+  font-weight: 600;
+}
+
+.application-form-modal .btn-secondary:hover {
+  background-color: var(--text-primary, #2b2d42);
+  border-color: var(--text-primary, #2b2d42);
+}
+
+.application-form-modal .alert {
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+}

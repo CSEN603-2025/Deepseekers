@@ -324,8 +324,8 @@ body {
 .status-badge {
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
+  padding: 0.4rem 0.75rem;
+  border-radius: 100px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -345,6 +345,11 @@ body {
   color: #388E3C;
 }
 
+.status-rejected {
+  background-color: #dc3545 !important;
+  color: white;
+}
+
 .internship-details {
   margin-top: 0.75rem;
 }
@@ -358,4 +363,186 @@ body {
 .applied-date {
   font-size: 0.85rem;
   color: #888;
+}
+
+/* Application status styling */
+.internships-applied-card .application-item {
+  padding: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.internships-applied-card .application-item:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.internships-applied-card .internship-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary, #2b2d42);
+}
+
+.internships-applied-card .company-name {
+  color: var(--accent, #9e7b73);
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.internships-applied-card .application-date {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #555b6e);
+}
+
+/* Status badge styling */
+.status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.status-badge {
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  border-radius: 100px;
+}
+
+.status-pending {
+  background-color: #ffc107 !important;
+  color: #212529;
+}
+
+.status-finalized {
+  background-color: #0dcaf0 !important;
+  color: #212529;
+}
+
+.status-accepted {
+  background-color: #198754 !important;
+  color: white;
+}
+
+.status-rejected {
+  background-color: #dc3545 !important;
+  color: white;
+}
+
+.status-description {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  text-align: right;
+  max-width: 200px;
+  display: block;
+}
+
+.view-application-btn {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.75rem;
+}
+
+/* Applied Internships Container Styling */
+.applied-internships-container {
+  margin-top: 2rem;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.internships-applied-card {
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-md, 0 4px 8px rgba(0, 0, 0, 0.1));
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.internships-applied-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg, 0 8px 16px rgba(0, 0, 0, 0.15));
+}
+
+.internships-applied-card .card-header {
+  background-color: var(--egg-light-blue, #c9ddff);
+  border-bottom: 1px solid var(--egg-teal, #8ecae6);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.internships-applied-card .card-header h5 {
+  color: var(--text-primary, #2b2d42);
+  font-weight: 600;
+  margin: 0;
+}
+
+.internships-applied-card .badge {
+  background-color: var(--egg-teal, #8ecae6);
+  color: var(--text-primary, #2b2d42);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.85rem;
+}
+
+/* Application Item Styling - Enhanced */
+.application-item {
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.application-item:hover {
+  border-left-color: var(--egg-teal, #8ecae6);
+  background-color: var(--egg-cream, #faf9f9);
+}
+
+/* Status Badge Styling - Enhanced to match website palette */
+.status-pending {
+  background-color: var(--egg-yellow, #ffd166) !important;
+  color: var(--text-primary, #2b2d42);
+}
+
+.status-finalized {
+  background-color: var(--egg-teal, #8ecae6) !important;
+  color: var(--text-primary, #2b2d42);
+}
+
+.status-accepted {
+  background-color: var(--egg-green, #89b0ae) !important;
+  color: white;
+}
+
+.status-rejected {
+  background-color: var(--accent, #9e7b73) !important;
+  color: white;
+}
+
+.status-description {
+  color: var(--text-secondary, #555b6e);
+  font-style: italic;
+  line-height: 1.3;
+}
+
+/* View Application Button - Match with website */
+.view-application-btn {
+  background-color: transparent;
+  border: 1px solid var(--egg-teal, #8ecae6);
+  color: var(--egg-teal, #8ecae6);
+  transition: all 0.2s ease;
+}
+
+.view-application-btn:hover {
+  background-color: var(--egg-light-blue, #c9ddff);
+  color: var(--text-primary, #2b2d42);
+  border-color: var(--egg-teal, #8ecae6);
+}
+
+/* No applications message */
+.no-applications {
+  background-color: var(--egg-cream, #faf9f9);
+  padding: 2rem !important;
+  border-radius: 0 0 var(--radius-md, 8px) var(--radius-md, 8px);
+  text-align: center;
+}
+
+.no-applications p {
+  color: var(--text-secondary, #555b6e);
+  font-style: italic;
 }

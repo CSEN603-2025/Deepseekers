@@ -2,19 +2,115 @@
 import React, { useState, useEffect } from 'react';
 import NavigationBar from '../components/NavigationBar';
 import Post from '../components/Post';
-import { Container, Row, Col, Form, InputGroup } from 'react-bootstrap';
+import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge } from 'react-bootstrap';
+import { companies } from '../Data/UserData';
+import { clearLocalStorage, clearSpecificLocalStorageData } from '../Data/ClearLocalStorage';
 import '../css/studentHome.css';
 
 const StudentHomePage = () => {
   const [internships, setInternships] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Filter states
   const [filterPaid, setFilterPaid] = useState(false);
-
+  const [filterUnpaid, setFilterUnpaid] = useState(false);
+  const [selectedIndustries, setSelectedIndustries] = useState([]);
+  const [durationFilter, setDurationFilter] = useState('all');
+  const [activeFilters, setActiveFilters] = useState(0);
+  
+  // Get unique list of industries from companies data
+  const industries = [...new Set(companies.map(company => company.industry))];
+  
+  // Duration options for filtering
+  const durationOptions = [
+    { value: 'all', label: 'All Durations' },
+    { value: 'short', label: 'Short Term (< 3 months)' },
+    { value: 'medium', label: 'Medium Term (3-6 months)' },
+    { value: 'long', label: 'Long Term (> 6 months)' }
+  ];
+  
+  // Function to handle clearing localStorage
+  const handleClearLocalStorage = () => {
+    // Clear only posted internships
+    clearSpecificLocalStorageData(['postedInternships']);
+    // Reload the page to reflect changes
+    window.location.reload();
+  };
+  
+  // Helper function to parse duration string into months - moved up before it's used
+  const parseDuration = (durationString) => {
+    if (!durationString) return 0;
+    
+    try {
+      // Convert to lowercase for case-insensitive matching
+      const duration = durationString.toLowerCase();
+      
+      // Check for common duration patterns
+      let totalMonths = 0;
+      
+      // Look for months
+      const monthsPattern = /(\d+)\s*(month|months|mo)/i;
+      const monthsMatch = duration.match(monthsPattern);
+      if (monthsMatch && monthsMatch[1]) {
+        totalMonths += parseInt(monthsMatch[1], 10) || 0;
+      }
+      
+      // Look for weeks
+      const weeksPattern = /(\d+)\s*(week|weeks|wk)/i;
+      const weeksMatch = duration.match(weeksPattern);
+      if (weeksMatch && weeksMatch[1]) {
+        totalMonths += (parseInt(weeksMatch[1], 10) || 0) / 4;
+      }
+      
+      // Look for years
+      const yearsPattern = /(\d+)\s*(year|years|yr)/i;
+      const yearsMatch = duration.match(yearsPattern);
+      if (yearsMatch && yearsMatch[1]) {
+        totalMonths += (parseInt(yearsMatch[1], 10) || 0) * 12;
+      }
+      
+      // Handle cases like "Summer 2025" or other text-based descriptions
+      if (totalMonths === 0) {
+        // If contains "summer", assume 3 months
+        if (duration.includes('summer')) {
+          totalMonths = 3;
+        }
+        // If contains "semester", assume 4 months
+        else if (duration.includes('semester')) {
+          totalMonths = 4;
+        }
+        // If a simple number is provided (like "3")
+        else {
+          const simpleNumber = /^(\d+)$/;
+          const numberMatch = duration.match(simpleNumber);
+          if (numberMatch && numberMatch[1]) {
+            totalMonths = parseInt(numberMatch[1], 10) || 0;
+          }
+        }
+      }
+      
+      return totalMonths;
+    } catch (error) {
+      console.error("Error parsing duration:", error);
+      return 0; // Return 0 as a fallback instead of crashing
+    }
+  };
+  
   // Load internships from localStorage
   useEffect(() => {
     const loadInternships = () => {
       const storedInternships = JSON.parse(localStorage.getItem('postedInternships')) || [];
-      setInternships(storedInternships);
+      
+      // Enrich internships with company data for filtering by industry
+      const enrichedInternships = storedInternships.map(internship => {
+        const company = companies.find(c => c.id === internship.companyId || c.name === internship.companyName);
+        return {
+          ...internship,
+          industry: company ? company.industry : 'Unknown'
+        };
+      });
+      
+      setInternships(enrichedInternships);
     };
     
     loadInternships();
@@ -27,76 +123,222 @@ const StudentHomePage = () => {
     };
   }, []);
   
-  // Filter internships based on search term and paid filter
+  // Calculate active filters count
+  useEffect(() => {
+    let count = 0;
+    if (filterPaid || filterUnpaid) count++;
+    if (selectedIndustries.length > 0) count++;
+    if (durationFilter !== 'all') count++;
+    setActiveFilters(count);
+  }, [filterPaid, filterUnpaid, selectedIndustries, durationFilter]);
+  
+  // Handle industry selection
+  const handleIndustryChange = (industry) => {
+    if (selectedIndustries.includes(industry)) {
+      setSelectedIndustries(selectedIndustries.filter(i => i !== industry));
+    } else {
+      setSelectedIndustries([...selectedIndustries, industry]);
+    }
+  };
+  
+  // Clear all filters
+  const clearFilters = () => {
+    setFilterPaid(false);
+    setFilterUnpaid(false);
+    setSelectedIndustries([]);
+    setDurationFilter('all');
+    setSearchTerm('');
+  };
+  
+  // Filter internships based on all criteria
   const filteredInternships = internships.filter(internship => {
+    // Match search term - ONLY search by job title or company name
     const matchesSearch = searchTerm === '' || 
-      internship.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (internship.description && internship.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (internship.department && internship.department.toLowerCase().includes(searchTerm.toLowerCase()));
+      internship.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      internship.companyName?.toLowerCase().includes(searchTerm.toLowerCase());
       
-    const matchesPaidFilter = !filterPaid || (filterPaid && internship.paid);
+    // Match paid/unpaid filter
+    let matchesPaymentFilter = true;
+    if (filterPaid && !filterUnpaid) {
+      matchesPaymentFilter = internship.paid === true;
+    } else if (!filterPaid && filterUnpaid) {
+      matchesPaymentFilter = internship.paid === false;
+    } else if (filterPaid && filterUnpaid) {
+      matchesPaymentFilter = true; // Show both if both filters are active
+    }
     
-    return matchesSearch && matchesPaidFilter;
+    // Match industry filter
+    const matchesIndustryFilter = selectedIndustries.length === 0 || 
+      selectedIndustries.includes(internship.industry);
+        
+    // Match duration filter
+    let matchesDurationFilter = true;
+    if (durationFilter !== 'all' && internship.duration) {
+      const durationInMonths = parseDuration(internship.duration);
+      
+      if (durationFilter === 'short') {
+        matchesDurationFilter = durationInMonths < 3;
+      } else if (durationFilter === 'medium') {
+        matchesDurationFilter = durationInMonths >= 3 && durationInMonths <= 6;
+      } else if (durationFilter === 'long') {
+        matchesDurationFilter = durationInMonths > 6;
+      }
+    }
+    
+    return matchesSearch && matchesPaymentFilter && matchesIndustryFilter && matchesDurationFilter;
   });
 
   return (    
     <div className="student-home">
-      <Container className="internships-container mt-4">
-        <Row className="mb-4">
-          <Col>
-            <h2 className="page-title">Available Internships</h2>
-            <p className="text-muted">Find and apply for internships that match your skills and interests</p>
+  
+      <Container fluid className="internships-page-container">
+        <Row>
+          <Col md={3} className="filters-sidebar">
+            <div className="filters-container">
+              <h2 className="page-title">Available Internships</h2>
+              <p className="text-muted">Find and apply for internships that match your skills and interests</p>
+                            
+           
+              
+              <div className="search-box mb-4">
+                <label htmlFor="search-input" className="fw-bold mb-2">Search Internships</label>
+                <InputGroup>
+                  <InputGroup.Text id="search-addon">
+                    <i className="bi bi-search"></i>
+                  </InputGroup.Text>
+                  <Form.Control
+                    id="search-input"
+                    placeholder="Search by job title or company name"
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    value={searchTerm}
+                  />
+                </InputGroup>
+                <small className="text-muted mt-1">
+                  Search results will only match job title or company name
+                </small>
+              </div>
+              
+              <div className="filter-options">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="filter-section-title m-0">
+                    Filters
+                    {activeFilters > 0 && (
+                      <Badge className="ms-2 filter-count-badge">{activeFilters}</Badge>
+                    )}
+                  </h5>
+                  
+                  {activeFilters > 0 && (
+                    <Button 
+                      variant="link" 
+                      className="p-0 text-decoration-none clear-filters-btn"
+                      onClick={clearFilters}
+                    >
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                
+                <Accordion defaultActiveKey="0" className="filter-accordion">
+                  {/* Payment Type Filter */}
+                  <Accordion.Item eventKey="0">
+                    <Accordion.Header>Payment Type</Accordion.Header>
+                    <Accordion.Body>
+                      <Form.Check 
+                        type="checkbox"
+                        id="paid-filter"
+                        label="Paid"
+                        checked={filterPaid}
+                        onChange={(e) => setFilterPaid(e.target.checked)}
+                        className="mb-2"
+                      />
+                      <Form.Check 
+                        type="checkbox"
+                        id="unpaid-filter"
+                        label="Unpaid"
+                        checked={filterUnpaid}
+                        onChange={(e) => setFilterUnpaid(e.target.checked)}
+                      />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                  
+                  {/* Industry Filter */}
+                  <Accordion.Item eventKey="1">
+                    <Accordion.Header>Industry</Accordion.Header>
+                    <Accordion.Body className="industry-filters">
+                      {industries.map(industry => (
+                        <Form.Check 
+                          key={industry}
+                          type="checkbox"
+                          id={`industry-${industry}`}
+                          label={industry}
+                          checked={selectedIndustries.includes(industry)}
+                          onChange={() => handleIndustryChange(industry)}
+                          className="mb-2"
+                        />
+                      ))}
+                    </Accordion.Body>
+                  </Accordion.Item>
+                  
+                  {/* Duration Filter */}
+                  <Accordion.Item eventKey="2">
+                    <Accordion.Header>Duration</Accordion.Header>
+                    <Accordion.Body>
+                      <Form.Select 
+                        value={durationFilter}
+                        onChange={(e) => setDurationFilter(e.target.value)}
+                      >
+                        {durationOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
+              </div>
+            </div>
           </Col>
-        </Row>
-        
-        <Row className="mb-4">
-          <Col md={8}>
-            <InputGroup>
-              <InputGroup.Text id="search-addon">
-                <i className="bi bi-search"></i>
-              </InputGroup.Text>
-              <Form.Control
-                placeholder="Search by title, department, or keywords"
-                onChange={(e) => setSearchTerm(e.target.value)}
-                value={searchTerm}
-              />
-            </InputGroup>
-          </Col>
-          <Col md={4}>
-            <Form.Check 
-              type="switch"
-              id="paid-only-switch"
-              label="Show paid internships only"
-              checked={filterPaid}
-              onChange={(e) => setFilterPaid(e.target.checked)}
-            />
-          </Col>
-        </Row>
-        
-        {filteredInternships.length > 0 ? (
-          <Row>
-            <Col>
-              {filteredInternships.map((internship) => (
-                <Post 
-                  key={internship.id} 
-                  internship={internship} 
-                  isStudent={true} 
-                />
-              ))}
-            </Col>
-          </Row>
-        ) : (
-          <Row>
-            <Col className="text-center py-5">
-              <h5>No internships found</h5>
-              <p className="text-muted">
-                {internships.length === 0 
-                  ? "No internships have been posted yet. Check back later!" 
-                  : "No internships match your search criteria. Try adjusting your filters."}
+          
+          <Col md={9} className="posts-container">
+            <div className="results-summary mb-3">
+              <p className="results-count">
+                Showing {filteredInternships.length} internship{filteredInternships.length !== 1 ? 's' : ''}
+                {activeFilters > 0 && ' with applied filters'}
               </p>
-            </Col>
-          </Row>
-        )}
+            </div>
+            
+            {filteredInternships.length > 0 ? (
+              <div className="internships-list">
+                {filteredInternships.map((internship) => (
+                  <Post 
+                    key={internship.id} 
+                    internship={internship} 
+                    isStudent={true} 
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="no-results-container text-center py-5">
+                <h5>No internships found</h5>
+                <p className="text-muted">
+                  {internships.length === 0 
+                    ? "No internships have been posted yet. Check back later!" 
+                    : "No internships match your search criteria. Try adjusting your filters."}
+                </p>
+                {activeFilters > 0 && (
+                  <Button 
+                    variant="outline-primary" 
+                    onClick={clearFilters}
+                    className="mt-3"
+                  >
+                    Clear all filters
+                  </Button>
+                )}
+              </div>
+            )}
+          </Col>
+        </Row>
       </Container>
     </div>
   );

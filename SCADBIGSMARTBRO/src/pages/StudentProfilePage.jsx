@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Container } from 'react-bootstrap';
 import Profile from '../components/Profile';
 import InternshipsAppliedFor from '../components/InternshipsAppliedFor';
 import LogoutButton from '../components/LogoutButton';
+
 import { useNavigate } from 'react-router-dom';
+import '../css/StudentProfilePage.css';
 
 function StudentProfilePage() {
     const [currentUser, setCurrentUser] = useState(null);
@@ -25,12 +28,17 @@ function StudentProfilePage() {
     }
 
     return (
-        <div>
-            <div className="logout-container" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
-                <LogoutButton />
-            </div>
-            <Profile name={currentUser.name} navigateTo="/student/edit-profile" />
-            <InternshipsAppliedFor />
+        <div className="student-profile-page">   
+            <Container className="profile-container py-4">
+                <div className="logout-container" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
+                    <LogoutButton />
+                </div>
+                <Profile name={currentUser.name} navigateTo="/student/edit-profile" />
+                
+                <div className="applied-internships-container mt-4">
+                    <InternshipsAppliedFor />
+                </div>
+            </Container>
         </div>
     );
 }

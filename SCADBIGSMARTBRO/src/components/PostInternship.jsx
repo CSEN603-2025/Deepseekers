@@ -13,7 +13,8 @@ function PostInternship() {
         salary: '',
         deadline: '',
         startDate: '',
-        department: ''
+        department: '',
+        applicantsCount: 0 // Adding applicantsCount field initialized to 0
     });
 
     // Always show form
@@ -37,6 +38,11 @@ function PostInternship() {
             return;
         }
 
+        // Get current company user from localStorage
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const companyName = currentUser && currentUser.name ? currentUser.name : 'Unknown Company';
+        const companyId = currentUser && currentUser.id ? currentUser.id : null;
+
         // In a real app, you would send this data to a server
         console.log('Internship posted:', formData);
         
@@ -46,7 +52,11 @@ function PostInternship() {
             ...formData,
             id: Date.now(),
             date: new Date().toISOString(),
-            status: 'active'
+            status: 'active',
+            companyName: companyName,
+            companyId: companyId,
+            applicantsCount: 0, // Ensure applicantsCount is set to 0 for new postings
+            applications: [] // Array to store applications for this internship
         });
         localStorage.setItem('postedInternships', JSON.stringify(internships));
         
@@ -61,7 +71,8 @@ function PostInternship() {
             salary: '',
             deadline: '',
             startDate: '',
-            department: ''
+            department: '',
+            applicantsCount: 0 // Reset applicantsCount too
         });
         setSubmitted(true);
         setError('');
