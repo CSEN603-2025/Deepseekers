@@ -1,6 +1,45 @@
 @import './variables.css';
 
 /* General Styles */
+/* Add these new styles at the top of your existing CSS */
+.compact-profile-container {
+  width: 100%;
+  position: relative;
+  margin-bottom: 0;
+}
+
+.profile_background_image {
+  height: 150px !important;
+  margin-bottom: 0;
+}
+
+.profile-info {
+  margin-top: -80px !important;
+  padding: 20px 20px 10px !important;
+}
+
+.profile-picture-placeholder {
+  width: 120px !important;
+  height: 120px !important;
+  top: -60px !important;
+}
+
+.profile-header {
+  margin-top: 10px !important;
+  margin-left: 140px !important;
+}
+
+.profile-edit-buttons {
+  gap: 8px !important;
+}
+
+.edit-button, .edit-profile-button {
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+}
+
+/* Keep all your existing styles below this line */
+/* ... rest of your existing CSS ... */
 * {
   margin: 0;
   padding: 0;
@@ -52,7 +91,7 @@ body {
 }
 
 .profile-name {
-  margin-left: 180px;
+  margin-left: 0px;
   font-size: 26px;
   font-weight: 600;
   color: var(--text-primary);
