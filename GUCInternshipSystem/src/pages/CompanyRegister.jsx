@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Form, Button, Container } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/CompanyRegister.css';
@@ -10,9 +11,30 @@ const CompanyRegister = () => {
     companySize: '',
     email: '',
     logo: null,
+    taxDocument: null,
   });
 
+  const industriesList = [
+    'Technology',
+    'Finance',
+    'Healthcare',
+    'Education',
+    'Manufacturing',
+    'Retail',
+    'Telecommunications',
+    'Media',
+    'Automotive',
+    'Construction',
+    'Energy',
+    'Agriculture',
+    'Hospitality',
+    'Consulting',
+    'Other'
+  ];
+
   const [logoPreview, setLogoPreview] = useState(null);
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -20,6 +42,9 @@ const CompanyRegister = () => {
       const file = files[0];
       setFormData({ ...formData, logo: file });
       setLogoPreview(URL.createObjectURL(file));
+    } else if (name === 'taxDocument') {
+      const file = files[0];
+      setFormData({ ...formData, taxDocument: file });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -33,9 +58,10 @@ const CompanyRegister = () => {
       !formData.industry ||
       !formData.companySize ||
       !formData.email ||
-      !formData.logo
+      !formData.logo ||
+      !formData.taxDocument
     ) {
-      alert('Please fill in all fields.');
+      alert('Please fill in all fields and upload all required documents.');
       return;
     }
 
@@ -45,8 +71,13 @@ const CompanyRegister = () => {
       return;
     }
 
+    const existingCompanies = JSON.parse(localStorage.getItem("registeredCompanies")) || [];
+    existingCompanies.push({ ...formData, status: "pending" });
+    localStorage.setItem("registeredCompanies", JSON.stringify(existingCompanies));
+
     console.log('Form Data:', formData);
     alert('Company registered successfully!');
+    navigate('/'); 
   };
 
   return (
@@ -69,14 +100,17 @@ const CompanyRegister = () => {
 
           <Form.Group className="mb-3">
             <Form.Label>Industry</Form.Label>
-            <Form.Control
-              type="text"
+            <Form.Select
               name="industry"
               value={formData.industry}
               onChange={handleChange}
-              placeholder="Enter industry"
               required
-            />
+            >
+              <option value="">-- Select Industry --</option>
+              {industriesList.map((industry, index) => (
+                <option key={index} value={industry}>{industry}</option>
+              ))}
+            </Form.Select>
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -123,6 +157,17 @@ const CompanyRegister = () => {
               <img src={logoPreview} alt="Logo Preview" />
             </div>
           )}
+          
+          <Form.Group className="mb-3">
+            <Form.Label>Tax Document (PDF only)</Form.Label>
+            <Form.Control
+              type="file"
+              name="taxDocument"
+              accept="application/pdf"
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
 
           <Button className="btn-login w-100" type="submit">
             Register

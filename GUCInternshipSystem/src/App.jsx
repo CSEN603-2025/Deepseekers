@@ -1,11 +1,18 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import StudentHomePage from "./pages/StudentHomePage";
-import StudentProfile from "./pages/StudentProfile";
+import EditStudentProfile from "./pages/EditStudentProfile";
+import StudentProfilePage from "./pages/StudentProfilePage";
 import NavigationBar from "./components/NavigationBar";
 import CompanyRegister from "./pages/CompanyRegister";
 
 import "./App.css";
+import ScadHomePage from "./pages/ScadHomePage";
+import ScadNavigationBar from "./components/ScadNavigationBar";
+import ScadCompanyApplications from "./pages/ScadCompanyApplications";
+
+
+
 
 function App() {
   return (
@@ -29,13 +36,42 @@ function App() {
             <>
               <NavigationBar />
               <main className="main-content">
-                <StudentProfile />
+                <StudentProfilePage />
               </main>
             </>
           }
         />
-
-        <Route path="/register" element={<CompanyRegister />} />
+          <Route
+          path="/student/edit-profile"
+          element={
+            <>
+              <NavigationBar />
+              <main className="main-content">
+                <EditStudentProfile />
+              </main>
+            </>
+          }
+        />
+        <Route path="/register" element={<CompanyRegister />} /> 
+        <Route
+          path="/scad/home"
+          element={
+            <>
+              <ScadNavigationBar />
+              <main className="main-content">
+                <ScadHomePage />
+              </main>
+            </>
+          }
+        />
+        <Route path="/scad/company-applications" element={
+          <>
+          <ScadNavigationBar />
+          <main className="main-content">
+          <ScadCompanyApplications />
+          </main>
+          </>}
+          />
       </Routes>
     </BrowserRouter>
   );

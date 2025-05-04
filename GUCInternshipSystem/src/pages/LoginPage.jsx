@@ -12,7 +12,7 @@ import '../css/login.css';
 const dummyUsers = {
   student: { email: "muhamed@student.guc.edu.eg", password: "123456" },
   company: { email: "company@company.com", password: "123456" },
-  admin: { email: "admin@scad.edu", password: "123456" },
+  scad: { email: "scad@guc.edu.eg", password: "123456" },
   faculty: { email: "faculty@uni.edu", password: "123456" },
 };
 
@@ -32,7 +32,7 @@ export default function LoginPage() {
         // ✅ Redirect based on role
         if (role === 'student') navigate('/student/home');
       else if (role === 'company') navigate('/company/home');
-      else if (role === 'admin') navigate('/admin/home');
+      else if (role === 'scad') navigate('/scad/home');
       else if (role === 'faculty') navigate('/faculty/home');
     } else {
       setMessage("Invalid credentials");

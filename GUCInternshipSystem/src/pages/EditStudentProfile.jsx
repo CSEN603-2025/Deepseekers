@@ -1,7 +1,8 @@
 // /pages/StudentProfile.jsx
 import React, { useState, useEffect } from 'react';
-import NavigationBar from '../components/NavigationBar';
-import '../css/studentProfile.css'; // Assuming you have a CSS file for styling
+import '../css/EditStudentProfile.css';
+
+
 
 const majors = [
   { name: 'MET', semesters: 10 },
@@ -15,7 +16,7 @@ const majors = [
   {name: 'Law', semesters: 8}
 ];
 
-const StudentProfile = () => {
+const EditStudentProfile = () => {
   const [profile, setProfile] = useState({
     jobInterests: '',
     internships: '',
@@ -154,4 +155,4 @@ useEffect(() => {
   );
 };
 
-export default StudentProfile;
+export default EditStudentProfile;
