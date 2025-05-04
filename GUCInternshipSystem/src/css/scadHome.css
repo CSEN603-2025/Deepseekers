@@ -69,10 +69,157 @@
   }
   
   .company-detail-card {
-    background-color: #e1ecf4;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border: 2px solid #0074b7;
+    background-color: #f8f9fa;
+    padding: 1.2rem;
+    margin-top: 0.5rem;
     border-radius: 5px;
+    border-left: 5px solid #60a3d9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .company-detail-card h4 {
+    color: #003b73;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.5rem;
   }
   
+  .detail-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .company-details-info {
+    flex: 3;
+    min-width: 300px;
+  }
+  
+  .company-logo-container {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .company-logo-container h5 {
+    margin-bottom: 0.8rem;
+    color: #003b73;
+  }
+  
+  .company-logo img {
+    max-width: 150px;
+    max-height: 150px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 0.5rem;
+    background-color: white;
+  }
+  
+  .no-logo {
+    padding: 2rem;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    color: #6c757d;
+    text-align: center;
+    font-style: italic;
+  }
+  
+  .document-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+  }
+  
+  .document-section h5 {
+    color: #003b73;
+    margin-bottom: 1rem;
+  }
+  
+  .document-container {
+    background-color: white;
+    border-radius: 5px;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+  }
+  
+  .document-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .document-item:last-child {
+    border-bottom: none;
+  }
+  
+  .document-label {
+    font-weight: 500;
+    color: #495057;
+  }
+  
+  .document-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .document-name {
+    color: #6c757d;
+    font-style: italic;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .view-document-btn {
+    background-color: #0074b7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .view-document-btn:hover {
+    background-color: #003b73;
+  }
+  
+  .no-document {
+    color: #dc3545;
+    font-style: italic;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    font-size: 0.85em;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    text-transform: capitalize;
+  }
+  
+  .status-pending {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  .status-accepted {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .status-rejected {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
