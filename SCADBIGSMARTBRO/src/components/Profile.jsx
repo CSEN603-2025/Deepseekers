@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../css/StudentProfilePage.css';
 import { useNavigate } from 'react-router-dom';
 
-function Profile({ name = 'User Name', navigateTo = '/student/edit-profile', showEditButton = true }) {
+function Profile({ 
+    name = 'User Name', 
+    navigateTo = '/student/edit-profile', 
+    showEditButton = true,
+    profileType = 'student', // New prop to identify profile type: 'student' or 'company'
+    userData = {} // New prop to pass user data for the About section
+}) {
     const navigate = useNavigate();
     
     // Profile data state
@@ -14,6 +20,15 @@ function Profile({ name = 'User Name', navigateTo = '/student/edit-profile', sho
     
     // UI state
     const [isEditing, setIsEditing] = useState(false);
+    
+    // Initialize state from userData if provided
+    useEffect(() => {
+        if (userData) {
+            if (userData.bio) setBio(userData.bio);
+            if (userData.location) setLocation(userData.location);
+            if (userData.skills) setSkills(userData.skills);
+        }
+    }, [userData]);
     
     const handleBackgroundChange = (event) => {
         const file = event.target.files[0];
@@ -104,9 +119,46 @@ function Profile({ name = 'User Name', navigateTo = '/student/edit-profile', sho
                             </div>
                         </div>
                         
-                        {bio && <p className="profile-bio">{bio}</p>}
-                        {location && <p className="profile-location">{location}</p>}
-                        {skills && <p className="profile-skills">{skills}</p>}
+                        {/* New About Section */}
+                        <div className="profile-about-section">
+                            <h3>About {profileType === 'student' ? 'Me' : 'Us'}</h3>
+                            
+                            {profileType === 'student' ? (
+                                <>
+                                    {/* Student profile information */}
+                                    {(userData?.bio || bio) && 
+                                        <p className="profile-bio">
+                                            <strong>Bio:</strong> {userData?.bio || bio}
+                                        </p>
+                                    }
+                                    {(userData?.skills || skills) && 
+                                        <p className="profile-skills">
+                                            <strong>Skills:</strong> {userData?.skills || skills}
+                                        </p>
+                                    }
+                                </>
+                            ) : (
+                                <>
+                                    {/* Company profile information */}
+                                    {(userData?.description) && 
+                                        <p className="profile-description">
+                                            {userData.description}
+                                        </p>
+                                    }
+                                    {(userData?.industry) && 
+                                        <p className="profile-industry">
+                                            <strong>Industry:</strong> {userData.industry}
+                                        </p>
+                                    }
+                                </>
+                            )}
+                            
+                            {(userData?.location || location) && 
+                                <p className="profile-location">
+                                    <strong>Location:</strong> {userData?.location || location}
+                                </p>
+                            }
+                        </div>
                     </div>
                 ) : (
                     // Profile Edit Mode

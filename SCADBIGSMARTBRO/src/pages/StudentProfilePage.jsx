@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Container } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import Profile from '../components/Profile';
 import InternshipsAppliedFor from '../components/InternshipsAppliedFor';
 import LogoutButton from '../components/LogoutButton';
-
-import { useNavigate } from 'react-router-dom';
 import '../css/StudentProfilePage.css';
 
 function StudentProfilePage() {
@@ -29,15 +28,25 @@ function StudentProfilePage() {
 
     return (
         <div className="student-profile-page">   
-            <Container className="profile-container py-4">
-                <div className="logout-container" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
-                    <LogoutButton />
-                </div>
-                <Profile name={currentUser.name} navigateTo="/student/edit-profile" />
-                
-                <div className="applied-internships-container mt-4">
-                    <InternshipsAppliedFor />
-                </div>
+            <div className="logout-container" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
+                <LogoutButton />
+            </div>
+            
+            {/* Use the enhanced Profile component with profileType and userData props */}
+            <Profile 
+                name={currentUser.name} 
+                navigateTo="/student/edit-profile" 
+                showEditButton={true}
+                profileType="student"
+                userData={currentUser}
+            />
+
+            <Container className="applied-internships-container">
+                <Row>
+                    <Col>
+                        <InternshipsAppliedFor />
+                    </Col>
+                </Row>
             </Container>
         </div>
     );
