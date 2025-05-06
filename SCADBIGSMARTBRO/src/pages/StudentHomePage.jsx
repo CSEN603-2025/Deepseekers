@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import NavigationBar from '../components/NavigationBar';
 import Post from '../components/Post';
 import AppointmentSystem from '../components/AppointmentSystem';
+import StudentAssessmentsPage from './StudentAssessmentsPage';
 import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge, Tabs, Tab } from 'react-bootstrap';
 import { companies } from '../Data/UserData';
 import { clearLocalStorage, clearSpecificLocalStorageData } from '../Data/ClearLocalStorage';
@@ -320,15 +321,8 @@ const StudentHomePage = () => {
               </Col>
             </Row>
           </Tab>
-          <Tab
-            eventKey="internshipRequirements"
-            title={
-              <>
-                Internship Requirements Video
-                <Badge className="ms-1 pro-badge">PRO</Badge>
-              </>
-            }
-          >
+
+          <Tab eventKey="internshipRequirements" title="Internship Requirements Video">
             <div className="video-container text-center py-5">
               <h5>Internship Requirements for {studentMajor}</h5>
               <iframe
@@ -342,8 +336,9 @@ const StudentHomePage = () => {
               ></iframe>
             </div>
           </Tab>
-          <Tab
-            eventKey="appointments"
+
+          <Tab 
+            eventKey="appointments" 
             title={
               <>
                 Appointments
@@ -351,20 +346,32 @@ const StudentHomePage = () => {
               </>
             }
           >
-            {studentProfile && (
+            {studentProfile?.pro ? (
+              <AppointmentSystem userType="student" studentId={studentProfile.gucId} />
+            ) : (
+              <div className="pro-feature-locked">
+                <h5>Pro Feature</h5>
+                <p>This feature is only available for Pro students.</p>
+              </div>
+            )}
+          </Tab>
+
+          <Tab
+            eventKey="assessments"
+            title={
               <>
-                {studentProfile.pro ? (
-                  <AppointmentSystem 
-                    userType="student"
-                    studentId={studentProfile.gucId}
-                  />
-                ) : (
-                  <div className="text-center py-5">
-                    <h5>Pro Feature</h5>
-                    <p>This feature is only available for Pro students.</p>
-                  </div>
-                )}
+                Assessments
+                <Badge className="ms-2 pro-badge">PRO</Badge>
               </>
+            }
+          >
+            {studentProfile?.pro ? (
+              <StudentAssessmentsPage />
+            ) : (
+              <div className="pro-feature-locked">
+                <h5>Pro Feature</h5>
+                <p>This feature is only available for Pro students.</p>
+              </div>
             )}
           </Tab>
         </Tabs>

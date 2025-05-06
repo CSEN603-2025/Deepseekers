@@ -30,3 +30,55 @@
   padding: 0.2rem 0.4rem !important;
   border-radius: 4px !important;
 }
+
+.student-navigation-bar {
+  background-color: #003b73;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-text {
+  color: white !important;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.nav-button {
+  margin: 0 0.5rem;
+  border-color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+.logout-button {
+  background-color: white;
+  color: #003b73;
+  border: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #f8f9fa;
+  color: #002855;
+}
+
+@media (max-width: 768px) {
+  .student-navigation-bar .navbar-collapse {
+    margin-top: 1rem;
+  }
+
+  .nav-button {
+    margin: 0.5rem 0;
+    width: 100%;
+  }
+
+  .logout-button {
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+}

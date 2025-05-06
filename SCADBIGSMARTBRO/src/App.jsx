@@ -4,7 +4,6 @@ import StudentHomePage from "./pages/StudentHomePage";
 import EditStudentProfile from "./pages/EditStudentProfile";
 import StudentProfilePage from "./pages/StudentProfilePage";
 import StudentInternshipsPage from "./pages/StudentInternshipsPage";
-import StudentAssessmentsPage from "./pages/StudentAssessmentsPage";
 import NavigationBar from "./components/NavigationBar";
 import CompanyRegister from "./pages/CompanyRegister";
 import CompanyDashBoard from "./pages/CompanyDashBoard";
@@ -64,17 +63,6 @@ function App() {
               <NavigationBar />
               <main className="main-content">
                 <StudentInternshipsPage />
-              </main>
-            </>
-          }
-        />
-        <Route
-          path="/student/assessments"
-          element={
-            <>
-              <NavigationBar />
-              <main className="main-content">
-                <StudentAssessmentsPage />
               </main>
             </>
           }
