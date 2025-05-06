@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-
 import Post from '../components/Post';
-import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge } from 'react-bootstrap';
+import AppointmentSystem from '../components/AppointmentSystem';
+import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge, Tabs, Tab } from 'react-bootstrap';
 import { companies } from '../Data/UserData';
 import '../css/scadHome.css';
 
@@ -15,6 +15,7 @@ export default function ScadHomePage() {
     const [selectedIndustries, setSelectedIndustries] = useState([]);
     const [durationFilter, setDurationFilter] = useState('all');
     const [activeFilters, setActiveFilters] = useState(0);
+    const [activeTab, setActiveTab] = useState('internships'); // Add this new state
     
     // Get unique list of industries from companies data
     const industries = [...new Set(companies.map(company => company.industry))];
@@ -181,150 +182,173 @@ export default function ScadHomePage() {
     return (
         <div className="scad-home-page">
             <Container className="scad-internships-container mt-4">
-                <Row className="mb-4">
-                    <Col>
-                        <h2 className="page-title">Internship Listings</h2>
-                        <p className="text-muted">Monitor all internships posted by partner companies</p>
-                    </Col>
-                </Row>
-                
-                <Row className="mb-4">
-                    <Col>
-                        <InputGroup>
-                            <InputGroup.Text id="search-addon">
-                                <i className="bi bi-search"></i>
-                            </InputGroup.Text>
-                            <Form.Control
-                                placeholder="Search by job title or company name"
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                value={searchTerm}
-                            />
-                        </InputGroup>
-                    </Col>
-                </Row>
-
-                <Row>
-                    <Col md={3}>
-                        <div className="filter-options mb-3">
-                            <div className="d-flex justify-content-between align-items-center">
-                                <h5 className="filter-section-title m-0">
-                                    Filters
-                                    {activeFilters > 0 && (
-                                        <Badge className="ms-2 filter-count-badge">{activeFilters}</Badge>
-                                    )}
-                                </h5>
-                                
-                                {activeFilters > 0 && (
-                                    <Button 
-                                        variant="link" 
-                                        className="p-0 text-decoration-none clear-filters-btn"
-                                        onClick={clearFilters}
-                                    >
-                                        Clear all
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-                        <Accordion defaultActiveKey="0" className="filter-accordion">
-                            {/* Payment Type Filter */}
-                            <Accordion.Item eventKey="0">
-                                <Accordion.Header>Payment Type</Accordion.Header>
-                                <Accordion.Body>
-                                    <Form.Check 
-                                        type="checkbox"
-                                        id="paid-filter"
-                                        label="Paid"
-                                        checked={filterPaid}
-                                        onChange={(e) => setFilterPaid(e.target.checked)}
-                                        className="mb-2"
-                                    />
-                                    <Form.Check 
-                                        type="checkbox"
-                                        id="unpaid-filter"
-                                        label="Unpaid"
-                                        checked={filterUnpaid}
-                                        onChange={(e) => setFilterUnpaid(e.target.checked)}
-                                    />
-                                </Accordion.Body>
-                            </Accordion.Item>
-                            
-                            {/* Industry Filter */}
-                            <Accordion.Item eventKey="1">
-                                <Accordion.Header>Industry</Accordion.Header>
-                                <Accordion.Body className="industry-filters">
-                                    {industries.map(industry => (
-                                        <Form.Check 
-                                            key={industry}
-                                            type="checkbox"
-                                            id={`industry-${industry}`}
-                                            label={industry}
-                                            checked={selectedIndustries.includes(industry)}
-                                            onChange={() => handleIndustryChange(industry)}
-                                            className="mb-2"
-                                        />
-                                    ))}
-                                </Accordion.Body>
-                            </Accordion.Item>
-                            
-                            {/* Duration Filter */}
-                            <Accordion.Item eventKey="2">
-                                <Accordion.Header>Duration</Accordion.Header>
-                                <Accordion.Body>
-                                    <Form.Select 
-                                        value={durationFilter}
-                                        onChange={(e) => setDurationFilter(e.target.value)}
-                                    >
-                                        {durationOptions.map(option => (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                </Accordion.Body>
-                            </Accordion.Item>
-                        </Accordion>
-                    </Col>
-                    
-                    <Col md={9}>
-                        <div className="results-summary mb-3">
-                            <p className="results-count">
-                                Showing {filteredInternships.length} internship{filteredInternships.length !== 1 ? 's' : ''}
-                                {activeFilters > 0 && ' with applied filters'}
-                            </p>
-                        </div>
+                <Tabs
+                    id="scad-home-tabs"
+                    activeKey={activeTab}
+                    onSelect={(k) => setActiveTab(k)}
+                    className="mb-4"
+                >
+                    <Tab eventKey="internships" title="Internship Listings">
+                        <Row className="mb-4">
+                            <Col>
+                                <h2 className="page-title">Internship Listings</h2>
+                                <p className="text-muted">Monitor all internships posted by partner companies</p>
+                            </Col>
+                        </Row>
                         
-                        {filteredInternships.length > 0 ? (
-                            <div className="internships-list">
-                                {filteredInternships.map((internship) => (
-                                    <Post 
-                                        key={internship.id} 
-                                        internship={internship} 
-                                        isStudent={false} // SCAD admin view
-                                        isScad={true} // SCAD admin view
+                        <Row className="mb-4">
+                            <Col>
+                                <InputGroup>
+                                    <InputGroup.Text id="search-addon">
+                                        <i className="bi bi-search"></i>
+                                    </InputGroup.Text>
+                                    <Form.Control
+                                        placeholder="Search by job title or company name"
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        value={searchTerm}
                                     />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="no-results-container text-center py-5">
-                                <h5>No internships found</h5>
-                                <p className="text-muted">
-                                    {internships.length === 0 
-                                        ? "No internships have been posted by companies yet." 
-                                        : "No internships match your search criteria. Try adjusting your filters."}
-                                </p>
-                                {activeFilters > 0 && (
-                                    <Button 
-                                        variant="outline-primary" 
-                                        onClick={clearFilters}
-                                        className="mt-3"
-                                    >
-                                        Clear all filters
-                                    </Button>
+                                </InputGroup>
+                            </Col>
+                        </Row>
+
+                        <Row>
+                            <Col md={3}>
+                                <div className="filter-options mb-3">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <h5 className="filter-section-title m-0">
+                                            Filters
+                                            {activeFilters > 0 && (
+                                                <Badge className="ms-2 filter-count-badge">{activeFilters}</Badge>
+                                            )}
+                                        </h5>
+                                        
+                                        {activeFilters > 0 && (
+                                            <Button 
+                                                variant="link" 
+                                                className="p-0 text-decoration-none clear-filters-btn"
+                                                onClick={clearFilters}
+                                            >
+                                                Clear all
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                                <Accordion defaultActiveKey="0" className="filter-accordion">
+                                    {/* Payment Type Filter */}
+                                    <Accordion.Item eventKey="0">
+                                        <Accordion.Header>Payment Type</Accordion.Header>
+                                        <Accordion.Body>
+                                            <Form.Check 
+                                                type="checkbox"
+                                                id="paid-filter"
+                                                label="Paid"
+                                                checked={filterPaid}
+                                                onChange={(e) => setFilterPaid(e.target.checked)}
+                                                className="mb-2"
+                                            />
+                                            <Form.Check 
+                                                type="checkbox"
+                                                id="unpaid-filter"
+                                                label="Unpaid"
+                                                checked={filterUnpaid}
+                                                onChange={(e) => setFilterUnpaid(e.target.checked)}
+                                            />
+                                        </Accordion.Body>
+                                    </Accordion.Item>
+                                    
+                                    {/* Industry Filter */}
+                                    <Accordion.Item eventKey="1">
+                                        <Accordion.Header>Industry</Accordion.Header>
+                                        <Accordion.Body className="industry-filters">
+                                            {industries.map(industry => (
+                                                <Form.Check 
+                                                    key={industry}
+                                                    type="checkbox"
+                                                    id={`industry-${industry}`}
+                                                    label={industry}
+                                                    checked={selectedIndustries.includes(industry)}
+                                                    onChange={() => handleIndustryChange(industry)}
+                                                    className="mb-2"
+                                                />
+                                            ))}
+                                        </Accordion.Body>
+                                    </Accordion.Item>
+                                    
+                                    {/* Duration Filter */}
+                                    <Accordion.Item eventKey="2">
+                                        <Accordion.Header>Duration</Accordion.Header>
+                                        <Accordion.Body>
+                                            <Form.Select 
+                                                value={durationFilter}
+                                                onChange={(e) => setDurationFilter(e.target.value)}
+                                            >
+                                                {durationOptions.map(option => (
+                                                    <option key={option.value} value={option.value}>
+                                                        {option.label}
+                                                    </option>
+                                                ))}
+                                            </Form.Select>
+                                        </Accordion.Body>
+                                    </Accordion.Item>
+                                </Accordion>
+                            </Col>
+                            
+                            <Col md={9}>
+                                <div className="results-summary mb-3">
+                                    <p className="results-count">
+                                        Showing {filteredInternships.length} internship{filteredInternships.length !== 1 ? 's' : ''}
+                                        {activeFilters > 0 && ' with applied filters'}
+                                    </p>
+                                </div>
+                                
+                                {filteredInternships.length > 0 ? (
+                                    <div className="internships-list">
+                                        {filteredInternships.map((internship) => (
+                                            <Post 
+                                                key={internship.id} 
+                                                internship={internship} 
+                                                isStudent={false} // SCAD admin view
+                                                isScad={true} // SCAD admin view
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="no-results-container text-center py-5">
+                                        <h5>No internships found</h5>
+                                        <p className="text-muted">
+                                            {internships.length === 0 
+                                                ? "No internships have been posted by companies yet." 
+                                                : "No internships match your search criteria. Try adjusting your filters."}
+                                        </p>
+                                        {activeFilters > 0 && (
+                                            <Button 
+                                                variant="outline-primary" 
+                                                onClick={clearFilters}
+                                                className="mt-3"
+                                            >
+                                                Clear all filters
+                                            </Button>
+                                        )}
+                                    </div>
                                 )}
-                            </div>
-                        )}
-                    </Col>
-                </Row>
+                            </Col>
+                        </Row>
+                    </Tab>
+
+                    <Tab eventKey="appointments" title="Appointments">
+                        <Row className="mb-4">
+                            <Col>
+                                <h2 className="page-title">Student Appointments</h2>
+                                <p className="text-muted">Manage appointment requests and schedule meetings with students</p>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <AppointmentSystem userType="scad" />
+                            </Col>
+                        </Row>
+                    </Tab>
+                </Tabs>
             </Container>
         </div>
     );

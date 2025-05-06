@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import NavigationBar from '../components/NavigationBar';
 import Post from '../components/Post';
+import AppointmentSystem from '../components/AppointmentSystem';
 import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge, Tabs, Tab } from 'react-bootstrap';
 import { companies } from '../Data/UserData';
 import { clearLocalStorage, clearSpecificLocalStorageData } from '../Data/ClearLocalStorage';
@@ -16,6 +17,7 @@ const StudentHomePage = () => {
   const [activeFilters, setActiveFilters] = useState(0);
   const [activeTab, setActiveTab] = useState('availableInternships'); // State to manage active tab
   const [studentMajor, setStudentMajor] = useState(''); // State to store the student's major
+  const [studentProfile, setStudentProfile] = useState(null); // State to store the student's profile
 
   // Map of majors to YouTube video IDs
   const majorVideos = {
@@ -32,11 +34,11 @@ const StudentHomePage = () => {
   };
 
   useEffect(() => {
-    // Retrieve the student's major from localStorage
-    const savedProfile = localStorage.getItem('studentProfile');
+    // Retrieve the student's profile from localStorage
+    const savedProfile = JSON.parse(localStorage.getItem('studentProfile'));
     if (savedProfile) {
-      const profile = JSON.parse(savedProfile);
-      setStudentMajor(profile.major || 'Default');
+      setStudentMajor(savedProfile.major || 'Default');
+      setStudentProfile(savedProfile);
     }
   }, []);
 
@@ -339,6 +341,31 @@ const StudentHomePage = () => {
                 allowFullScreen
               ></iframe>
             </div>
+          </Tab>
+          <Tab
+            eventKey="appointments"
+            title={
+              <>
+                Appointments
+                <Badge className="ms-2 pro-badge">PRO</Badge>
+              </>
+            }
+          >
+            {studentProfile && (
+              <>
+                {studentProfile.pro ? (
+                  <AppointmentSystem 
+                    userType="student"
+                    studentId={studentProfile.gucId}
+                  />
+                ) : (
+                  <div className="text-center py-5">
+                    <h5>Pro Feature</h5>
+                    <p>This feature is only available for Pro students.</p>
+                  </div>
+                )}
+              </>
+            )}
           </Tab>
         </Tabs>
       </Container>

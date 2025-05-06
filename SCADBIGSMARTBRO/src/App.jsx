@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import StudentHomePage from "./pages/StudentHomePage";
 import EditStudentProfile from "./pages/EditStudentProfile";
@@ -14,14 +14,16 @@ import ScadHomePage from "./pages/ScadHomePage";
 import ScadNavigationBar from "./components/ScadNavigationBar";
 import ScadCompanyApplications from "./pages/ScadCompanyApplications";
 
-
-
-
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        {/* Redirect from root to login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        
+        {/* Login route */}
+        <Route path="/login" element={<LoginPage />} />
+        
         <Route
           path="/student/home"
           element={
@@ -44,7 +46,7 @@ function App() {
             </>
           }
         />
-          <Route
+        <Route
           path="/student/edit-profile"
           element={
             <>

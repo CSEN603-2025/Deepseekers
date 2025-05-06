@@ -12,7 +12,8 @@ export const students = [
       gpa: 3.7,
       bio: "Passionate about software engineering and AI.",
       skills: "React, JavaScript, Python, Machine Learning",
-      location: "Cairo, Egypt"
+      location: "Cairo, Egypt",
+      pro: true
     },
     {
       id: 2,
@@ -25,7 +26,8 @@ export const students = [
       gpa: 3.5,
       bio: "Interested in data analytics and business development.",
       skills: "SQL, Excel, Tableau, Data Analysis",
-      location: "Alexandria, Egypt"
+      location: "Alexandria, Egypt",
+      pro: false
     },
     {
       id: 3,
@@ -38,7 +40,8 @@ export const students = [
       gpa: 3.8,
       bio: "Passionate about embedded systems and IoT solutions.",
       skills: "C++, Arduino, VHDL, PCB Design",
-      location: "Cairo, Egypt"
+      location: "Cairo, Egypt",
+      pro: true
     }
   ];
   

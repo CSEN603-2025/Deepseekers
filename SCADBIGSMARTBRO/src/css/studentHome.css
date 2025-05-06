@@ -173,3 +173,22 @@
     font-size: 1.5rem;
   }
 }
+
+/* Pro badge styling */
+.pro-badge {
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.25em 0.6em;
+  border-radius: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+/* Make sure the tab content is visible */
+.tab-content {
+  background: white;
+  padding: 20px;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}

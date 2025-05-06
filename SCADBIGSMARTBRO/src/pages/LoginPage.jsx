@@ -14,10 +14,14 @@ export default function LoginPage() {
 
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = (e) => {
+    e.preventDefault();
     const user = findUserByCredentials(email, password, role);
     
     if (user) {
+      if (role === 'student') {
+        localStorage.setItem('studentProfile', JSON.stringify(user));
+      }
       // Store user data in localStorage for use across components
       localStorage.setItem('currentUser', JSON.stringify({
         id: user.id,

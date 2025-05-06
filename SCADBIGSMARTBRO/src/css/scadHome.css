@@ -374,3 +374,48 @@
       font-size: 1.75rem;
     }
   }
+
+  /* Add these new styles for tabs */
+  .nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 2rem;
+  }
+
+  .nav-tabs .nav-link {
+    color: #6c757d;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+  }
+
+  .nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: #003b73;
+  }
+
+  .nav-tabs .nav-link.active {
+    color: #003b73;
+    border-bottom: 2px solid #003b73;
+    background-color: transparent;
+  }
+
+  .tab-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 2rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .nav-tabs .nav-link {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .tab-content {
+      padding: 1rem;
+    }
+  }
