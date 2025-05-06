@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Badge, Button, Row, Col, Modal, Table, Tabs, Tab, Form, Alert } from 'react-bootstrap';
+import { Card, Badge, Button, Row, Col, Modal, Table, Tabs, Tab, Form, Alert, Dropdown } from 'react-bootstrap';
 import ApplicationForm from './ApplicationForm';
 import '../css/Post.css';
 
@@ -495,36 +495,122 @@ function Post({ internship, isStudent = true, isScad = false }) {
                   <ul className="list-unstyled">
                     {selectedApplication.resumeBase64 && (
                       <li>
-                        <a 
-                          href={selectedApplication.resumeBase64} 
-                          target="_blank" 
-                          rel="noreferrer"
+                        <Button 
+                          variant="outline-primary"
+                          size="sm"
+                          className="document-link"
+                          onClick={() => {
+                            // Open PDF in new tab
+                            const pdfWindow = window.open();
+                            pdfWindow.document.write(`
+                              <html>
+                                <head>
+                                  <title>Resume - ${selectedApplication.studentName}</title>
+                                  <style>
+                                    body, html {
+                                      margin: 0;
+                                      padding: 0;
+                                      height: 100%;
+                                      overflow: hidden;
+                                    }
+                                    embed {
+                                      width: 100%;
+                                      height: 100%;
+                                    }
+                                  </style>
+                                </head>
+                                <body>
+                                  <embed src="${selectedApplication.resumeBase64}" type="application/pdf" width="100%" height="100%" />
+                                </body>
+                              </html>
+                            `);
+                          }}
                         >
-                          Resume/CV
-                        </a>
+                          <i className="bi bi-file-earmark-pdf me-2"></i>
+                          View Resume/CV
+                        </Button>
                       </li>
                     )}
                     {selectedApplication.certificateBase64 && (
                       <li>
-                        <a 
-                          href={selectedApplication.certificateBase64} 
-                          target="_blank" 
-                          rel="noreferrer"
+                        <Button 
+                          variant="outline-primary"
+                          size="sm"
+                          className="document-link"
+                          onClick={() => {
+                            // Open PDF in new tab
+                            const pdfWindow = window.open();
+                            pdfWindow.document.write(`
+                              <html>
+                                <head>
+                                  <title>Certificate - ${selectedApplication.studentName}</title>
+                                  <style>
+                                    body, html {
+                                      margin: 0;
+                                      padding: 0;
+                                      height: 100%;
+                                      overflow: hidden;
+                                    }
+                                    embed {
+                                      width: 100%;
+                                      height: 100%;
+                                    }
+                                  </style>
+                                </head>
+                                <body>
+                                  <embed src="${selectedApplication.certificateBase64}" type="application/pdf" width="100%" height="100%" />
+                                </body>
+                              </html>
+                            `);
+                          }}
                         >
-                          Certificate
-                        </a>
+                          <i className="bi bi-file-earmark-pdf me-2"></i>
+                          View Certificate
+                        </Button>
                       </li>
                     )}
                     {selectedApplication.otherDocBase64 && (
                       <li>
-                        <a 
-                          href={selectedApplication.otherDocBase64} 
-                          target="_blank" 
-                          rel="noreferrer"
+                        <Button 
+                          variant="outline-primary"
+                          size="sm"
+                          className="document-link"
+                          onClick={() => {
+                            // Open PDF in new tab
+                            const pdfWindow = window.open();
+                            pdfWindow.document.write(`
+                              <html>
+                                <head>
+                                  <title>Document - ${selectedApplication.studentName}</title>
+                                  <style>
+                                    body, html {
+                                      margin: 0;
+                                      padding: 0;
+                                      height: 100%;
+                                      overflow: hidden;
+                                    }
+                                    embed {
+                                      width: 100%;
+                                      height: 100%;
+                                    }
+                                  </style>
+                                </head>
+                                <body>
+                                  <embed src="${selectedApplication.otherDocBase64}" type="application/pdf" width="100%" height="100%" />
+                                </body>
+                              </html>
+                            `);
+                          }}
                         >
-                          Other Document
-                        </a>
+                          <i className="bi bi-file-earmark-pdf me-2"></i>
+                          View Other Document
+                        </Button>
                       </li>
+                    )}
+                    {!selectedApplication.resumeBase64 && 
+                     !selectedApplication.certificateBase64 && 
+                     !selectedApplication.otherDocBase64 && (
+                      <li className="text-muted">No documents attached</li>
                     )}
                   </ul>
                 </div>
@@ -661,54 +747,41 @@ function ApplicationStatusBadge({ status }) {
 // Helper component for status dropdown
 function StatusDropdown({ currentStatus, applicationId, onUpdateStatus }) {
   return (
-    <div className="dropdown d-inline-block">
-      <button 
-        className="btn btn-outline-secondary btn-sm dropdown-toggle" 
-        type="button" 
-        id={`dropdown-${applicationId}`} 
-        data-bs-toggle="dropdown" 
-        aria-expanded="false"
-      >
-        Change Status
-      </button>
-      <ul className="dropdown-menu" aria-labelledby={`dropdown-${applicationId}`}>
-        <li>
-          <button 
-            className="dropdown-item" 
+    <div className="d-inline-block">
+      <Dropdown>
+        <Dropdown.Toggle variant="outline-secondary" size="sm">
+          Change Status
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          <Dropdown.Item 
             onClick={() => onUpdateStatus(applicationId, 'pending')}
             disabled={currentStatus === 'pending'}
           >
             Pending
-          </button>
-        </li>
-        <li>
-          <button 
-            className="dropdown-item text-info" 
+          </Dropdown.Item>
+          <Dropdown.Item 
+            className="text-info"
             onClick={() => onUpdateStatus(applicationId, 'finalized')}
             disabled={currentStatus === 'finalized'}
           >
             Finalized
-          </button>
-        </li>
-        <li>
-          <button 
-            className="dropdown-item text-success" 
+          </Dropdown.Item>
+          <Dropdown.Item 
+            className="text-success"
             onClick={() => onUpdateStatus(applicationId, 'accepted')}
             disabled={currentStatus === 'accepted'}
           >
             Accept
-          </button>
-        </li>
-        <li>
-          <button 
-            className="dropdown-item text-danger" 
+          </Dropdown.Item>
+          <Dropdown.Item 
+            className="text-danger"
             onClick={() => onUpdateStatus(applicationId, 'rejected')}
             disabled={currentStatus === 'rejected'}
           >
             Reject
-          </button>
-        </li>
-      </ul>
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
     </div>
   );
 }

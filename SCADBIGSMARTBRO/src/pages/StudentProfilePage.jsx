@@ -41,13 +41,6 @@ function StudentProfilePage() {
                 userData={currentUser}
             />
 
-            <Container className="applied-internships-container">
-                <Row>
-                    <Col>
-                        <InternshipsAppliedFor />
-                    </Col>
-                </Row>
-            </Container>
         </div>
     );
 }

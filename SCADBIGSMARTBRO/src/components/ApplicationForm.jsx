@@ -45,6 +45,20 @@ function ApplicationForm({ show, onHide, internship }) {
     const file = e.target.files[0];
     
     if (file) {
+      // Check file type
+      if (file.type !== 'application/pdf') {
+        alert('Please upload only PDF files');
+        e.target.value = '';
+        return;
+      }
+      
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size exceeds 5MB limit');
+        e.target.value = '';
+        return;
+      }
+      
       // Store file object for submission
       setFiles(prevFiles => ({
         ...prevFiles,
@@ -262,12 +276,12 @@ function ApplicationForm({ show, onHide, internship }) {
           <Row className="mb-3">
             <Col md={12}>
               <Form.Group className="document-upload">
-                <Form.Label>Resume/CV (Required)</Form.Label>
+                <Form.Label>Resume/CV (Required) - PDF Only</Form.Label>
                 <div className="input-group">
                   <Form.Control
                     type="file"
                     ref={fileInputRefs.resume}
-                    accept=".pdf,.doc,.docx"
+                    accept=".pdf"
                     onChange={(e) => handleFileChange(e, 'resume')}
                     required
                   />
@@ -282,7 +296,7 @@ function ApplicationForm({ show, onHide, internship }) {
                   )}
                 </div>
                 <Form.Text className="text-muted">
-                  Accepted formats: PDF, DOC, DOCX. Max size: 5MB
+                  Only PDF format accepted. Max size: 5MB
                 </Form.Text>
                 {fileNames.resume && (
                   <div className="selected-file">Selected: {fileNames.resume}</div>
@@ -294,12 +308,12 @@ function ApplicationForm({ show, onHide, internship }) {
           <Row className="mb-3">
             <Col md={12}>
               <Form.Group className="document-upload">
-                <Form.Label>Certificates (Optional)</Form.Label>
+                <Form.Label>Certificates (Optional) - PDF Only</Form.Label>
                 <div className="input-group">
                   <Form.Control
                     type="file"
                     ref={fileInputRefs.certificate}
-                    accept=".pdf,.jpg,.jpeg,.png"
+                    accept=".pdf"
                     onChange={(e) => handleFileChange(e, 'certificate')}
                   />
                   {fileNames.certificate && (
@@ -325,12 +339,12 @@ function ApplicationForm({ show, onHide, internship }) {
           <Row className="mb-4">
             <Col md={12}>
               <Form.Group className="document-upload">
-                <Form.Label>Other Supporting Document (Optional)</Form.Label>
+                  <Form.Label>Other Supporting Document (Optional) - PDF Only</Form.Label>
                 <div className="input-group">
                   <Form.Control
                     type="file"
                     ref={fileInputRefs.otherDoc}
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    accept=".pdf"
                     onChange={(e) => handleFileChange(e, 'otherDoc')}
                   />
                   {fileNames.otherDoc && (
@@ -344,7 +358,7 @@ function ApplicationForm({ show, onHide, internship }) {
                   )}
                 </div>
                 <Form.Text className="text-muted">
-                  Any additional document that supports your application
+                  Only PDF format accepted. Max size: 5MB
                 </Form.Text>
                 {fileNames.otherDoc && (
                   <div className="selected-file">Selected: {fileNames.otherDoc}</div>
