@@ -300,6 +300,7 @@ export default function ScadHomePage() {
                                         key={internship.id} 
                                         internship={internship} 
                                         isStudent={false} // SCAD admin view
+                                        isScad={true} // SCAD admin view
                                     />
                                 ))}
                             </div>

@@ -102,13 +102,7 @@ function InternshipsAppliedFor() {
                         {getStatusDescription(application.status)}
                       </small>
                     </div>
-                    <Button 
-                      variant="outline-primary" 
-                      size="sm"
-                      className="view-application-btn mt-2"
-                    >
-                      View Application
-                    </Button>
+                   
                   </Col>
                 </Row>
               </ListGroup.Item>

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import Profile from "../components/Profile";
 import LogoutButton from "../components/LogoutButton";
 import PostInternship from "../components/PostInternship";
-import Post from "../components/Post"; // Import the Post component
-import { Container, Row, Col, Form, InputGroup, Button, Tabs, Tab, Accordion, Badge } from "react-bootstrap";
+import Post from "../components/Post";
+import { Container, Row, Col, Form, InputGroup, Button, Tabs, Tab, Accordion, Badge, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../css/CompanyDashBoard.css";
 import { companies } from '../Data/UserData';
@@ -12,9 +12,31 @@ function CompanyDashBoard() {
     const [postedInternships, setPostedInternships] = useState([]);
     const [allInternships, setAllInternships] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
-const [companyDetails, setCompanyDetails] = useState(null);
     const [activeTab, setActiveTab] = useState("all-internships");
     const navigate = useNavigate();
+    
+    // Edit internship state
+    const [editingInternship, setEditingInternship] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+    
+    // Delete confirmation state
+    const [internshipToDelete, setInternshipToDelete] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    
+    // Form state for editing
+    const [editForm, setEditForm] = useState({
+        title: "",
+        department: "",
+        description: "",
+        requirements: "",
+        location: "",
+        duration: "",
+        deadline: "",
+        startDate: "",
+        paid: false,
+        salary: "",
+        additionalInfo: ""
+    });
     
     // Search and filter states
     const [searchTerm, setSearchTerm] = useState('');
@@ -231,6 +253,100 @@ const [companyDetails, setCompanyDetails] = useState(null);
         return <div>Loading profile...</div>;
     }
     
+    // Edit Internship Handlers
+    const handleEditInternship = (internship) => {
+        setEditingInternship(internship);
+        setEditForm({
+            title: internship.title || "",
+            department: internship.department || "",
+            description: internship.description || "",
+            requirements: internship.requirements || "",
+            location: internship.location || "",
+            duration: internship.duration || "",
+            deadline: internship.deadline || "",
+            startDate: internship.startDate || "",
+            paid: internship.paid || false,
+            salary: internship.salary || "",
+            additionalInfo: internship.additionalInfo || ""
+        });
+        setShowEditModal(true);
+    };
+    
+    const handleEditFormChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setEditForm({
+            ...editForm,
+            [name]: type === 'checkbox' ? checked : value
+        });
+    };
+    
+    const handleSaveEdit = () => {
+        // Get all internships from localStorage
+        const allInternshipsData = JSON.parse(localStorage.getItem('postedInternships')) || [];
+        
+        // Find the internship to update
+        const updatedInternships = allInternshipsData.map(internship => {
+            if (internship.id === editingInternship.id) {
+                return {
+                    ...internship,
+                    ...editForm,
+                    lastUpdated: new Date().toISOString()
+                };
+            }
+            return internship;
+        });
+        
+        // Save updated internships to localStorage
+        localStorage.setItem('postedInternships', JSON.stringify(updatedInternships));
+        
+        // Update state with new data
+        setAllInternships(enrichInternshipsWithIndustry(updatedInternships));
+        
+        // Update company internships
+        const companyInternships = updatedInternships.filter(
+            internship => internship.companyId === currentUser.id || internship.companyName === currentUser.name
+        );
+        setPostedInternships(enrichInternshipsWithIndustry(companyInternships));
+        
+        // Close modal and reset form
+        setShowEditModal(false);
+        setEditingInternship(null);
+    };
+    
+    // Delete Internship Handlers
+    const handleDeleteInternship = (internship) => {
+        setInternshipToDelete(internship);
+        setShowDeleteModal(true);
+    };
+    
+    const confirmDeleteInternship = () => {
+        if (!internshipToDelete) return;
+        
+        // Get all internships from localStorage
+        const allInternshipsData = JSON.parse(localStorage.getItem('postedInternships')) || [];
+        
+        // Filter out the internship to delete
+        const updatedInternships = allInternshipsData.filter(
+            internship => internship.id !== internshipToDelete.id
+        );
+        
+        // Save updated internships to localStorage
+        localStorage.setItem('postedInternships', JSON.stringify(updatedInternships));
+        
+        // Update state with new data
+        setAllInternships(enrichInternshipsWithIndustry(updatedInternships));
+        
+        // Update company internships
+        const companyInternships = updatedInternships.filter(
+            internship => internship.companyId === currentUser.id || internship.companyName === currentUser.name
+        );
+        setPostedInternships(enrichInternshipsWithIndustry(companyInternships));
+        
+        // Close modal and reset state
+        setShowDeleteModal(false);
+        setInternshipToDelete(null);
+    };
+    
     return (
         <div className="company-dashboard">
             <div className="logout-container" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
@@ -371,6 +487,7 @@ const [companyDetails, setCompanyDetails] = useState(null);
                                                     key={internship.id} 
                                                     internship={internship} 
                                                     isStudent={false} 
+                                                    isScad={false}
                                                 />
                                             ))}
                                         </div>
@@ -513,12 +630,14 @@ const [companyDetails, setCompanyDetails] = useState(null);
                                                             <Button 
                                                                 variant="outline-primary" 
                                                                 className="me-2 management-btn"
+                                                                onClick={() => handleEditInternship(internship)}
                                                             >
                                                                 <i className="bi bi-pencil-square"></i> Edit Internship
                                                             </Button>
                                                             <Button 
                                                                 variant="outline-danger"
                                                                 className="management-btn"
+                                                                onClick={() => handleDeleteInternship(internship)}
                                                             >
                                                                 <i className="bi bi-trash"></i> Delete Internship
                                                             </Button>
@@ -568,8 +687,185 @@ const [companyDetails, setCompanyDetails] = useState(null);
                     </Tab>
                 </Tabs>
             </Container>
+            
+            {/* Edit Internship Modal */}
+            <Modal 
+                show={showEditModal} 
+                onHide={() => setShowEditModal(false)} 
+                size="lg" 
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit Internship</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Internship Title*</Form.Label>
+                            <Form.Control 
+                                type="text" 
+                                name="title" 
+                                value={editForm.title} 
+                                onChange={handleEditFormChange} 
+                                required 
+                            />
+                        </Form.Group>
+                        
+                        <Form.Group className="mb-3">
+                            <Form.Label>Department</Form.Label>
+                            <Form.Control 
+                                type="text" 
+                                name="department" 
+                                value={editForm.department} 
+                                onChange={handleEditFormChange} 
+                            />
+                        </Form.Group>
+                        
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description*</Form.Label>
+                            <Form.Control 
+                                as="textarea" 
+                                rows={3} 
+                                name="description" 
+                                value={editForm.description} 
+                                onChange={handleEditFormChange} 
+                                required 
+                            />
+                        </Form.Group>
+                        
+                        <Form.Group className="mb-3">
+                            <Form.Label>Requirements</Form.Label>
+                            <Form.Control 
+                                as="textarea" 
+                                rows={3} 
+                                name="requirements" 
+                                value={editForm.requirements} 
+                                onChange={handleEditFormChange} 
+                            />
+                        </Form.Group>
+                        
+                        <Row className="mb-3">
+                            <Col md={6}>
+                                <Form.Group>
+                                    <Form.Label>Location</Form.Label>
+                                    <Form.Control 
+                                        type="text" 
+                                        name="location" 
+                                        value={editForm.location} 
+                                        onChange={handleEditFormChange} 
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group>
+                                    <Form.Label>Duration</Form.Label>
+                                    <Form.Control 
+                                        type="text" 
+                                        name="duration" 
+                                        value={editForm.duration} 
+                                        onChange={handleEditFormChange} 
+                                    />
+                                    <Form.Text className="text-muted">
+                                        Example: 3 months, 6 weeks, etc.
+                                    </Form.Text>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        
+                        <Row className="mb-3">
+                            <Col md={6}>
+                                <Form.Group>
+                                    <Form.Label>Application Deadline</Form.Label>
+                                    <Form.Control 
+                                        type="date" 
+                                        name="deadline" 
+                                        value={editForm.deadline ? editForm.deadline.split('T')[0] : ''} 
+                                        onChange={handleEditFormChange} 
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group>
+                                    <Form.Label>Start Date</Form.Label>
+                                    <Form.Control 
+                                        type="date" 
+                                        name="startDate" 
+                                        value={editForm.startDate ? editForm.startDate.split('T')[0] : ''} 
+                                        onChange={handleEditFormChange} 
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        
+                        <Form.Group className="mb-3">
+                            <Form.Check 
+                                type="checkbox" 
+                                label="This is a paid internship" 
+                                name="paid" 
+                                checked={editForm.paid} 
+                                onChange={handleEditFormChange} 
+                            />
+                        </Form.Group>
+                        
+                        {editForm.paid && (
+                            <Form.Group className="mb-3">
+                                <Form.Label>Compensation Details</Form.Label>
+                                <Form.Control 
+                                    type="text" 
+                                    name="salary" 
+                                    value={editForm.salary} 
+                                    onChange={handleEditFormChange} 
+                                    placeholder="E.g. $15/hour, $1000/month, etc." 
+                                />
+                            </Form.Group>
+                        )}
+                        
+                        <Form.Group className="mb-3">
+                            <Form.Label>Additional Information</Form.Label>
+                            <Form.Control 
+                                as="textarea" 
+                                rows={2} 
+                                name="additionalInfo" 
+                                value={editForm.additionalInfo} 
+                                onChange={handleEditFormChange} 
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleSaveEdit}>
+                        Save Changes
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            
+            {/* Delete Confirmation Modal */}
+            <Modal
+                show={showDeleteModal}
+                onHide={() => setShowDeleteModal(false)}
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Are you sure you want to delete the internship <strong>{internshipToDelete?.title}</strong>?</p>
+                    <p className="text-danger">This action cannot be undone.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={confirmDeleteInternship}>
+                        Delete Internship
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 }
-    
+
 export default CompanyDashBoard;

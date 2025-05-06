@@ -261,6 +261,88 @@
   opacity: 0.8;
 }
 
+/* Application viewing styles */
+.application-details {
+  padding: 10px;
+}
+
+.application-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.application-section {
+  margin-bottom: 25px;
+}
+
+.section-title {
+  font-weight: 600;
+  color: var(--text-primary, #2b2d42);
+  margin-bottom: 10px;
+  font-size: 1rem;
+  border-bottom: 1px dashed #eee;
+  padding-bottom: 5px;
+}
+
+.section-content {
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  white-space: pre-line;
+}
+
+.submission-date {
+  color: var(--text-secondary, #555b6e);
+  font-size: 0.9rem;
+}
+
+/* Make table more compact for applications */
+.table td, .table th {
+  padding: 0.5rem;
+  vertical-align: middle;
+}
+
+/* Fix dropdown menu in table */
+.dropdown-menu {
+  min-width: 8rem;
+}
+
+.dropdown-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Document links */
+.section-content ul li {
+  margin-bottom: 8px;
+}
+
+.section-content ul li a {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  color: #495057;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.section-content ul li a:hover {
+  background-color: #dee2e6;
+}
+
+/* Tab styling */
+.nav-tabs .nav-link {
+  color: var(--text-secondary, #555b6e);
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--egg-teal, #8ecae6);
+  font-weight: 600;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .dates-section {
