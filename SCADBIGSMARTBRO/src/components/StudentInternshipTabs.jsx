@@ -8,28 +8,29 @@ function StudentInternshipTabs() {
   const [completedInternships, setCompletedInternships] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
+
+  // First useEffect to load user data
   useEffect(() => {
     // Get current user data
     const userData = localStorage.getItem('currentUser');
     if (userData) {
       setCurrentUser(JSON.parse(userData));
     }
-
-    // Load applications from localStorage and filter completed ones
-    const loadCompletedInternships = () => {
-      if (currentUser) {
-        const allApplications = JSON.parse(localStorage.getItem('appliedInternships')) || [];
-        // Filter applications for this student that are accepted
-        const studentApplications = allApplications.filter(
-          app => app.studentId === currentUser.id && 
-                (app.status.toLowerCase() === 'accepted' || app.status.toLowerCase() === 'finalized')
-        );
-        setCompletedInternships(studentApplications);
-      }
-    };
-
-    loadCompletedInternships();
-  }, [currentUser]);
+  }, []);
+  
+ // Second useEffect to load completed internships when currentUser changes
+ useEffect(() => {
+  // Only run this effect if currentUser exists
+  if (currentUser) {
+    const allApplications = JSON.parse(localStorage.getItem('appliedInternships')) || [];
+    // Filter applications for this student that are accepted
+    const studentApplications = allApplications.filter(
+      app => app.studentId === currentUser.id && 
+            (app.status.toLowerCase() === 'accepted' || app.status.toLowerCase() === 'finalized')
+    );
+    setCompletedInternships(studentApplications);
+  }
+}, [currentUser]);
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Not specified';
