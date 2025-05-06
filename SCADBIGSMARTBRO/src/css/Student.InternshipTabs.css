@@ -1,0 +1,183 @@
+@import './variables.css';
+
+/* Tab Container Styles */
+.student-internship-tabs-container {
+  margin-top: 2rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* Tab Navigation Styles */
+.profile-tabs {
+  border-bottom: 2px solid var(--egg-light-blue);
+  margin-bottom: 1.5rem;
+  background-color: var(--card-bg);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding-top: 0.5rem;
+}
+
+.profile-tabs .nav-link {
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background-color: transparent;
+  transition: all 0.2s ease;
+  margin-bottom: -2px;
+}
+
+.profile-tabs .nav-link:hover {
+  color: var(--primary);
+  border-bottom-color: var(--primary-light);
+}
+
+.profile-tabs .nav-link.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  background-color: transparent;
+}
+
+/* Tab Content Container */
+.tab-content-container {
+  padding: 1rem 0;
+  min-height: 300px;
+  background-color: var(--card-bg);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Completed Internships Styles */
+.completed-internships-container {
+  padding: 1rem;
+}
+
+.completed-internships-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.completed-internship-card {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-light);
+}
+
+.completed-internship-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+.completed-internship-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.completed-internship-header h5 {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.completion-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--egg-green);
+  color: white;
+}
+
+.completed-internship-details {
+  margin-bottom: 1.5rem;
+}
+
+.completed-internship-details p {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.company-name {
+  font-weight: 600;
+  color: var(--text-primary) !important;
+}
+
+.application-date, .completion-date {
+  font-size: 0.9rem;
+}
+
+.completed-internship-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.view-certificate-btn, .view-details-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.view-certificate-btn {
+  background-color: var(--egg-green);
+  color: white;
+}
+
+.view-certificate-btn:hover {
+  background-color: #6b9795; /* Darker version of egg-green */
+}
+
+.view-details-btn {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.view-details-btn:hover {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+/* No Completed Internships Message */
+.no-completed-internships {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: var(--card-bg);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-light);
+}
+
+.no-completed-internships h5 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.no-completed-internships p {
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Student Internships Page Styles */
+.student-internships-page {
+  min-height: 100vh;
+  background-color: var(--background);
+}
+
+.page-title {
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 1.5rem;
+}
