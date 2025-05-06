@@ -318,7 +318,15 @@ const StudentHomePage = () => {
               </Col>
             </Row>
           </Tab>
-          <Tab eventKey="internshipRequirements" title="Internship Requirements Video">
+          <Tab
+            eventKey="internshipRequirements"
+            title={
+              <>
+                Internship Requirements Video
+                <Badge className="ms-1 pro-badge">PRO</Badge>
+              </>
+            }
+          >
             <div className="video-container text-center py-5">
               <h5>Internship Requirements for {studentMajor}</h5>
               <iframe

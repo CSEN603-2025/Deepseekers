@@ -22,3 +22,11 @@
     letter-spacing: 1px;
   }
   
+  /* PRO badge styling */
+  .pro-badge {
+    background-color: #FFD700 !important; /* Yellow/gold background */
+    color: #212529 !important;
+    font-weight: 500 !important;
+    padding: 0.2rem 0.4rem !important;
+    border-radius: 4px !important;
+  }
