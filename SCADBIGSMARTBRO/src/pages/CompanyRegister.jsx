@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Form, Button, Container } from 'react-bootstrap';
+import { Card, Form, Button, Container, Alert, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/CompanyRegister.css';
 
@@ -12,7 +12,19 @@ const CompanyRegister = () => {
     email: '',
     logo: null,
     taxDocument: null,
+    // Add base64 fields to the initial state
+    logoBase64: null,
+    taxDocumentBase64: null
   });
+
+  const [documentNames, setDocumentNames] = useState({
+    taxDocument: '',
+    businessLicense: ''
+  });
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
 
   const industriesList = [
     'Technology',
@@ -33,25 +45,92 @@ const CompanyRegister = () => {
   ];
 
   const [logoPreview, setLogoPreview] = useState(null);
+  const [validationError, setValidationError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+    setValidationError('');
+    
     if (name === 'logo') {
       const file = files[0];
+      if (file && file.size > 2 * 1024 * 1024) { // 2MB limit
+        setValidationError('Logo file size must be under 2MB');
+        return;
+      }
+      
+      // Store file for form state
       setFormData({ ...formData, logo: file });
       setLogoPreview(URL.createObjectURL(file));
-    } else if (name === 'taxDocument') {
+      
+      // Convert logo to base64 for storage
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Logo = reader.result;
+        setFormData(prev => ({ 
+          ...prev, 
+          logoBase64: base64Logo,
+          logoName: file.name,
+          logoType: file.type
+        }));
+      };
+      reader.readAsDataURL(file);
+    } 
+    else if (name === 'taxDocument' || name === 'businessLicense') {
       const file = files[0];
-      setFormData({ ...formData, taxDocument: file });
-    } else {
+      if (file) {
+        // Check if it's a PDF file
+        if (!file.type.includes('pdf')) {
+          setValidationError(`${name === 'taxDocument' ? 'Tax document' : 'Business license'} must be a PDF file`);
+          return;
+        }
+        
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          setValidationError(`${name === 'taxDocument' ? 'Tax document' : 'Business license'} file size must be under 5MB`);
+          return;
+        }
+        
+        // Store file for form state
+        setFormData({ ...formData, [name]: file });
+        setDocumentNames({ ...documentNames, [name]: file.name });
+        
+        // Convert document to base64 for storage
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64Doc = reader.result;
+          if (name === 'taxDocument') {
+            setFormData(prev => ({ 
+              ...prev, 
+              taxDocumentBase64: base64Doc,
+              taxDocumentName: file.name,
+              taxDocumentType: file.type 
+            }));
+          } else {
+            setFormData(prev => ({ 
+              ...prev, 
+              businessLicenseBase64: base64Doc,
+              businessLicenseName: file.name,
+              businessLicenseType: file.type 
+            }));
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    } 
+    else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Debug information to help troubleshoot
+    console.log("Form data at submission:", formData);
 
     if (
       !formData.companyName ||
@@ -61,29 +140,100 @@ const CompanyRegister = () => {
       !formData.logo ||
       !formData.taxDocument
     ) {
-      alert('Please fill in all fields and upload all required documents.');
+      setValidationError('Please fill in all required fields and upload all required documents.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // If we have a logo file but no base64 yet, the FileReader hasn't finished
+    if (formData.logo && !formData.logoBase64) {
+      const logoReader = new FileReader();
+      logoReader.onload = () => {
+        setFormData(prev => ({
+          ...prev,
+          logoBase64: logoReader.result,
+          logoName: formData.logo.name,
+          logoType: formData.logo.type
+        }));
+      };
+      logoReader.readAsDataURL(formData.logo);
+    }
+
+    // If we have a tax document file but no base64 yet, the FileReader hasn't finished
+    if (formData.taxDocument && !formData.taxDocumentBase64) {
+      const taxDocReader = new FileReader();
+      taxDocReader.onload = () => {
+        setFormData(prev => ({
+          ...prev,
+          taxDocumentBase64: taxDocReader.result,
+          taxDocumentName: formData.taxDocument.name,
+          taxDocumentType: formData.taxDocument.type
+        }));
+      };
+      taxDocReader.readAsDataURL(formData.taxDocument);
+      
+      // Since we're still processing files, set a timeout to try again
+      setTimeout(() => handleSubmit(e), 500);
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      alert('Please enter a valid email address.');
+      setValidationError('Please enter a valid email address.');
+      setIsSubmitting(false);
       return;
     }
 
+    // Now we can be sure all files are processed
+    // Prepare the data for storage, removing File objects
+    const companyData = {
+      companyName: formData.companyName,
+      industry: formData.industry,
+      companySize: formData.companySize,
+      email: formData.email,
+      
+      // Logo data
+      logoBase64: formData.logoBase64,
+      logoName: formData.logo.name,
+      logoType: formData.logo.type,
+      
+      // Tax document data
+      taxDocumentBase64: formData.taxDocumentBase64,
+      taxDocumentName: formData.taxDocument.name,
+      taxDocumentType: formData.taxDocument.type,
+      
+      // Business license data (optional)
+      businessLicenseBase64: formData.businessLicenseBase64,
+      businessLicenseName: formData.businessLicense ? formData.businessLicense.name : null,
+      businessLicenseType: formData.businessLicense ? formData.businessLicense.type : null,
+      
+      status: "pending",
+      submissionDate: new Date().toISOString()
+    };
+
     const existingCompanies = JSON.parse(localStorage.getItem("registeredCompanies")) || [];
-    existingCompanies.push({ ...formData, status: "pending" });
+    existingCompanies.push(companyData);
     localStorage.setItem("registeredCompanies", JSON.stringify(existingCompanies));
 
-    console.log('Form Data:', formData);
-    alert('Company registered successfully!');
-    navigate('/'); 
+    console.log('Company registered successfully!');
+    setModalTitle("Registration Successful");
+    setModalMessage("Your company has been registered successfully! Your documents will be reviewed for verification.");
+    setShowModal(true);
+    setIsSubmitting(false);
+  };
+
+  // Handle modal close
+  const handleCloseModal = () => {
+    setShowModal(false);
+    navigate('/'); // Navigate to home after closing the modal
   };
 
   return (
     <div className="login-container">
       <Card className="login-card">
         <Card.Title className="login-title mb-3">Company Registration</Card.Title>
+
+        {validationError && <Alert variant="danger">{validationError}</Alert>}
 
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
@@ -169,11 +319,26 @@ const CompanyRegister = () => {
             />
           </Form.Group>
 
-          <Button className="btn-login w-100" type="submit">
-            Register
+          <Button className="btn-login w-100" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Registering...' : 'Register'}
           </Button>
         </Form>
       </Card>
+
+      {/* Success Modal */}
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{modalTitle}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>{modalMessage}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleCloseModal}>
+            Go to Home
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -8,6 +8,7 @@ import NavigationBar from "./components/NavigationBar";
 import CompanyRegister from "./pages/CompanyRegister";
 import CompanyDashBoard from "./pages/CompanyDashBoard";
 
+
 import "./App.css";
 import ScadHomePage from "./pages/ScadHomePage";
 import ScadNavigationBar from "./components/ScadNavigationBar";

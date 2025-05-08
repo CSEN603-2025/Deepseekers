@@ -5,7 +5,7 @@
 }
 
 .post-internship-btn {
-    background-color: #4CAF50;
+       background-color: var(--primary); background-color: #4CAF50;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -54,14 +54,14 @@
 }
 
 .post-btn {
-    background-color: #4CAF50;
+    background-color: #0074b7;
     border-color: #4CAF50;
     padding: 10px 24px;
     font-weight: 600;
 }
 
 .post-btn:hover {
-    background-color: #388E3C;
+    background-color: #003b73;
     border-color: #388E3C;
 }
 

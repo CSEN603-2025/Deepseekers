@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Form, InputGroup, Row, Col, Badge } from "react-bootstrap";
+import { Card, Button, Form, InputGroup, Row, Col, Badge, Modal } from "react-bootstrap";
 
 import "../css/scadHome.css"; // Assuming you have a CSS file for styling
 
@@ -8,6 +8,10 @@ const ScadCompanyApplications = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [industryFilter, setIndustryFilter] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
+  const [companiesToShow, setCompaniesToShow] = useState([]);
 
   // Using the same industry list from CompanyRegister.jsx
   const industriesList = [
@@ -35,16 +39,51 @@ const ScadCompanyApplications = () => {
   const loadCompanies = () => {
     const stored = JSON.parse(localStorage.getItem("registeredCompanies")) || [];
     setCompanies(stored);
+    // Initially show all pending companies
+    setCompaniesToShow(stored.filter(company => company.status === "pending"));
   };
 
   const handleStatusChange = (index, newStatus) => {
-    const updated = [...companies];
-    updated[index].status = newStatus;
-    setCompanies(updated);
-    localStorage.setItem("registeredCompanies", JSON.stringify(updated));
+    // Get the company from the filtered display list
+    const companyToUpdate = companiesToShow[index];
+    
+    // Find this company in the original array by a unique identifier (using ID or name+email as unique key)
+    const originalCompanies = JSON.parse(localStorage.getItem("registeredCompanies")) || [];
+    const updatedCompanies = originalCompanies.map(company => {
+      // Using company name and email as a composite unique identifier
+      if (company.email === companyToUpdate.email && company.companyName === companyToUpdate.companyName) {
+        return { ...company, status: newStatus };
+      }
+      return company;
+    });
+    
+    // Update localStorage with the updated companies
+    localStorage.setItem("registeredCompanies", JSON.stringify(updatedCompanies));
+    
+    // Update the React state
+    setCompanies(updatedCompanies);
+    
+    // Show appropriate modal message
+    if (newStatus === "accepted") {
+      setModalTitle("Company Accepted");
+      setModalMessage(`An email will be sent to ${companyToUpdate.companyName} at ${companyToUpdate.email} informing them of their acceptance.`);
+    } else if (newStatus === "rejected") {
+      setModalTitle("Company Rejected");
+      setModalMessage(`An email will be sent to ${companyToUpdate.companyName} at ${companyToUpdate.email} informing them of their rejection.`);
+    }
+    setShowModal(true);
+    
+    // Remove the company from the displayed list
+    const updatedToShow = companiesToShow.filter((_, i) => i !== index);
+    setCompaniesToShow(updatedToShow);
   };
 
-  const filteredCompanies = companies.filter((company) => {
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  // Update the filtered companies to use the companiesToShow state
+  const filteredCompanies = companiesToShow.filter((company) => {
     const matchesName = company.companyName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesIndustry = industryFilter === "" || company.industry === industryFilter;
     return matchesName && matchesIndustry;
@@ -202,6 +241,21 @@ const ScadCompanyApplications = () => {
           ))
         )}
       </ul>
+
+      {/* Modal for showing messages */}
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{modalTitle}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {modalMessage}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

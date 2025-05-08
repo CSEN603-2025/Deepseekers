@@ -27,11 +27,20 @@ function ApplicationForm({ show, onHide, internship }) {
     error: null
   });
 
+  const [validationErrors, setValidationErrors] = useState({
+    coverLetter: false,
+    whyApplying: false,
+    relevantExperience: false,
+    resume: false
+  });
+
   const fileInputRefs = {
     resume: useRef(),
     certificate: useRef(),
     otherDoc: useRef()
   };
+  
+  const formRef = useRef();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,6 +48,14 @@ function ApplicationForm({ show, onHide, internship }) {
       ...prevData,
       [name]: value
     }));
+    
+    // Clear validation error when user types
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: false
+      }));
+    }
   };
 
   const handleFileChange = (e, fileType) => {
@@ -81,6 +98,14 @@ function ApplicationForm({ show, onHide, internship }) {
           [`${fileType}Base64`]: base64File
         }));
       };
+      
+      // Clear resume validation error if this is the resume
+      if (fileType === 'resume' && validationErrors.resume) {
+        setValidationErrors(prev => ({
+          ...prev,
+          resume: false
+        }));
+      }
     }
   };
 
@@ -95,10 +120,71 @@ function ApplicationForm({ show, onHide, internship }) {
       ...prevNames,
       [fileType]: ''
     }));
+    
+    // Set validation error for resume if it's required and being cleared
+    if (fileType === 'resume') {
+      setValidationErrors(prev => ({
+        ...prev,
+        resume: true
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const newValidationErrors = {
+      coverLetter: false,
+      whyApplying: false,
+      relevantExperience: false,
+      resume: false
+    };
+    
+    // Check text fields
+    if (!formData.coverLetter.trim()) {
+      newValidationErrors.coverLetter = true;
+      isValid = false;
+    }
+    
+    if (!formData.whyApplying.trim()) {
+      newValidationErrors.whyApplying = true;
+      isValid = false;
+    }
+    
+    if (!formData.relevantExperience.trim()) {
+      newValidationErrors.relevantExperience = true;
+      isValid = false;
+    }
+    
+    // Check resume (required)
+    if (!files.resume && !files.resumeBase64) {
+      newValidationErrors.resume = true;
+      isValid = false;
+    }
+    
+    setValidationErrors(newValidationErrors);
+    return isValid;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // First check HTML5 form validity
+    if (formRef.current && !formRef.current.checkValidity()) {
+      // Trigger browser validation UI
+      formRef.current.reportValidity();
+      return;
+    }
+    
+    // Additional custom validation
+    if (!validateForm()) {
+      setStatus({
+        isSubmitting: false,
+        isSuccess: false,
+        error: "Please fill all required fields before submitting."
+      });
+      return;
+    }
+    
     setStatus({ ...status, isSubmitting: true, error: null });
 
     try {
@@ -226,10 +312,12 @@ function ApplicationForm({ show, onHide, internship }) {
           </Alert>
         )}
 
-        <Form onSubmit={handleSubmit}>
+        <Form ref={formRef} noValidate onSubmit={handleSubmit}>
           {/* Cover Letter */}
           <Form.Group className="mb-4">
-            <Form.Label>Cover Letter</Form.Label>
+            <Form.Label>
+              Cover Letter <span className="text-danger">*</span>
+            </Form.Label>
             <Form.Control
               as="textarea"
               rows={4}
@@ -238,12 +326,18 @@ function ApplicationForm({ show, onHide, internship }) {
               value={formData.coverLetter}
               onChange={handleInputChange}
               required
+              isInvalid={validationErrors.coverLetter}
             />
+            <Form.Control.Feedback type="invalid">
+              Cover letter is required.
+            </Form.Control.Feedback>
           </Form.Group>
 
           {/* Why Applying */}
           <Form.Group className="mb-4">
-            <Form.Label>Why are you interested in this position?</Form.Label>
+            <Form.Label>
+              Why are you interested in this position? <span className="text-danger">*</span>
+            </Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -252,12 +346,18 @@ function ApplicationForm({ show, onHide, internship }) {
               value={formData.whyApplying}
               onChange={handleInputChange}
               required
+              isInvalid={validationErrors.whyApplying}
             />
+            <Form.Control.Feedback type="invalid">
+              Please explain your interest in this position.
+            </Form.Control.Feedback>
           </Form.Group>
 
           {/* Relevant Experience */}
           <Form.Group className="mb-4">
-            <Form.Label>Relevant Experience & Skills</Form.Label>
+            <Form.Label>
+              Relevant Experience & Skills <span className="text-danger">*</span>
+            </Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -266,7 +366,11 @@ function ApplicationForm({ show, onHide, internship }) {
               value={formData.relevantExperience}
               onChange={handleInputChange}
               required
+              isInvalid={validationErrors.relevantExperience}
             />
+            <Form.Control.Feedback type="invalid">
+              Please describe your relevant experience and skills.
+            </Form.Control.Feedback>
           </Form.Group>
 
           <hr className="my-4" />
@@ -276,7 +380,9 @@ function ApplicationForm({ show, onHide, internship }) {
           <Row className="mb-3">
             <Col md={12}>
               <Form.Group className="document-upload">
-                <Form.Label>Resume/CV (Required) - PDF Only</Form.Label>
+                <Form.Label>
+                  Resume/CV <span className="text-danger">*</span> (Required) - PDF Only
+                </Form.Label>
                 <div className="input-group">
                   <Form.Control
                     type="file"
@@ -284,6 +390,7 @@ function ApplicationForm({ show, onHide, internship }) {
                     accept=".pdf"
                     onChange={(e) => handleFileChange(e, 'resume')}
                     required
+                    isInvalid={validationErrors.resume}
                   />
                   {fileNames.resume && (
                     <Button 
@@ -295,9 +402,15 @@ function ApplicationForm({ show, onHide, internship }) {
                     </Button>
                   )}
                 </div>
-                <Form.Text className="text-muted">
-                  Only PDF format accepted. Max size: 5MB
-                </Form.Text>
+                {validationErrors.resume ? (
+                  <div className="text-danger small mt-1">
+                    Please upload your resume/CV.
+                  </div>
+                ) : (
+                  <Form.Text className="text-muted">
+                    Only PDF format accepted. Max size: 5MB
+                  </Form.Text>
+                )}
                 {fileNames.resume && (
                   <div className="selected-file">Selected: {fileNames.resume}</div>
                 )}
@@ -327,7 +440,7 @@ function ApplicationForm({ show, onHide, internship }) {
                   )}
                 </div>
                 <Form.Text className="text-muted">
-                  Accepted formats: PDF, JPG, PNG. Max size: 5MB
+                  Only PDF format accepted. Max size: 5MB
                 </Form.Text>
                 {fileNames.certificate && (
                   <div className="selected-file">Selected: {fileNames.certificate}</div>
@@ -339,7 +452,7 @@ function ApplicationForm({ show, onHide, internship }) {
           <Row className="mb-4">
             <Col md={12}>
               <Form.Group className="document-upload">
-                  <Form.Label>Other Supporting Document (Optional) - PDF Only</Form.Label>
+                <Form.Label>Other Supporting Document (Optional) - PDF Only</Form.Label>
                 <div className="input-group">
                   <Form.Control
                     type="file"
@@ -366,6 +479,11 @@ function ApplicationForm({ show, onHide, internship }) {
               </Form.Group>
             </Col>
           </Row>
+          
+          {/* Submit button within the form for proper HTML validation */}
+          <div className="d-none">
+            <Button type="submit">Submit</Button>
+          </div>
         </Form>
       </Modal.Body>
       
@@ -379,7 +497,7 @@ function ApplicationForm({ show, onHide, internship }) {
         </Button>
         <Button 
           variant="primary" 
-          onClick={handleSubmit}
+          onClick={() => formRef.current.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))}
           disabled={status.isSubmitting || status.isSuccess}
         >
           {status.isSubmitting ? "Submitting..." : "Submit Application"}

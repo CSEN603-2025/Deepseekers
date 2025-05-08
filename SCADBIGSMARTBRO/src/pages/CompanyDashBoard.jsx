@@ -3,7 +3,8 @@ import Profile from "../components/Profile";
 import LogoutButton from "../components/LogoutButton";
 import PostInternship from "../components/PostInternship";
 import Post from "../components/Post";
-import { Container, Row, Col, Form, InputGroup, Button, Tabs, Tab, Accordion, Badge, Modal } from "react-bootstrap";
+import AcceptedApplicants from "../components/AcceptedApplicants";
+import { Container, Row, Col, Form, InputGroup, Button, Tabs, Tab, Accordion, Badge, Modal, Table, Dropdown } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../css/CompanyDashBoard.css";
 import { companies } from '../Data/UserData';
@@ -45,6 +46,18 @@ function CompanyDashBoard() {
     const [selectedIndustries, setSelectedIndustries] = useState([]);
     const [durationFilter, setDurationFilter] = useState('all');
     const [activeFilters, setActiveFilters] = useState(0);
+    const [acceptedStudentsSearchTerm, setAcceptedStudentsSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    
+    // View All Applications state
+    const [showAllApplicationsModal, setShowAllApplicationsModal] = useState(false);
+    const [allCompanyApplications, setAllCompanyApplications] = useState([]);
+    const [selectedApplication, setSelectedApplication] = useState(null);
+    const [showApplicationDetailsModal, setShowApplicationDetailsModal] = useState(false);
+    
+    // --- Add state for position filter ---
+    const [allApplicationsPositionFilter, setAllApplicationsPositionFilter] = useState('all');
+    const [allCompanyInternships, setAllCompanyInternships] = useState([]);
     
     // Get unique list of industries from companies data
     const industries = [...new Set(companies.map(company => company.industry))];
@@ -204,6 +217,9 @@ function CompanyDashBoard() {
         setSelectedIndustries([]);
         setDurationFilter('all');
         setSearchTerm('');
+        setAcceptedStudentsSearchTerm('');
+        setStatusFilter('all');
+        setAllApplicationsPositionFilter('all'); // Clear position filter
     };
     
     // Apply filters to internships
@@ -345,6 +361,68 @@ function CompanyDashBoard() {
         // Close modal and reset state
         setShowDeleteModal(false);
         setInternshipToDelete(null);
+    };
+    
+    // View All Applications Handler
+    const handleViewAllApplications = () => {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const allInternships = JSON.parse(localStorage.getItem('postedInternships')) || [];
+        const allApplications = JSON.parse(localStorage.getItem('appliedInternships')) || [];
+        const companyId = currentUser?.id;
+        const companyName = currentUser?.name;
+        
+        // Get all company's internships
+        const companyInternships = allInternships.filter(
+            internship => internship.companyId === companyId || internship.companyName === companyName
+        );
+        setAllCompanyInternships(companyInternships);
+        
+        // Get all applications for company's internships
+        const companyApplications = allApplications.filter(application => {
+            const internship = companyInternships.find(i => i.id === application.internshipId);
+            return !!internship;
+        }).map(app => ({
+            ...app,
+            internshipTitle: companyInternships.find(i => i.id === app.internshipId)?.title || 'Unknown Position',
+        }));
+        
+        setAllCompanyApplications(companyApplications);
+        setAllApplicationsPositionFilter('all'); // Reset filter to show all positions
+        setShowAllApplicationsModal(true);
+    };
+    
+    const handleViewApplicationDetails = (application) => {
+        setSelectedApplication(application);
+        setShowApplicationDetailsModal(true);
+    };
+    
+    const handleUpdateStatus = (applicationId, newStatus) => {
+        // Update status in local state
+        const updatedApplications = allCompanyApplications.map(app =>
+            app.id === applicationId ? { ...app, status: newStatus } : app
+        );
+        setAllCompanyApplications(updatedApplications);
+        // Update status in localStorage
+        const allApplications = JSON.parse(localStorage.getItem('appliedInternships')) || [];
+        const updatedAllApplications = allApplications.map(app =>
+            app.id === applicationId ? { ...app, status: newStatus } : app
+        );
+        localStorage.setItem('appliedInternships', JSON.stringify(updatedAllApplications));
+        // If details modal is open, update selected application
+        if (selectedApplication && selectedApplication.id === applicationId) {
+            setSelectedApplication({ ...selectedApplication, status: newStatus });
+        }
+    };
+    
+    // --- Add this helper for status badge ---
+    const getStatusBadgeVariant = (status) => {
+        switch(status) {
+            case 'pending': return 'warning';
+            case 'finalized': return 'info';
+            case 'accepted': return 'success';
+            case 'rejected': return 'danger';
+            default: return 'secondary';
+        }
     };
     
     return (
@@ -616,6 +694,9 @@ function CompanyDashBoard() {
                                                 Showing {filteredCompanyInternships.length} internship{filteredCompanyInternships.length !== 1 ? 's' : ''}
                                                 {activeFilters > 0 && ' with applied filters'}
                                             </p>
+                                            <Button variant="outline-primary" onClick={handleViewAllApplications}>
+                                                <i className="bi bi-people"></i> View All Applications
+                                            </Button>
                                         </div>
                                         
                                         {filteredCompanyInternships.length > 0 ? (
@@ -684,6 +765,80 @@ function CompanyDashBoard() {
                     
                     <Tab eventKey="post-new" title="Post New Internship">
                         <PostInternship />
+                    </Tab>
+                    
+                    <Tab eventKey="accepted-students" title="Accepted Students">
+                        <div className="tab-content-container">
+                            <Row>
+                                <Col md={3} className="filters-sidebar">
+                                    <div className="filters-container">
+                                        <div className="search-box mb-4">
+                                            <label htmlFor="search-input-accepted" className="fw-bold mb-2">Search Accepted Students</label>
+                                            <InputGroup>
+                                                <InputGroup.Text id="search-addon-accepted">
+                                                    <i className="bi bi-search"></i>
+                                                </InputGroup.Text>
+                                                <Form.Control
+                                                    id="search-input-accepted"
+                                                    placeholder="Search by student name or job title"
+                                                    onChange={(e) => setAcceptedStudentsSearchTerm(e.target.value)}
+                                                    value={acceptedStudentsSearchTerm}
+                                                />
+                                            </InputGroup>
+                                            <small className="text-muted mt-1">
+                                                Search by student name or internship title
+                                            </small>
+                                        </div>
+                                        
+                                        <div className="filter-options">
+                                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 className="filter-section-title m-0">
+                                                    Filters
+                                                </h5>
+                                                
+                                                {(statusFilter !== 'all' || acceptedStudentsSearchTerm !== '') && (
+                                                    <Button 
+                                                        variant="link" 
+                                                        className="p-0 text-decoration-none clear-filters-btn"
+                                                        onClick={() => {
+                                                            setStatusFilter('all');
+                                                            setAcceptedStudentsSearchTerm('');
+                                                        }}
+                                                    >
+                                                        Clear all
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            
+                                            <Accordion defaultActiveKey="0" className="filter-accordion">
+                                                {/* Status Filter */}
+                                                <Accordion.Item eventKey="0">
+                                                    <Accordion.Header>Internship Status</Accordion.Header>
+                                                    <Accordion.Body>
+                                                        <Form.Select 
+                                                            value={statusFilter}
+                                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                                        >
+                                                            <option value="all">All Statuses</option>
+                                                            <option value="accepted">Accepted</option>
+                                                            <option value="current_intern">Current Intern</option>
+                                                            <option value="internship_complete">Internship Complete</option>
+                                                        </Form.Select>
+                                                    </Accordion.Body>
+                                                </Accordion.Item>
+                                            </Accordion>
+                                        </div>
+                                    </div>
+                                </Col>
+                                
+                                <Col md={9} className="posts-container">
+                                    <AcceptedApplicants 
+                                        searchTerm={acceptedStudentsSearchTerm}
+                                        statusFilter={statusFilter}
+                                    />
+                                </Col>
+                            </Row>
+                        </div>
                     </Tab>
                 </Tabs>
             </Container>
@@ -862,6 +1017,296 @@ function CompanyDashBoard() {
                     <Button variant="danger" onClick={confirmDeleteInternship}>
                         Delete Internship
                     </Button>
+                </Modal.Footer>
+            </Modal>
+            
+            {/* All Applications Modal */}
+            <Modal show={showAllApplicationsModal} onHide={() => setShowAllApplicationsModal(false)} size="lg" centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>All Applications</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="mb-3">
+                        <Form.Label>Filter by Position Title</Form.Label>
+                        <Form.Select 
+                            value={allApplicationsPositionFilter}
+                            onChange={(e) => setAllApplicationsPositionFilter(e.target.value)}
+                        >
+                            <option value="all">All Positions</option>
+                            {allCompanyInternships.map(internship => (
+                                <option key={internship.id} value={internship.id}>
+                                    {internship.title}
+                                </option>
+                            ))}
+                        </Form.Select>
+                    </div>
+                    
+                    <Table striped bordered hover responsive>
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Email</th>
+                                <th>Position</th>
+                                <th>Date Applied</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {allCompanyApplications.length === 0 ? (
+                                <tr><td colSpan={6} className="text-center">No applications found.</td></tr>
+                            ) : (
+                                allCompanyApplications
+                                    .filter(application => {
+                                        // Check if we're filtering "all" or if the internship ID matches the selected filter
+                                        // Use String() to ensure consistent type comparison
+                                        return allApplicationsPositionFilter === 'all' || 
+                                               String(application.internshipId) === String(allApplicationsPositionFilter);
+                                    })
+                                    .map(application => (
+                                        <tr key={application.id}>
+                                            <td>{application.studentName}</td>
+                                            <td>{application.studentEmail}</td>
+                                            <td>{application.internshipTitle}</td>
+                                            <td>{new Date(application.applicationDate).toLocaleDateString()}</td>
+                                            <td><Badge bg={getStatusBadgeVariant(application.status)}>{application.status}</Badge></td>
+                                            <td>
+                                                <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleViewApplicationDetails(application)}>
+                                                    View Details
+                                                </Button>
+                                                <Dropdown className="d-inline-block">
+                                                    <Dropdown.Toggle variant="outline-secondary" size="sm">Change Status</Dropdown.Toggle>
+                                                    <Dropdown.Menu>
+                                                        <Dropdown.Item onClick={() => handleUpdateStatus(application.id, 'pending')} disabled={application.status === 'pending'}>Pending</Dropdown.Item>
+                                                        <Dropdown.Item onClick={() => handleUpdateStatus(application.id, 'finalized')} disabled={application.status === 'finalized'}>Finalized</Dropdown.Item>
+                                                        <Dropdown.Item onClick={() => handleUpdateStatus(application.id, 'accepted')} disabled={application.status === 'accepted'}>Accept</Dropdown.Item>
+                                                        <Dropdown.Item onClick={() => handleUpdateStatus(application.id, 'rejected')} disabled={application.status === 'rejected'}>Reject</Dropdown.Item>
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                            </td>
+                                        </tr>
+                                    ))
+                            )}
+                        </tbody>
+                    </Table>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAllApplicationsModal(false)}>Close</Button>
+                </Modal.Footer>
+            </Modal>
+            
+            {/* Application Details Modal (updated to match Post.jsx exactly) */}
+            <Modal show={showApplicationDetailsModal} onHide={() => setShowApplicationDetailsModal(false)} size="lg" centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Application Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedApplication && (
+                        <div className="application-details">
+                            <div className="application-header mb-4">
+                                <h5>{selectedApplication.studentName}</h5>
+                                <p className="text-muted">{selectedApplication.studentEmail}</p>
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <span className="submission-date">
+                                        Submitted on {selectedApplication.applicationDate ? new Date(selectedApplication.applicationDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Not specified'}
+                                    </span>
+                                    <span className="position-title">
+                                        {selectedApplication.internshipTitle || 'Unknown Position'}
+                                    </span>
+                                    <Badge bg={getStatusBadgeVariant(selectedApplication.status)}>{selectedApplication.status}</Badge>
+                                </div>
+                            </div>
+                            
+                            <div className="application-section mb-4">
+                                <h6 className="section-title">Cover Letter</h6>
+                                <div className="section-content">
+                                    {selectedApplication.coverLetter}
+                                </div>
+                            </div>
+                            
+                            <div className="application-section mb-4">
+                                <h6 className="section-title">Why Interested</h6>
+                                <div className="section-content">
+                                    {selectedApplication.whyApplying}
+                                </div>
+                            </div>
+                            
+                            <div className="application-section mb-4">
+                                <h6 className="section-title">Relevant Experience & Skills</h6>
+                                <div className="section-content">
+                                    {selectedApplication.relevantExperience}
+                                </div>
+                            </div>
+                            
+                            <div className="application-section mb-4">
+                                <h6 className="section-title">Attached Documents</h6>
+                                <div className="section-content">
+                                    <ul className="list-unstyled">
+                                        {selectedApplication.resumeBase64 && (
+                                            <li>
+                                                <Button 
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    className="document-link"
+                                                    onClick={() => {
+                                                        // Open PDF in new tab
+                                                        const pdfWindow = window.open();
+                                                        pdfWindow.document.write(`
+                                                            <html>
+                                                                <head>
+                                                                    <title>Resume - ${selectedApplication.studentName}</title>
+                                                                    <style>
+                                                                        body, html {
+                                                                            margin: 0;
+                                                                            padding: 0;
+                                                                            height: 100%;
+                                                                            overflow: hidden;
+                                                                        }
+                                                                        embed {
+                                                                            width: 100%;
+                                                                            height: 100%;
+                                                                        }
+                                                                    </style>
+                                                                </head>
+                                                                <body>
+                                                                    <embed src="${selectedApplication.resumeBase64}" type="application/pdf" width="100%" height="100%" />
+                                                                </body>
+                                                            </html>
+                                                        `);
+                                                    }}
+                                                >
+                                                    <i className="bi bi-file-earmark-pdf me-2"></i>
+                                                    View Resume/CV
+                                                </Button>
+                                            </li>
+                                        )}
+                                        {selectedApplication.certificateBase64 && (
+                                            <li>
+                                                <Button 
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    className="document-link"
+                                                    onClick={() => {
+                                                        // Open PDF in new tab
+                                                        const pdfWindow = window.open();
+                                                        pdfWindow.document.write(`
+                                                            <html>
+                                                                <head>
+                                                                    <title>Certificate - ${selectedApplication.studentName}</title>
+                                                                    <style>
+                                                                        body, html {
+                                                                            margin: 0;
+                                                                            padding: 0;
+                                                                            height: 100%;
+                                                                            overflow: hidden;
+                                                                        }
+                                                                        embed {
+                                                                            width: 100%;
+                                                                            height: 100%;
+                                                                        }
+                                                                    </style>
+                                                                </head>
+                                                                <body>
+                                                                    <embed src="${selectedApplication.certificateBase64}" type="application/pdf" width="100%" height="100%" />
+                                                                </body>
+                                                            </html>
+                                                        `);
+                                                    }}
+                                                >
+                                                    <i className="bi bi-file-earmark-pdf me-2"></i>
+                                                    View Certificate
+                                                </Button>
+                                            </li>
+                                        )}
+                                        {selectedApplication.otherDocBase64 && (
+                                            <li>
+                                                <Button 
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    className="document-link"
+                                                    onClick={() => {
+                                                        // Open PDF in new tab
+                                                        const pdfWindow = window.open();
+                                                        pdfWindow.document.write(`
+                                                            <html>
+                                                                <head>
+                                                                    <title>Document - ${selectedApplication.studentName}</title>
+                                                                    <style>
+                                                                        body, html {
+                                                                            margin: 0;
+                                                                            padding: 0;
+                                                                            height: 100%;
+                                                                            overflow: hidden;
+                                                                        }
+                                                                        embed {
+                                                                            width: 100%;
+                                                                            height: 100%;
+                                                                        }
+                                                                    </style>
+                                                                </head>
+                                                                <body>
+                                                                    <embed src="${selectedApplication.otherDocBase64}" type="application/pdf" width="100%" height="100%" />
+                                                                </body>
+                                                            </html>
+                                                        `);
+                                                    }}
+                                                >
+                                                    <i className="bi bi-file-earmark-pdf me-2"></i>
+                                                    View Other Document
+                                                </Button>
+                                            </li>
+                                        )}
+                                        {!selectedApplication.resumeBase64 && 
+                                        !selectedApplication.certificateBase64 && 
+                                        !selectedApplication.otherDocBase64 && (
+                                            <li className="text-muted">No documents attached</li>
+                                        )}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <div className="d-flex justify-content-between w-100">
+                        <div>
+                            <Button 
+                                variant="secondary" 
+                                onClick={() => setShowApplicationDetailsModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </div>
+                        
+                        {/* Status change buttons matching Post.jsx */}
+                        {selectedApplication && (
+                            <div>
+                                <Button 
+                                    variant="info" 
+                                    className="me-2"
+                                    onClick={() => handleUpdateStatus(selectedApplication.id, 'finalized')}
+                                    disabled={selectedApplication?.status === 'finalized'}
+                                >
+                                    Mark as Finalized
+                                </Button>
+                                <Button 
+                                    variant="danger" 
+                                    className="me-2"
+                                    onClick={() => handleUpdateStatus(selectedApplication.id, 'rejected')}
+                                    disabled={selectedApplication?.status === 'rejected'}
+                                >
+                                    Reject
+                                </Button>
+                                <Button 
+                                    variant="success"
+                                    onClick={() => handleUpdateStatus(selectedApplication.id, 'accepted')}
+                                    disabled={selectedApplication?.status === 'accepted'}
+                                >
+                                    Accept
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </Modal.Footer>
             </Modal>
         </div>
