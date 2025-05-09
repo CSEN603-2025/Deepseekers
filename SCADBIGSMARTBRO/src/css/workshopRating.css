@@ -1,0 +1,102 @@
+/* Workshop Rating Styles */
+.workshop-rating-container {
+  padding: 1.5rem;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+/* Rating scale styling */
+.rating-buttons {
+  margin-bottom: 1.5rem;
+}
+
+.rating-scale {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.rating-option {
+  text-align: center;
+  flex: 1;
+  padding: 0 5px;
+}
+
+.rating-radio {
+  cursor: pointer;
+}
+
+.rating-radio input {
+  cursor: pointer;
+}
+
+.rating-radio label {
+  font-weight: 500;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: block;
+  margin-bottom: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+/* Customize radio buttons to look more like numbered buttons */
+.form-check-input:checked + .form-check-label {
+  background-color: #5cb85c;
+  color: white;
+}
+
+.form-check-input {
+  position: absolute;
+  opacity: 0;
+}
+
+.form-check-label {
+  border: 1px solid #ced4da;
+  background-color: #f8f9fa;
+}
+
+.form-check-label:hover {
+  background-color: #e9ecef;
+}
+
+/* Rating labels */
+.rating-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.selected-rating {
+  text-align: center;
+  font-size: 1rem;
+  color: #212529;
+}
+
+/* Success message styling */
+.text-success {
+  color: #28a745 !important;
+}
+
+/* Textarea focus styling */
+.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Submit button styling */
+.btn-success {
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+  transition: background-color 0.2s;
+}
+
+.btn-success:hover {
+  background-color: #449d44;
+  border-color: #398439;
+}
