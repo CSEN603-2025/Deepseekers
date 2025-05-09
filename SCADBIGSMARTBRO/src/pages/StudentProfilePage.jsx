@@ -28,10 +28,6 @@ function StudentProfilePage() {
 
     return (
         <div className="student-profile-page">   
-            <div className="logout-container" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
-                <LogoutButton />
-            </div>
-            
             {/* Use the enhanced Profile component with profileType and userData props */}
             <Profile 
                 name={currentUser.name} 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import '../css/navigationBar.css';
+import LogoutButton from './LogoutButton';
 
 const ScadNavigationBar = () => {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ const ScadNavigationBar = () => {
             <Nav.Link onClick={() => navigate('/scad/home')}>Home</Nav.Link>
             <Nav.Link onClick={() => navigate('/scad/company-applications')}>Company Applications</Nav.Link>
           </Nav>
+          <div className="ms-3">
+            <LogoutButton />
+          </div>
         </Navbar.Collapse>
       </Container>
     </Navbar>

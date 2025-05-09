@@ -4,6 +4,7 @@ import LogoutButton from "../components/LogoutButton";
 import PostInternship from "../components/PostInternship";
 import Post from "../components/Post";
 import AcceptedApplicants from "../components/AcceptedApplicants";
+import NotificationButton from "../components/NotificationButton"; // Import the new component
 import { Container, Row, Col, Form, InputGroup, Button, Tabs, Tab, Accordion, Badge, Modal, Table, Dropdown } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../css/CompanyDashBoard.css";
@@ -429,8 +430,12 @@ function CompanyDashBoard() {
         <div className="company-dashboard">
             <div className="logout-container" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
                 <LogoutButton />
+                <NotificationButton onViewApplication={(application) => {
+                    setSelectedApplication(application);
+                    setShowApplicationDetailsModal(true);
+                }} />
             </div>
-            
+  
             <Profile 
                 name={currentUser.name} 
                 navigateTo="/company/edit-profile" 

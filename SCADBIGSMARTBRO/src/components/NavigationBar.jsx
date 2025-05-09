@@ -3,6 +3,7 @@ import React from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import '../css/navigationBar.css';
+import LogoutButton from './LogoutButton';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ const NavigationBar = () => {
             <Nav.Link onClick={() => navigate('/student/profile')}>Profile</Nav.Link>
             <Nav.Link onClick={() => navigate('/student/internships')}>Internships</Nav.Link>
           </Nav>
+          <div className="ms-3">
+            <LogoutButton />
+          </div>
         </Navbar.Collapse>
       </Container>
     </Navbar>

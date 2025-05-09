@@ -8,8 +8,9 @@ import '../css/AcceptedApplicants.css';
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [feedback, setFeedback] = useState('');
-  const [rating, setRating] = useState(5);
+  const [evaluation, setEvaluation] = useState('');
+  const [evaluationRating, setEvaluationRating] = useState(5);
+  const [existingEvaluation, setExistingEvaluation] = useState(null);
   const [filteredApplicants, setFilteredApplicants] = useState([]);
 
   // Get current company user
@@ -136,48 +137,68 @@ import '../css/AcceptedApplicants.css';
     setShowFeedbackModal(true);
   };
 
-  const handleSubmitFeedback = () => {
-    // Update the applicant record with feedback and rating
-    const allApplications = JSON.parse(localStorage.getItem('appliedInternships')) || [];
-    const updatedApplications = allApplications.map(app => {
-      if (app.id === selectedApplicant.id) {
-        return { 
-          ...app, 
-          feedback,
-          rating,
-          feedbackDate: new Date().toISOString()
-        };
+  // Load evaluation for selected applicant
+  useEffect(() => {
+    if (selectedApplicant && selectedApplicant.status === 'internship_complete') {
+      const evaluations = JSON.parse(localStorage.getItem('CompanyEvaluations')) || [];
+      const found = evaluations.find(ev =>
+        ev.studentId === selectedApplicant.studentId &&
+        ev.internshipId === selectedApplicant.internshipId &&
+        ev.companyId === companyId
+      );
+      if (found) {
+        setEvaluation(found.evaluationText);
+        setEvaluationRating(found.rating);
+        setExistingEvaluation(found);
+      } else {
+        setEvaluation('');
+        setEvaluationRating(5);
+        setExistingEvaluation(null);
       }
-      return app;
-    });
-    
-    // Save back to localStorage
-    localStorage.setItem('appliedInternships', JSON.stringify(updatedApplications));
-    
-    // Update the state
-    const updatedApplicants = acceptedApplicants.map(app => 
-      app.id === selectedApplicant.id ? {
-        ...app,
-        feedback,
-        rating,
-        feedbackDate: new Date().toISOString()
-      } : app
+    }
+  }, [selectedApplicant, companyId]);
+
+  // CRUD: Save or update evaluation
+  const handleSubmitEvaluation = () => {
+    const evaluations = JSON.parse(localStorage.getItem('CompanyEvaluations')) || [];
+    const idx = evaluations.findIndex(ev =>
+      ev.studentId === selectedApplicant.studentId &&
+      ev.internshipId === selectedApplicant.internshipId &&
+      ev.companyId === companyId
     );
-    
-    setAcceptedApplicants(updatedApplicants);
-    
-    // Update selected applicant if we keep the modal open
-    setSelectedApplicant({
-      ...selectedApplicant,
-      feedback,
-      rating,
-      feedbackDate: new Date().toISOString()
-    });
-    
-    // Close the modal
+    const newEval = {
+      studentId: selectedApplicant.studentId,
+      internshipId: selectedApplicant.internshipId,
+      companyId,
+      evaluationText: evaluation,
+      rating: evaluationRating,
+      date: new Date().toISOString(),
+      studentName: selectedApplicant.studentName,
+      internshipTitle: getInternshipTitle(selectedApplicant.internshipId)
+    };
+    if (idx !== -1) {
+      evaluations[idx] = newEval;
+    } else {
+      evaluations.push(newEval);
+    }
+    localStorage.setItem('CompanyEvaluations', JSON.stringify(evaluations));
+    setExistingEvaluation(newEval);
     setShowFeedbackModal(false);
-    setFeedback('');
-    setRating(5);
+  };
+
+  // CRUD: Delete evaluation
+  const handleDeleteEvaluation = () => {
+    let evaluations = JSON.parse(localStorage.getItem('CompanyEvaluations')) || [];
+    evaluations = evaluations.filter(ev =>
+      !(ev.studentId === selectedApplicant.studentId &&
+        ev.internshipId === selectedApplicant.internshipId &&
+        ev.companyId === companyId)
+    );
+    localStorage.setItem('CompanyEvaluations', JSON.stringify(evaluations));
+    setExistingEvaluation(null);
+    setEvaluation('');
+    setEvaluationRating(5);
+    setShowFeedbackModal(false);
   };
 
   // Display status badge with appropriate color
@@ -306,13 +327,22 @@ import '../css/AcceptedApplicants.css';
                     </Button>
                   )}
                   
-                  {applicant.status === 'internship_complete' && !applicant.feedback && (
+                  {applicant.status === 'internship_complete' && !existingEvaluation && (
                     <Button 
                       variant="outline-info" 
                       size="sm"
                       onClick={() => handleOpenFeedbackModal(applicant)}
                     >
-                      Add Feedback
+                      Add Evaluation
+                    </Button>
+                  )}
+                  {applicant.status === 'internship_complete' && existingEvaluation && (
+                    <Button 
+                      variant="outline-info" 
+                      size="sm"
+                      onClick={() => handleOpenFeedbackModal(applicant)}
+                    >
+                      Edit Evaluation
                     </Button>
                   )}
                 </td>
@@ -496,28 +526,27 @@ import '../css/AcceptedApplicants.css';
         </Modal.Footer>
       </Modal>
       
-      {/* Feedback Modal */}
+      {/* Feedback Modal (now Evaluation Modal) */}
       <Modal
         show={showFeedbackModal}
         onHide={() => setShowFeedbackModal(false)}
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Provide Feedback</Modal.Title>
+          <Modal.Title>{existingEvaluation ? 'Edit Evaluation' : 'Add Evaluation'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedApplicant && (
             <Form>
               <p>
-                Providing feedback for <strong>{selectedApplicant.studentName}</strong> who completed 
+                {existingEvaluation ? 'Editing' : 'Providing'} evaluation for <strong>{selectedApplicant.studentName}</strong> who completed 
                 their internship as <strong>{getInternshipTitle(selectedApplicant.internshipId)}</strong>
               </p>
-              
               <Form.Group className="mb-3">
                 <Form.Label>Rating (1-5)</Form.Label>
                 <Form.Select
-                  value={rating}
-                  onChange={(e) => setRating(parseInt(e.target.value))}
+                  value={evaluationRating}
+                  onChange={(e) => setEvaluationRating(parseInt(e.target.value))}
                 >
                   <option value="5">5 - Excellent</option>
                   <option value="4">4 - Very Good</option>
@@ -526,30 +555,34 @@ import '../css/AcceptedApplicants.css';
                   <option value="1">1 - Poor</option>
                 </Form.Select>
               </Form.Group>
-              
               <Form.Group className="mb-3">
-                <Form.Label>Feedback</Form.Label>
+                <Form.Label>Evaluation</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={4}
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="Please provide detailed feedback about the intern's performance, skills, and areas for improvement..."
+                  value={evaluation}
+                  onChange={(e) => setEvaluation(e.target.value)}
+                  placeholder="Please provide a detailed evaluation about the intern's performance, skills, and areas for improvement..."
                 />
               </Form.Group>
             </Form>
           )}
         </Modal.Body>
         <Modal.Footer>
+          {existingEvaluation && (
+            <Button variant="danger" onClick={handleDeleteEvaluation}>
+              Delete Evaluation
+            </Button>
+          )}
           <Button variant="secondary" onClick={() => setShowFeedbackModal(false)}>
             Cancel
           </Button>
           <Button 
             variant="primary" 
-            onClick={handleSubmitFeedback}
-            disabled={!feedback.trim()}
+            onClick={handleSubmitEvaluation}
+            disabled={!evaluation.trim()}
           >
-            Submit Feedback
+            {existingEvaluation ? 'Update Evaluation' : 'Submit Evaluation'}
           </Button>
         </Modal.Footer>
       </Modal>
