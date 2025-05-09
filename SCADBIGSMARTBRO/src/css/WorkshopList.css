@@ -1,0 +1,43 @@
+.workshop-list {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.workshop-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-top: 4px solid #003b73;
+}
+
+.workshop-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.workshop-description {
+  min-height: 72px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.speaker-info {
+  font-size: 0.9rem;
+}
+
+.workshop-agenda table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.workshop-agenda th {
+  background-color: #f8f9fa;
+}
+
+.workshop-agenda th, .workshop-agenda td {
+  padding: 0.75rem;
+  vertical-align: top;
+  border-top: 1px solid #dee2e6;
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Post from '../components/Post';
 import AppointmentSystem from '../components/AppointmentSystem';
+import WorkshopManagement from '../components/WorkshopManagement';
 import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge, Tabs, Tab } from 'react-bootstrap';
 import { companies } from '../Data/UserData';
 import '../css/scadHome.css';
@@ -15,7 +16,7 @@ export default function ScadHomePage() {
     const [selectedIndustries, setSelectedIndustries] = useState([]);
     const [durationFilter, setDurationFilter] = useState('all');
     const [activeFilters, setActiveFilters] = useState(0);
-    const [activeTab, setActiveTab] = useState('internships'); // Add this new state
+    const [activeTab, setActiveTab] = useState('internships');
     
     // Get unique list of industries from companies data
     const industries = [...new Set(companies.map(company => company.industry))];
@@ -345,6 +346,20 @@ export default function ScadHomePage() {
                         <Row>
                             <Col>
                                 <AppointmentSystem userType="scad" />
+                            </Col>
+                        </Row>
+                    </Tab>
+
+                    <Tab eventKey="workshops" title="Career Workshops">
+                        <Row className="mb-4">
+                            <Col>
+                                <h2 className="page-title">Career Workshops</h2>
+                                <p className="text-muted">Create and manage online workshops for students</p>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <WorkshopManagement />
                             </Col>
                         </Row>
                     </Tab>

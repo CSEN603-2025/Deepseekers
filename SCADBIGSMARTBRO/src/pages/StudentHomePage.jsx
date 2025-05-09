@@ -3,6 +3,7 @@ import NavigationBar from '../components/NavigationBar';
 import Post from '../components/Post';
 import AppointmentSystem from '../components/AppointmentSystem';
 import StudentAssessmentsPage from './StudentAssessmentsPage';
+import WorkshopList from '../components/WorkshopList';
 import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge, Tabs, Tab } from 'react-bootstrap';
 import { companies } from '../Data/UserData';
 import { clearLocalStorage, clearSpecificLocalStorageData } from '../Data/ClearLocalStorage';
@@ -367,6 +368,25 @@ const StudentHomePage = () => {
           >
             {studentProfile?.pro ? (
               <StudentAssessmentsPage />
+            ) : (
+              <div className="pro-feature-locked">
+                <h5>Pro Feature</h5>
+                <p>This feature is only available for Pro students.</p>
+              </div>
+            )}
+          </Tab>
+          
+          <Tab
+            eventKey="workshops"
+            title={
+              <>
+                Workshops
+                <Badge className="ms-2 pro-badge">PRO</Badge>
+              </>
+            }
+          >
+            {studentProfile?.pro ? (
+              <WorkshopList studentId={studentProfile.gucId} />
             ) : (
               <div className="pro-feature-locked">
                 <h5>Pro Feature</h5>
