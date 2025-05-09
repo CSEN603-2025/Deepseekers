@@ -7,7 +7,8 @@ function Profile({
     navigateTo = '/student/edit-profile', 
     showEditButton = true,
     profileType = 'student', // New prop to identify profile type: 'student' or 'company'
-    userData = {} // New prop to pass user data for the About section
+    userData = {}, // New prop to pass user data for the About section
+    onEditClick = null // New prop to handle edit button click
 }) {
     const navigate = useNavigate();
     
@@ -56,8 +57,13 @@ function Profile({
     };
     
     const toggleEditMode = () => {
-        // Navigate to edit profile page
-        navigate(navigateTo);
+        // If a custom edit handler is provided, use it
+        if (onEditClick) {
+            onEditClick();
+        } else {
+            // Otherwise, navigate to edit profile page (fallback behavior)
+            navigate(navigateTo);
+        }
     };
     
     const handleSaveChanges = () => {

@@ -4,10 +4,13 @@ import Post from '../components/Post';
 import AppointmentSystem from '../components/AppointmentSystem';
 import StudentAssessmentsPage from './StudentAssessmentsPage';
 import WorkshopList from '../components/WorkshopList';
+import PrerecordedWorkshops from '../components/PrerecordedWorkshops'; // Add this import
+import LiveWorkshops from '../components/LiveWorkshops'; // Add this import
 import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge, Tabs, Tab } from 'react-bootstrap';
 import { companies } from '../Data/UserData';
 import { clearLocalStorage, clearSpecificLocalStorageData } from '../Data/ClearLocalStorage';
 import '../css/studentHome.css';
+import '../css/liveWorkshops.css'; // Add this import
 
 const StudentHomePage = () => {
   const [internships, setInternships] = useState([]);
@@ -17,7 +20,8 @@ const StudentHomePage = () => {
   const [selectedIndustries, setSelectedIndustries] = useState([]);
   const [durationFilter, setDurationFilter] = useState('all');
   const [activeFilters, setActiveFilters] = useState(0);
-  const [activeTab, setActiveTab] = useState('availableInternships'); // State to manage active tab
+  const [activeTab, setActiveTab] = useState('availableInternships'); 
+  const [activeWorkshopTab, setActiveWorkshopTab] = useState('all'); // Add this line
   const [studentMajor, setStudentMajor] = useState(''); // State to store the student's major
   const [studentProfile, setStudentProfile] = useState(null); // State to store the student's profile
 
@@ -386,7 +390,46 @@ const StudentHomePage = () => {
             }
           >
             {studentProfile?.pro ? (
-              <WorkshopList studentId={studentProfile.gucId} />
+              <div className="workshops-container">
+                <Row>
+                  <Col md={3} className="workshop-nav-sidebar">
+                    <div className="workshop-nav-container">
+                      <h5 className="mb-4">Workshop Categories</h5>
+                      <div className="d-grid gap-2">
+                        <Button
+                          variant={activeWorkshopTab === 'all' ? 'primary' : 'outline-primary'}
+                          onClick={() => setActiveWorkshopTab('all')}
+                          className="text-start"
+                        >
+                          <i className="bi bi-calendar-event me-2"></i>
+                          All Upcoming Workshops
+                        </Button>
+                        <Button
+                          variant={activeWorkshopTab === 'prerecorded' ? 'primary' : 'outline-primary'}
+                          onClick={() => setActiveWorkshopTab('prerecorded')}
+                          className="text-start"
+                        >
+                          <i className="bi bi-play-circle me-2"></i>
+                          Pre-recorded Workshops
+                        </Button>
+                        <Button
+                          variant={activeWorkshopTab === 'live' ? 'primary' : 'outline-primary'}
+                          onClick={() => setActiveWorkshopTab('live')}
+                          className="text-start"
+                        >
+                          <i className="bi bi-broadcast me-2"></i>
+                          Live Online Workshops
+                        </Button>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md={9}>
+                    {activeWorkshopTab === 'all' && <WorkshopList studentId={studentProfile.gucId} />}
+                    {activeWorkshopTab === 'prerecorded' && <PrerecordedWorkshops studentId={studentProfile.gucId} />}
+                    {activeWorkshopTab === 'live' && <LiveWorkshops studentId={studentProfile.gucId} />}
+                  </Col>
+                </Row>
+              </div>
             ) : (
               <div className="pro-feature-locked">
                 <h5>Pro Feature</h5>

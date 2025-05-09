@@ -4,6 +4,7 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import '../css/navigationBar.css';
 import LogoutButton from './LogoutButton';
+import NotificationButton from './NotificationButton';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
@@ -19,8 +20,11 @@ const NavigationBar = () => {
             <Nav.Link onClick={() => navigate('/student/profile')}>Profile</Nav.Link>
             <Nav.Link onClick={() => navigate('/student/internships')}>Internships</Nav.Link>
           </Nav>
-          <div className="ms-3">
+          <div className="navbar-actions d-flex align-items-center">
             <LogoutButton />
+            <div className="notification-btn-wrapper">
+              <NotificationButton userRole="student" />
+            </div>
           </div>
         </Navbar.Collapse>
       </Container>

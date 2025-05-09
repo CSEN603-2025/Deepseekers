@@ -67,6 +67,18 @@
   color: #002855;
 }
 
+.navbar-actions {
+  display: flex;
+  align-items: center;
+}
+
+.notification-btn-wrapper {
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+}
+
+
 @media (max-width: 768px) {
   .student-navigation-bar .navbar-collapse {
     margin-top: 1rem;

@@ -20,8 +20,45 @@ export default function LoginPage() {
     
     if (user) {
       if (role === 'student') {
-        localStorage.setItem('studentProfile', JSON.stringify(user));
+        // Use a structured storage approach for student profiles
+        const allStudentProfiles = JSON.parse(localStorage.getItem('allStudentProfiles')) || {};
+        
+        // Check if there's existing profile data for this student
+        if (allStudentProfiles[user.id]) {
+          // Update existing profile while preserving custom fields
+          allStudentProfiles[user.id] = {
+            ...allStudentProfiles[user.id],
+            // Always use the latest basic info from user
+            name: user.name,
+            email: user.email,
+            gucId: user.gucId,
+            faculty: user.faculty,
+            major: user.major
+          };
+        } else {
+          // Create new profile entry for this student
+          allStudentProfiles[user.id] = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            gucId: user.gucId,
+            faculty: user.faculty,
+            major: user.major,
+            jobInterests: '',
+            internships: '',
+            activities: '',
+            semester: ''
+          };
+        }
+        
+        // Save the updated profiles collection
+        localStorage.setItem('allStudentProfiles', JSON.stringify(allStudentProfiles));
+        
+        // Set the current profile for backward compatibility
+        // This can be removed once all components are updated to use allStudentProfiles
+        localStorage.setItem('studentProfile', JSON.stringify(allStudentProfiles[user.id]));
       }
+      
       // Store user data in localStorage for use across components
       localStorage.setItem('currentUser', JSON.stringify({
         id: user.id,

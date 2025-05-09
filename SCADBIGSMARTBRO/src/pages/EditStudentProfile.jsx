@@ -1,8 +1,7 @@
 // /pages/StudentProfile.jsx
 import React, { useState, useEffect } from 'react';
 import '../css/EditStudentProfile.css';
-
-
+import { Modal, Button } from 'react-bootstrap';
 
 const majors = [
   { name: 'MET', semesters: 10 },
@@ -24,20 +23,24 @@ const EditStudentProfile = () => {
     major: '',
     semester: '',
   });
+  
+  // Modal states
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   // Load from localStorage when component mounts
-useEffect(() => {
-  const savedProfile = localStorage.getItem('studentProfile');
-  if (savedProfile) {
-    setProfile(JSON.parse(savedProfile));
-    // Also generate semester options if major exists
-    const majorObj = majors.find((m) => m.name === JSON.parse(savedProfile).major);
-    if (majorObj) {
-      const semesters = [...Array(majorObj.semesters)].map((_, i) => i + 1);
-      setSemesterOptions(semesters);
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('studentProfile');
+    if (savedProfile) {
+      setProfile(JSON.parse(savedProfile));
+      // Also generate semester options if major exists
+      const majorObj = majors.find((m) => m.name === JSON.parse(savedProfile).major);
+      if (majorObj) {
+        const semesters = [...Array(majorObj.semesters)].map((_, i) => i + 1);
+        setSemesterOptions(semesters);
+      }
     }
-  }
-}, []);
+  }, []);
     
   const [semesterOptions, setSemesterOptions] = useState([]);
 
@@ -62,26 +65,27 @@ useEffect(() => {
   const handleSubmit = (e) => {
     e.preventDefault();
     localStorage.setItem('studentProfile', JSON.stringify(profile));
-    alert("Profile saved successfully!");
+    setShowSaveModal(true);
   };
 
   const handleClear = () => {
-    const confirmed = window.confirm("Are you sure you want to clear your profile?");
-    if (confirmed) {
-      localStorage.removeItem('studentProfile');
-      setProfile({
-        jobInterests: '',
-        internships: '',
-        activities: '',
-        major: '',
-        semester: '',
-      });
-      setSemesterOptions([]);
-    }
+    setShowClearModal(true);
+  };
+  
+  const confirmClear = () => {
+    localStorage.removeItem('studentProfile');
+    setProfile({
+      jobInterests: '',
+      internships: '',
+      activities: '',
+      major: '',
+      semester: '',
+    });
+    setSemesterOptions([]);
+    setShowClearModal(false);
   };
   
   return (
- 
       <div className="student-profile-container">
         <h2>Your Profile</h2>
         <p>Edit your job interests, past experiences, and academic details.</p>
@@ -145,12 +149,41 @@ useEffect(() => {
           )}
           
           <div className="button-row">
-  <button type="submit">Save Profile</button>
-  <div className="right-button">
-    <button type="button" onClick={handleClear}>Clear Profile</button>
-  </div>
-</div>
+            <button type="button" onClick={handleClear}>Clear Profile</button>
+            <div className="right-button">
+              <button type="submit">Save Profile</button>
+            </div>
+          </div>
         </form>
+        
+        {/* Success Modal */}
+        <Modal show={showSaveModal} onHide={() => setShowSaveModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Success</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Profile saved successfully!</Modal.Body>
+          <Modal.Footer>
+            <Button variant="success" onClick={() => setShowSaveModal(false)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        
+        {/* Clear Confirmation Modal */}
+        <Modal show={showClearModal} onHide={() => setShowClearModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Are you sure you want to clear your profile?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowClearModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={confirmClear}>
+              Clear Profile
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
   );
 };
