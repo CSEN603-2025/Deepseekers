@@ -10,6 +10,8 @@ const StudentAssessmentsPage = () => {
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  // Add state for sharing assessment results
+  const [shareOnProfile, setShareOnProfile] = useState(true);
 
   // Sample assessment data - in a real app, this would come from an API or database
   const sampleAssessments = [
@@ -175,12 +177,25 @@ const StudentAssessmentsPage = () => {
       assessmentTitle: currentAssessment.title,
       score: calculatedScore,
       completionDate: new Date().toISOString(),
-      studentId: currentUser?.id
+      studentId: currentUser?.id,
+      sharedOnProfile: shareOnProfile // Add this property
     };
 
     const updatedCompletedAssessments = [...completedAssessments, newCompletedAssessment];
     setCompletedAssessments(updatedCompletedAssessments);
     localStorage.setItem('completedAssessments', JSON.stringify(updatedCompletedAssessments));
+  };
+
+  // Add function to toggle sharing status
+  const handleToggleSharing = (assessmentId, isShared) => {
+    const updatedAssessments = completedAssessments.map(assessment => 
+      assessment.id === assessmentId 
+        ? { ...assessment, sharedOnProfile: isShared }
+        : assessment
+    );
+    
+    setCompletedAssessments(updatedAssessments);
+    localStorage.setItem('completedAssessments', JSON.stringify(updatedAssessments));
   };
 
   const handleCloseModal = () => {
@@ -251,11 +266,11 @@ const StudentAssessmentsPage = () => {
                 {userCompletedAssessments.map(assessment => (
                   <ListGroup.Item key={assessment.id} className="completed-assessment-item">
                     <Row>
-                      <Col md={8}>
+                      <Col md={7}>
                         <h5 className="assessment-title">{assessment.assessmentTitle}</h5>
                         <p className="completion-date">Completed on: {formatDate(assessment.completionDate)}</p>
                       </Col>
-                      <Col md={4} className="d-flex align-items-center justify-content-end">
+                      <Col md={3} className="d-flex align-items-center justify-content-end">
                         <div className="score-container">
                           <div className={`score-circle ${
                             assessment.score >= 70 ? 'high-score' : 
@@ -268,6 +283,15 @@ const StudentAssessmentsPage = () => {
                              assessment.score >= 40 ? 'Good' : 'Needs Improvement'}
                           </span>
                         </div>
+                      </Col>
+                      <Col md={2} className="d-flex align-items-center justify-content-end">
+                        <Form.Check 
+                          type="switch"
+                          id={`share-toggle-${assessment.id}`}
+                          label="Share"
+                          checked={assessment.sharedOnProfile}
+                          onChange={(e) => handleToggleSharing(assessment.id, e.target.checked)}
+                        />
                       </Col>
                     </Row>
                   </ListGroup.Item>
@@ -371,15 +395,27 @@ const StudentAssessmentsPage = () => {
             </div>
           )}
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className="d-flex justify-content-between align-items-center">
           {score === null ? (
-            <Button variant="primary" onClick={handleSubmitAssessment}>
-              Submit Assessment
-            </Button>
+            <div className="d-flex justify-content-end w-100">
+              <Button variant="primary" onClick={handleSubmitAssessment}>
+                Submit Assessment
+              </Button>
+            </div>
           ) : (
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Close
-            </Button>
+            <>
+              <div className="share-toggle-container">
+                <Button 
+                  className={`share-profile-toggle ${shareOnProfile ? 'active' : ''}`}
+                  onClick={() => setShareOnProfile(!shareOnProfile)}
+                >
+                  {shareOnProfile ? 'Shared on Profile' : 'Share on Profile'}
+                </Button>
+              </div>
+              <Button variant="secondary" onClick={handleCloseModal}>
+                Close
+              </Button>
+            </>
           )}
         </Modal.Footer>
       </Modal>

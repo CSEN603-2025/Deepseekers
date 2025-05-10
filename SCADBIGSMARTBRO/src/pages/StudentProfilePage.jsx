@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Form, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form, Modal, Card, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import Profile from '../components/Profile';
 import '../css/StudentProfilePage.css';
@@ -19,9 +19,6 @@ const majors = [
 function StudentProfilePage() {
     const [currentUser, setCurrentUser] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const navigate = useNavigate();
-    
-    // Profile state
     const [profile, setProfile] = useState({
         jobInterests: '',
         internships: '',
@@ -30,11 +27,11 @@ function StudentProfilePage() {
         semester: '',
     });
     const [semesterOptions, setSemesterOptions] = useState([]);
-    
-    // Modal states
     const [showSaveModal, setShowSaveModal] = useState(false);
     const [showClearModal, setShowClearModal] = useState(false);
-
+    const [sharedAssessments, setSharedAssessments] = useState([]);
+    const navigate = useNavigate();
+    
     useEffect(() => {
         // Retrieve user data from localStorage
         const userData = localStorage.getItem('currentUser');
@@ -72,6 +69,13 @@ function StudentProfilePage() {
                     }
                 }
             }
+            
+            // Load shared assessment scores
+            const completedAssessments = JSON.parse(localStorage.getItem('completedAssessments')) || [];
+            const userSharedAssessments = completedAssessments.filter(
+                assessment => assessment.studentId === parsedUserData.id && assessment.sharedOnProfile
+            );
+            setSharedAssessments(userSharedAssessments);
         } else {
             // Redirect to login if no user data is found
             navigate('/');
@@ -174,6 +178,13 @@ function StudentProfilePage() {
         
         setSemesterOptions([]);
         setShowClearModal(false);
+    };
+
+    // Add this helper function
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Not specified';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     };
 
     if (!currentUser) {
@@ -347,6 +358,57 @@ function StudentProfilePage() {
                                         </Button>
                                     </div>
                                 )
+                            )}
+                        </div>
+                    </Col>
+                </Row>
+            </Container>
+            
+            {/* Assessment Scores Section - Add this new section */}
+            <Container className="assessment-scores-section mt-4">
+                <Row>
+                    <Col md={12}>
+                        <div className="assessment-info-container">
+                            <h3 className="section-title">Assessment Results</h3>
+                            
+                            {sharedAssessments.length > 0 ? (
+                                <div className="assessment-cards">
+                                    <Row>
+                                        {sharedAssessments.map(assessment => (
+                                            <Col key={assessment.id} md={4} className="mb-3">
+                                                <Card className="assessment-card">
+                                                    <Card.Body>
+                                                        <Card.Title>{assessment.assessmentTitle}</Card.Title>
+                                                        <div className="text-center my-3">
+                                                            <div className={`score-circle mx-auto ${
+                                                                assessment.score >= 70 ? 'high-score' : 
+                                                                assessment.score >= 40 ? 'medium-score' : 'low-score'
+                                                            }`}>
+                                                                {assessment.score}%
+                                                            </div>
+                                                        </div>
+                                                        <div className="assessment-meta">
+                                                            <Badge 
+                                                                bg={assessment.score >= 70 ? 'success' : 
+                                                                    assessment.score >= 40 ? 'warning' : 'danger'}>
+                                                                {assessment.score >= 70 ? 'Excellent' : 
+                                                                 assessment.score >= 40 ? 'Good' : 'Needs Improvement'}
+                                                            </Badge>
+                                                            <small className="text-muted d-block mt-2">
+                                                                Completed on: {formatDate(assessment.completionDate)}
+                                                            </small>
+                                                        </div>
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                        ))}
+                                    </Row>
+                                </div>
+                            ) : (
+                                <div className="text-center py-4">
+                                    <p>No assessment results to display.</p>
+                                    <p className="text-muted">Assessment results shared from the Assessments page will appear here.</p>
+                                </div>
                             )}
                         </div>
                     </Col>
