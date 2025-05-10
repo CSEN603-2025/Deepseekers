@@ -4,15 +4,16 @@ import StudentHomePage from "./pages/StudentHomePage";
 import EditStudentProfile from "./pages/EditStudentProfile";
 import StudentProfilePage from "./pages/StudentProfilePage";
 import StudentInternshipsPage from "./pages/StudentInternshipsPage";
+import StudentReportsPage from "./pages/StudentReportsPage";
 import NavigationBar from "./components/NavigationBar";
 import CompanyRegister from "./pages/CompanyRegister";
 import CompanyDashBoard from "./pages/CompanyDashBoard";
-
-
-import "./App.css";
 import ScadHomePage from "./pages/ScadHomePage";
 import ScadNavigationBar from "./components/ScadNavigationBar";
 import ScadCompanyApplications from "./pages/ScadCompanyApplications";
+import ScadReportsPage from "./pages/ScadReportsPage";
+
+import "./App.css";
 
 function App() {
   return (
@@ -56,14 +57,24 @@ function App() {
               </main>
             </>
           }
-        />
-        <Route
+        />        <Route
           path="/student/internships"
           element={
             <>
               <NavigationBar />
               <main className="main-content">
                 <StudentInternshipsPage />
+              </main>
+            </>
+          }
+        />
+        <Route
+          path="/student/reports"
+          element={
+            <>
+              <NavigationBar />
+              <main className="main-content">
+                <StudentReportsPage />
               </main>
             </>
           }
@@ -86,6 +97,14 @@ function App() {
           <ScadNavigationBar />
           <main className="main-content">
           <ScadCompanyApplications />
+          </main>
+          </>}
+          />
+        <Route path="/scad/reports" element={
+          <>
+          <ScadNavigationBar />
+          <main className="main-content">
+          <ScadReportsPage />
           </main>
           </>}
           />

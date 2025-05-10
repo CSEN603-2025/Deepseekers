@@ -9,8 +9,7 @@ import NotificationButton from './NotificationButton';
 const NavigationBar = () => {
   const navigate = useNavigate();
 
-  return (
-    <Navbar expand="lg" className="custom-navbar" variant="dark">
+  return (    <Navbar expand="lg" className="custom-navbar" variant="dark">
       <Container>
         <Navbar.Brand className="brand-text">GUC Internship System</Navbar.Brand>
         <Navbar.Toggle />
@@ -19,6 +18,7 @@ const NavigationBar = () => {
             <Nav.Link onClick={() => navigate('/student/home')}>Home</Nav.Link>
             <Nav.Link onClick={() => navigate('/student/profile')}>Profile</Nav.Link>
             <Nav.Link onClick={() => navigate('/student/internships')}>Internships</Nav.Link>
+            <Nav.Link onClick={() => navigate('/student/reports')}>Reports</Nav.Link>
           </Nav>
           <div className="navbar-actions d-flex align-items-center">
             <LogoutButton />

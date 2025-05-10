@@ -142,3 +142,50 @@ export const students = [
     
     return user;
   };
+    // Course lists based on majors
+  export const coursesByMajor = {
+    "Computer Science & Engineering": [
+      { id: 1, code: "CSEN 401", name: "Computer Programming Lab" },
+      { id: 2, code: "CSEN 403", name: "Database Systems" },
+      { id: 3, code: "CSEN 501", name: "Advanced Computer Programming" },
+      { id: 4, code: "CSEN 502", name: "Theory of Computation" },
+      { id: 5, code: "CSEN 503", name: "Digital System Design" },
+      { id: 6, code: "CSEN 504", name: "Computer Architecture" },
+      { id: 7, code: "CSEN 601", name: "Computer Networks" },
+      { id: 8, code: "CSEN 602", name: "Software Engineering" },
+      { id: 9, code: "CSEN 603", name: "Parallel Computing" },
+      { id: 10, code: "CSEN 604", name: "Advanced Algorithms" },
+      { id: 11, code: "CSEN 605", name: "Operating Systems" },
+      { id: 12, code: "CSEN 606", name: "Computer Graphics" },
+      { id: 13, code: "CSEN 701", name: "Embedded Systems" },
+      { id: 14, code: "CSEN 702", name: "Microprocessors" },
+      { id: 15, code: "CSEN 703", name: "Analysis and Design of Algorithms" },
+      { id: 16, code: "CSEN 704", name: "Advanced Software Engineering" },
+      { id: 17, code: "CSEN 705", name: "Distributed Systems" },
+      { id: 18, code: "CSEN 706", name: "Machine Learning" }
+    ],
+    "Business Informatics": [
+      { id: 1, code: "BINF 301", name: "Introduction to Business Informatics" },
+      { id: 2, code: "BINF 302", name: "Management Information Systems" },
+      { id: 3, code: "BINF 401", name: "Business Process Management" },
+      { id: 4, code: "BINF 402", name: "Business Intelligence" },
+      { id: 5, code: "BINF 403", name: "IT Project Management" },
+      { id: 6, code: "BINF 501", name: "Enterprise Resource Planning" },
+      { id: 7, code: "BINF 502", name: "Knowledge Management" },
+      { id: 8, code: "BINF 503", name: "Supply Chain Management" },
+      { id: 9, code: "BINF 601", name: "IT Governance" },
+      { id: 10, code: "BINF 602", name: "Big Data Analytics" }
+    ],
+    "Electronics Engineering": [
+      { id: 1, code: "ELCT 301", name: "Circuit Analysis" },
+      { id: 2, code: "ELCT 302", name: "Digital Logic Design" },
+      { id: 3, code: "ELCT 401", name: "Electronics I" },
+      { id: 4, code: "ELCT 402", name: "Signals & Systems" },
+      { id: 5, code: "ELCT 501", name: "Electronics II" },
+      { id: 6, code: "ELCT 502", name: "Control Systems" },
+      { id: 7, code: "ELCT 503", name: "Embedded Systems" },
+      { id: 8, code: "ELCT 601", name: "Digital Signal Processing" },
+      { id: 9, code: "ELCT 602", name: "VLSI Design" },
+      { id: 10, code: "ELCT 603", name: "Communication Systems" }
+    ]
+  };
