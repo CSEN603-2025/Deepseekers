@@ -90,27 +90,7 @@ function ScadReportsPage() {
     setCompanyEvaluations(enrichedEvals);
   };
 
-  const handleStatusChange = (reportId, newStatus) => {
-    // Update in localStorage first
-    const savedReports = localStorage.getItem('internshipReports') || '[]';
-    const allReports = JSON.parse(savedReports);
-    
-    const reportIndex = allReports.findIndex(report => report.id === reportId);
-    if (reportIndex >= 0) {
-      allReports[reportIndex] = {
-        ...allReports[reportIndex],
-        status: newStatus
-      };
-      localStorage.setItem('internshipReports', JSON.stringify(allReports));
-      
-      // Update in state
-      setSubmittedReports(prevReports => 
-        prevReports.map(report => 
-          report.id === reportId ? {...report, status: newStatus} : report
-        )
-      );
-    }
-  };
+    // Report status will be managed by Faculty academics in a separate page
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Not specified';
@@ -287,33 +267,6 @@ function ScadReportsPage() {
                           View Report
                         </Button>
                         
-                        <div className="btn-group me-1">
-                          <Button 
-                            variant="outline-secondary" 
-                            size="sm"
-                            onClick={() => handleStatusChange(report.id, 'accepted')}
-                            className={report.status === 'accepted' ? 'active' : ''}
-                          >
-                            Accept
-                          </Button>
-                          <Button 
-                            variant="outline-secondary" 
-                            size="sm"
-                            onClick={() => handleStatusChange(report.id, 'rejected')}
-                            className={report.status === 'rejected' ? 'active' : ''}
-                          >
-                            Reject
-                          </Button>
-                          <Button 
-                            variant="outline-secondary" 
-                            size="sm"
-                            onClick={() => handleStatusChange(report.id, 'flagged')}
-                            className={report.status === 'flagged' ? 'active' : ''}
-                          >
-                            Flag
-                          </Button>
-                        </div>
-                        
                         {matchingEval && (
                           <Button 
                             variant="info" 
@@ -362,14 +315,16 @@ function ScadReportsPage() {
               </div>              <div className="detail-header">
                 <span className="detail-label">Submitted on:</span> {formatDate(selectedItem?.submissionDate)}
               </div>
-              
-              <div className="detail-header">
+                <div className="detail-header">
                 <span className="detail-label">Status:</span>
                 {selectedItem?.status === 'pending' && <Badge bg="warning" text="dark" className="ms-2">Pending</Badge>}
                 {selectedItem?.status === 'accepted' && <Badge bg="success" className="ms-2">Accepted</Badge>}
                 {selectedItem?.status === 'rejected' && <Badge bg="danger" className="ms-2">Rejected</Badge>}
                 {selectedItem?.status === 'flagged' && <Badge bg="info" className="ms-2">Flagged</Badge>}
                 {!selectedItem?.status && <Badge bg="warning" text="dark" className="ms-2">Pending</Badge>}
+                <small className="d-block text-muted mt-1">
+                  (Only Faculty academics can change report status)
+                </small>
               </div>
               
               {selectedItem?.evaluationText && (
@@ -493,48 +448,7 @@ function ScadReportsPage() {
             </div>
           )}
         </Modal.Body>
-        <Modal.Footer>          {selectedItem?.type === 'report' && (
-            <div className="d-flex gap-2">
-              <Button 
-                variant={selectedItem?.status === 'accepted' ? 'success' : 'outline-success'} 
-                onClick={() => {
-                  handleStatusChange(selectedItem.id, 'accepted');
-                  setSelectedItem({...selectedItem, status: 'accepted'});
-                }}
-              >
-                Accept
-              </Button>
-              <Button 
-                variant={selectedItem?.status === 'rejected' ? 'danger' : 'outline-danger'} 
-                onClick={() => {
-                  handleStatusChange(selectedItem.id, 'rejected');
-                  setSelectedItem({...selectedItem, status: 'rejected'});
-                }}
-              >
-                Reject
-              </Button>
-              <Button 
-                variant={selectedItem?.status === 'flagged' ? 'info' : 'outline-info'} 
-                onClick={() => {
-                  handleStatusChange(selectedItem.id, 'flagged');
-                  setSelectedItem({...selectedItem, status: 'flagged'});
-                }}
-              >
-                Flag
-              </Button>
-              <Button 
-                variant={selectedItem?.status === 'pending' ? 'warning' : 'outline-warning'} 
-                onClick={() => {
-                  handleStatusChange(selectedItem.id, 'pending');
-                  setSelectedItem({...selectedItem, status: 'pending'});
-                }}
-              >
-                Mark Pending
-              </Button>
-            </div>
-          )}
-          
-          <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
+        <Modal.Footer>          <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
             Close
           </Button>
         </Modal.Footer>
