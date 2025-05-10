@@ -148,6 +148,12 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
         }
       }
       
+      // Get workshop notifications from localStorage
+      const workshopNotifications = JSON.parse(localStorage.getItem('studentNotifications') || '[]');
+      
+      // Add workshop notifications to all notifications
+      allNotifications = [...allNotifications, ...workshopNotifications];
+      
       // Sort by date (newest first)
       allNotifications.sort((a, b) => new Date(b.date) - new Date(a.date));
       
@@ -222,6 +228,18 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
         </>
       );
     } else if (userRole === 'student' && notification.type === 'cycle') {
+      return (
+        <>
+          <div>
+            <strong>{notification.title}</strong>
+          </div>
+          <div>{notification.message}</div>
+          <small className="text-muted">
+            {new Date(notification.date).toLocaleString()}
+          </small>
+        </>
+      );
+    } else if (userRole === 'student' && notification.type === 'workshop') {
       return (
         <>
           <div>

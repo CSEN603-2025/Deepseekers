@@ -48,6 +48,12 @@ const WorkshopList = ({ studentId }) => {
         registeredStudents: selectedWorkshop.registeredStudents.filter(id => id !== studentId)
       });
       localStorage.setItem('workshops', JSON.stringify(updatedWorkshops));
+      
+      // Create cancellation notification
+      createNotification(
+        "Workshop Registration Cancelled",
+        `You have cancelled your registration for "${selectedWorkshop.title}" on ${formatDate(selectedWorkshop.startDate)}.`
+      );
     } else {
       // Register student
       const updatedWorkshops = workshops.map(w => {
@@ -66,7 +72,39 @@ const WorkshopList = ({ studentId }) => {
         registeredStudents: [...selectedWorkshop.registeredStudents, studentId]
       });
       localStorage.setItem('workshops', JSON.stringify(updatedWorkshops));
+      
+      // Create registration notification
+      createNotification(
+        "Workshop Registration Confirmed",
+        `You have successfully registered for "${selectedWorkshop.title}" on ${formatDate(selectedWorkshop.startDate)} at ${selectedWorkshop.startTime}.`
+      );
     }
+    
+    // Reset registration note and close the modal
+    setRegistrationNote('');
+    setShowModal(false);
+  };
+  
+  // Function to create notifications in localStorage
+  const createNotification = (title, message) => {
+    // Get existing student notifications or initialize empty array
+    const notifications = JSON.parse(localStorage.getItem('studentNotifications') || '[]');
+    
+    // Create new notification with unique ID
+    const newNotification = {
+      id: `workshop-${selectedWorkshop.id}-${Date.now()}`,
+      title: title,
+      message: message,
+      date: new Date().toISOString(),
+      type: 'workshop',
+      workshopId: selectedWorkshop.id
+    };
+    
+    // Add notification to beginning of array (newest first)
+    notifications.unshift(newNotification);
+    
+    // Save back to localStorage
+    localStorage.setItem('studentNotifications', JSON.stringify(notifications));
   };
 
   const isWorkshopUpcoming = (workshop) => {
