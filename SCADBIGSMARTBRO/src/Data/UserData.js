@@ -56,7 +56,37 @@ export const students = [
       location: "Cairo, Egypt",
       description: "Leading software development company specializing in enterprise solutions.",
       website: "www.techinnovators.com",
-      verified: true
+      verified: true,
+      employees: [
+        {
+          id: 101,
+          name: "Ahmad Hassan",
+          position: "Senior Software Engineer",
+          department: "Engineering",
+          email: "ahmad.hassan@techinnovators.com"
+        },
+        {
+          id: 102,
+          name: "Nour El-Din",
+          position: "Project Manager",
+          department: "Project Management",
+          email: "nour@techinnovators.com"
+        },
+        {
+          id: 103,
+          name: "Fatima Ali",
+          position: "HR Director",
+          department: "Human Resources",
+          email: "fatima@techinnovators.com"
+        },
+        {
+          id: 104,
+          name: "Omar Khalid",
+          position: "CTO",
+          department: "Executive",
+          email: "omar@techinnovators.com"
+        }
+      ]
     },
     {
       id: 2,
@@ -68,9 +98,38 @@ export const students = [
       location: "Alexandria, Egypt",
       description: "International financial services provider with focus on emerging markets.",
       website: "www.globalfinance.com",
-      verified: true
-    },
-    {
+      verified: true,
+      employees: [
+        {
+          id: 201,
+          name: "Sara Mohamed",
+          position: "Financial Analyst",
+          department: "Finance",
+          email: "sara@globalfinance.com"
+        },
+        {
+          id: 202,
+          name: "Karim Ahmed",
+          position: "Investment Manager",
+          department: "Investments",
+          email: "karim@globalfinance.com"
+        },
+        {
+          id: 203,
+          name: "Laila Mahmoud",
+          position: "HR Manager",
+          department: "Human Resources",
+          email: "laila@globalfinance.com"
+        },
+        {
+          id: 204,
+          name: "Tarek Hussein",
+          position: "CFO",
+          department: "Executive",
+          email: "tarek@globalfinance.com"
+        }
+      ]
+    },    {
       id: 3,
       name: "MediCare Solutions",
       email: "contact@medicare.com",
@@ -80,7 +139,37 @@ export const students = [
       location: "Giza, Egypt",
       description: "Healthcare technology provider focusing on patient management systems.",
       website: "www.medicaresolutions.com",
-      verified: false
+      verified: false,
+      employees: [
+        {
+          id: 301,
+          name: "Hoda Nabil",
+          position: "Medical Systems Developer",
+          department: "Engineering",
+          email: "hoda@medicare.com"
+        },
+        {
+          id: 302,
+          name: "Amir Safwat",
+          position: "Healthcare Specialist",
+          department: "Healthcare",
+          email: "amir@medicare.com"
+        },
+        {
+          id: 303,
+          name: "Dina Fouad",
+          position: "HR Coordinator",
+          department: "Human Resources",
+          email: "dina@medicare.com"
+        },
+        {
+          id: 304,
+          name: "Mohamed Samir",
+          position: "CTO",
+          department: "Executive",
+          email: "mohamed@medicare.com"
+        }
+      ]
     }
   ];
   

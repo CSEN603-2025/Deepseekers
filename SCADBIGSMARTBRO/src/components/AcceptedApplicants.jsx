@@ -1,25 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Badge, Button, Modal, Form } from 'react-bootstrap';
+import { Card, Table, Badge, Button, Modal, Form, Row, Col } from 'react-bootstrap';
 import '../css/AcceptedApplicants.css';
+import { companies as allCompanies } from '../Data/UserData.js';
 
     const AcceptedApplicants = ({ searchTerm, statusFilter }) => {
   const [acceptedApplicants, setAcceptedApplicants] = useState([]);
   const [internships, setInternships] = useState([]);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [evaluation, setEvaluation] = useState('');
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);  const [evaluation, setEvaluation] = useState('');
   const [evaluationRating, setEvaluationRating] = useState(5);
   const [existingEvaluation, setExistingEvaluation] = useState(null);
   const [filteredApplicants, setFilteredApplicants] = useState([]);
+  const [companyEmployees, setCompanyEmployees] = useState([]);
+  const [selectedSupervisor, setSelectedSupervisor] = useState('');
+  const [internshipStartDate, setInternshipStartDate] = useState('');
+  const [internshipEndDate, setInternshipEndDate] = useState('');
 
   // Get current company user
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   const companyId = currentUser?.id;
   const companyName = currentUser?.name;
-
   useEffect(() => {
     loadAcceptedApplicants();
+    loadCompanyEmployees();
   }, []);
 
   // Apply filters when searchTerm or statusFilter changes
@@ -131,12 +135,39 @@ import '../css/AcceptedApplicants.css';
       });
     }
   };
-
   const handleOpenFeedbackModal = (applicant) => {
     setSelectedApplicant(applicant);
     setShowFeedbackModal(true);
   };
+    const loadCompanyEmployees = () => {
+    // First check if there are any companies in localStorage
+    const savedCompanies = localStorage.getItem('companies');
+    if (savedCompanies) {
+      try {
+        const companies = JSON.parse(savedCompanies);
+        const currentCompany = companies.find(c => c.id === companyId || c.name === companyName);
+        if (currentCompany && currentCompany.employees) {
+          setCompanyEmployees(currentCompany.employees);
+          return;
+        }
+      } catch (error) {
+        console.error('Error parsing companies from localStorage:', error);
+      }
+    }
 
+    // If not found in localStorage, use the imported data from UserData.js
+    try {
+      // Use the statically imported allCompanies
+      const currentCompany = allCompanies.find(c => c.id === companyId || c.name === companyName);
+      if (currentCompany && currentCompany.employees) {
+        setCompanyEmployees(currentCompany.employees);
+      } else {
+        console.log('No employees found for company in UserData.js');
+      }
+    } catch (error) {
+      console.error('Error loading company employees from UserData.js:', error);
+    }
+  };
   // Load evaluation for selected applicant
   useEffect(() => {
     if (selectedApplicant && selectedApplicant.status === 'internship_complete') {
@@ -149,23 +180,79 @@ import '../css/AcceptedApplicants.css';
       if (found) {
         setEvaluation(found.evaluationText);
         setEvaluationRating(found.rating);
+        
+        // Load supervisor if it exists
+        if (found.supervisorId) {
+          setSelectedSupervisor(String(found.supervisorId));
+        } else {
+          setSelectedSupervisor('');
+        }
+        
+        // Load internship dates if they exist
+        if (found.internshipStartDate) {
+          const startDate = new Date(found.internshipStartDate);
+          setInternshipStartDate(startDate.toISOString().split('T')[0]);
+        } else if (selectedApplicant.internshipStartDate) {
+          const startDate = new Date(selectedApplicant.internshipStartDate);
+          setInternshipStartDate(startDate.toISOString().split('T')[0]);
+        } else {
+          setInternshipStartDate('');
+        }
+        
+        if (found.internshipEndDate) {
+          const endDate = new Date(found.internshipEndDate);
+          setInternshipEndDate(endDate.toISOString().split('T')[0]);
+        } else if (selectedApplicant.internshipEndDate) {
+          const endDate = new Date(selectedApplicant.internshipEndDate);
+          setInternshipEndDate(endDate.toISOString().split('T')[0]);
+        } else {
+          setInternshipEndDate('');
+        }
+        
         setExistingEvaluation(found);
       } else {
         setEvaluation('');
         setEvaluationRating(5);
+        setSelectedSupervisor('');
+        
+        // Initialize dates from applicant if available
+        if (selectedApplicant.internshipStartDate) {
+          const startDate = new Date(selectedApplicant.internshipStartDate);
+          setInternshipStartDate(startDate.toISOString().split('T')[0]);
+        } else {
+          setInternshipStartDate('');
+        }
+        
+        if (selectedApplicant.internshipEndDate) {
+          const endDate = new Date(selectedApplicant.internshipEndDate);
+          setInternshipEndDate(endDate.toISOString().split('T')[0]);
+        } else {
+          setInternshipEndDate('');
+        }
+        
         setExistingEvaluation(null);
       }
     }
   }, [selectedApplicant, companyId]);
-
   // CRUD: Save or update evaluation
   const handleSubmitEvaluation = () => {
+    // Validate required fields
+    if (!selectedSupervisor || !internshipStartDate || !internshipEndDate || !evaluation.trim()) {
+      alert("Please fill in all required fields: supervisor, internship dates, and evaluation text");
+      return;
+    }
+    
     const evaluations = JSON.parse(localStorage.getItem('CompanyEvaluations')) || [];
     const idx = evaluations.findIndex(ev =>
       ev.studentId === selectedApplicant.studentId &&
       ev.internshipId === selectedApplicant.internshipId &&
       ev.companyId === companyId
     );
+    
+    // Find supervisor information
+    const supervisorId = parseInt(selectedSupervisor);
+    const supervisor = companyEmployees.find(emp => emp.id === supervisorId);
+    
     const newEval = {
       studentId: selectedApplicant.studentId,
       internshipId: selectedApplicant.internshipId,
@@ -174,14 +261,40 @@ import '../css/AcceptedApplicants.css';
       rating: evaluationRating,
       date: new Date().toISOString(),
       studentName: selectedApplicant.studentName,
-      internshipTitle: getInternshipTitle(selectedApplicant.internshipId)
+      internshipTitle: getInternshipTitle(selectedApplicant.internshipId),
+      
+      // Add supervisor information
+      supervisorId: supervisorId,
+      supervisorName: supervisor ? supervisor.name : 'Unknown',
+      supervisorPosition: supervisor ? supervisor.position : 'Unknown',
+      
+      // Add internship dates
+      internshipStartDate: new Date(internshipStartDate).toISOString(),
+      internshipEndDate: new Date(internshipEndDate).toISOString()
     };
+    
     if (idx !== -1) {
       evaluations[idx] = newEval;
     } else {
       evaluations.push(newEval);
     }
+    
     localStorage.setItem('CompanyEvaluations', JSON.stringify(evaluations));
+    
+    // Also update dates in the applicant record
+    const applications = JSON.parse(localStorage.getItem('appliedInternships')) || [];
+    const updatedApplications = applications.map(app => {
+      if (app.id === selectedApplicant.id) {
+        return {
+          ...app,
+          internshipStartDate: new Date(internshipStartDate).toISOString(),
+          internshipEndDate: new Date(internshipEndDate).toISOString()
+        };
+      }
+      return app;
+    });
+    localStorage.setItem('appliedInternships', JSON.stringify(updatedApplications));
+    
     setExistingEvaluation(newEval);
     setShowFeedbackModal(false);
   };
@@ -472,8 +585,7 @@ import '../css/AcceptedApplicants.css';
                   )}
                 </div>
               </div>
-              
-              {/* Feedback section (if available) */}
+                {/* Feedback section (if available) */}
               {selectedApplicant.feedback && (
                 <div className="feedback-section mb-4">
                   <h6 className="section-title">Company Feedback</h6>
@@ -481,6 +593,22 @@ import '../css/AcceptedApplicants.css';
                     <div className="rating mb-2">
                       <strong>Rating:</strong> {selectedApplicant.rating}/5
                     </div>
+                    
+                    {selectedApplicant.supervisorName && (
+                      <div className="supervisor mb-2">
+                        <strong>Supervisor:</strong> {selectedApplicant.supervisorName} ({selectedApplicant.supervisorPosition})
+                      </div>
+                    )}
+                    
+                    {(selectedApplicant.internshipStartDate || selectedApplicant.internshipEndDate) && (
+                      <div className="internship-period mb-2">
+                        <strong>Internship Period:</strong>{' '}
+                        {selectedApplicant.internshipStartDate ? formatDate(selectedApplicant.internshipStartDate) : 'Not specified'} 
+                        {' '} to {' '} 
+                        {selectedApplicant.internshipEndDate ? formatDate(selectedApplicant.internshipEndDate) : 'Not specified'}
+                      </div>
+                    )}
+                    
                     <div className="feedback-text">
                       {selectedApplicant.feedback}
                     </div>
@@ -537,32 +665,81 @@ import '../css/AcceptedApplicants.css';
         </Modal.Header>
         <Modal.Body>
           {selectedApplicant && (
-            <Form>
-              <p>
+            <Form>              <p>
                 {existingEvaluation ? 'Editing' : 'Providing'} evaluation for <strong>{selectedApplicant.studentName}</strong> who completed 
                 their internship as <strong>{getInternshipTitle(selectedApplicant.internshipId)}</strong>
               </p>
+              
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Rating (1-5)</Form.Label>
+                    <Form.Select
+                      value={evaluationRating}
+                      onChange={(e) => setEvaluationRating(parseInt(e.target.value))}
+                      required
+                    >
+                      <option value="5">5 - Excellent</option>
+                      <option value="4">4 - Very Good</option>
+                      <option value="3">3 - Good</option>
+                      <option value="2">2 - Fair</option>
+                      <option value="1">1 - Poor</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Main Supervisor <span className="text-danger">*</span></Form.Label>
+                    <Form.Select
+                      value={selectedSupervisor}
+                      onChange={(e) => setSelectedSupervisor(e.target.value)}
+                      required
+                    >
+                      <option value="">Select a supervisor</option>
+                      {companyEmployees.map(employee => (
+                        <option key={employee.id} value={employee.id}>
+                          {employee.name} - {employee.position}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              </Row>
+              
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Internship Start Date <span className="text-danger">*</span></Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={internshipStartDate}
+                      onChange={(e) => setInternshipStartDate(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Internship End Date <span className="text-danger">*</span></Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={internshipEndDate}
+                      onChange={(e) => setInternshipEndDate(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              
               <Form.Group className="mb-3">
-                <Form.Label>Rating (1-5)</Form.Label>
-                <Form.Select
-                  value={evaluationRating}
-                  onChange={(e) => setEvaluationRating(parseInt(e.target.value))}
-                >
-                  <option value="5">5 - Excellent</option>
-                  <option value="4">4 - Very Good</option>
-                  <option value="3">3 - Good</option>
-                  <option value="2">2 - Fair</option>
-                  <option value="1">1 - Poor</option>
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Evaluation</Form.Label>
+                <Form.Label>Evaluation <span className="text-danger">*</span></Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={4}
                   value={evaluation}
                   onChange={(e) => setEvaluation(e.target.value)}
                   placeholder="Please provide a detailed evaluation about the intern's performance, skills, and areas for improvement..."
+                  required
                 />
               </Form.Group>
             </Form>
@@ -576,11 +753,10 @@ import '../css/AcceptedApplicants.css';
           )}
           <Button variant="secondary" onClick={() => setShowFeedbackModal(false)}>
             Cancel
-          </Button>
-          <Button 
+          </Button>          <Button 
             variant="primary" 
             onClick={handleSubmitEvaluation}
-            disabled={!evaluation.trim()}
+            disabled={!evaluation.trim() || !selectedSupervisor || !internshipStartDate || !internshipEndDate}
           >
             {existingEvaluation ? 'Update Evaluation' : 'Submit Evaluation'}
           </Button>

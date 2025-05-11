@@ -222,6 +222,8 @@ function ScadReportsPage() {
                 <th>Company</th>
                 <th>Report Title</th>
                 <th>Recommend</th>
+                <th>Main Supervisor</th>
+                <th>Internship Period</th>
                 <th>Status</th>
                 <th>Submission Date</th>
                 <th>Actions</th>
@@ -230,10 +232,9 @@ function ScadReportsPage() {
             <tbody>
               {filteredReports.map(report => {
                 const student = students.find(s => s.id === report.studentId);
-                
                 // Find matching company evaluation for this student/internship
                 const matchingEval = companyEvaluations.find(
-                  evaluation => evaluation.studentId === report.studentId 
+                  evaluation => evaluation.studentId === report.studentId
                 );
                 
                 return (
@@ -241,12 +242,25 @@ function ScadReportsPage() {
                     <td>{student ? student.name : report.studentName}</td>
                     <td>{student ? student.gucId : report.studentId}</td>
                     <td>{student ? student.major : 'Unknown Major'}</td>
-                    <td>{report.companyName}</td>                    <td>{report.title || 'Untitled Report'}</td>
+                    <td>{report.companyName}</td>
+                    <td>{report.title || 'Untitled Report'}</td>
                     <td>
                       {report.recommend ? (
                         <Badge bg="success">Recommended</Badge>
                       ) : (
                         <Badge bg="secondary">Not Recommended</Badge>
+                      )}
+                    </td>
+                    <td>
+                      {/* Supervisor Name from company evaluation if available */}
+                      {matchingEval && matchingEval.supervisorName ? matchingEval.supervisorName : <span className="text-muted">N/A</span>}
+                    </td>
+                    <td>
+                      {/* Internship Period from company evaluation if available */}
+                      {matchingEval && matchingEval.internshipStartDate && matchingEval.internshipEndDate ? (
+                        `${formatDate(matchingEval.internshipStartDate)} - ${formatDate(matchingEval.internshipEndDate)}`
+                      ) : (
+                        <span className="text-muted">N/A</span>
                       )}
                     </td>
                     <td>
@@ -256,7 +270,8 @@ function ScadReportsPage() {
                       {report.status === 'flagged' && <Badge bg="info">Flagged</Badge>}
                       {!report.status && <Badge bg="warning" text="dark">Pending</Badge>}
                     </td>
-                    <td>{formatDate(report.submissionDate)}</td>                    <td>
+                    <td>{formatDate(report.submissionDate)}</td>
+                    <td>
                       <div className="d-flex flex-wrap gap-1">
                         <Button 
                           variant="primary" 
@@ -264,7 +279,7 @@ function ScadReportsPage() {
                           onClick={() => handleViewDetails(report, 'report')}
                           className="me-1"
                         >
-                          View Report
+                          View Student's Report
                         </Button>
                         
                         {matchingEval && (
