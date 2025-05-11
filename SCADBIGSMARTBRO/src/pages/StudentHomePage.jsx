@@ -6,11 +6,13 @@ import StudentAssessmentsPage from './StudentAssessmentsPage';
 import WorkshopList from '../components/WorkshopList';
 import PrerecordedWorkshops from '../components/PrerecordedWorkshops'; // Add this import
 import LiveWorkshops from '../components/LiveWorkshops'; // Add this import
+import MyCertifications from '../components/MyCertifications'; // Add this import
 import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge, Tabs, Tab } from 'react-bootstrap';
 import { companies } from '../Data/UserData';
 import { clearLocalStorage, clearSpecificLocalStorageData } from '../Data/ClearLocalStorage';
 import '../css/studentHome.css';
 import '../css/liveWorkshops.css'; // Add this import
+//import { useEffect } from 'react';
 
 const StudentHomePage = () => {
   const [internships, setInternships] = useState([]);
@@ -40,11 +42,20 @@ const StudentHomePage = () => {
   };
 
   useEffect(() => {
-    // Retrieve the student's profile from localStorage
-    const savedProfile = JSON.parse(localStorage.getItem('studentProfile'));
-    if (savedProfile) {
-      setStudentMajor(savedProfile.major || 'Default');
-      setStudentProfile(savedProfile);
+    // First try to get the current user data (which includes pro status)
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    // If pro status exists in currentUser, use that
+    if (currentUser) {
+      setStudentMajor(currentUser.major || 'Default');
+      setStudentProfile(currentUser); // This will set the pro status from currentUser
+    } else {
+      // Fall back to studentProfile if currentUser isn't available
+      const savedProfile = JSON.parse(localStorage.getItem('studentProfile'));
+      if (savedProfile) {
+        setStudentMajor(savedProfile.major || 'Default');
+        setStudentProfile(savedProfile);
+      }
     }
   }, []);
 
@@ -180,6 +191,13 @@ const StudentHomePage = () => {
 
     return matchesSearch && matchesPaymentFilter && matchesIndustryFilter && matchesDurationFilter;
   });
+
+  useEffect(() => {
+    // Dispatch a custom event when student returns to home page
+    // NotificationButton can listen for this to refresh notifications
+    const event = new CustomEvent('refresh-notifications');
+    window.dispatchEvent(event);
+  }, []);
 
   return (
     <div className="student-home">
@@ -420,6 +438,14 @@ const StudentHomePage = () => {
                           <i className="bi bi-broadcast me-2"></i>
                           Live Online Workshops
                         </Button>
+                        <Button
+                          variant={activeWorkshopTab === 'certificates' ? 'primary' : 'outline-primary'}
+                          onClick={() => setActiveWorkshopTab('certificates')}
+                          className="text-start"
+                        >
+                          <i className="bi bi-award me-2"></i>
+                          My Certifications
+                        </Button>
                       </div>
                     </div>
                   </Col>
@@ -427,6 +453,7 @@ const StudentHomePage = () => {
                     {activeWorkshopTab === 'all' && <WorkshopList studentId={studentProfile.gucId} />}
                     {activeWorkshopTab === 'prerecorded' && <PrerecordedWorkshops studentId={studentProfile.gucId} />}
                     {activeWorkshopTab === 'live' && <LiveWorkshops studentId={studentProfile.gucId} />}
+                    {activeWorkshopTab === 'certificates' && <MyCertifications studentId={studentProfile.gucId} />}
                   </Col>
                 </Row>
               </div>

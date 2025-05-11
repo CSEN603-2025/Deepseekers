@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Row, Col, ProgressBar, Form, Modal } from 'react-bootstrap';
 import WorkshopRating from './WorkshopRating';
+import CertificateNotification from './CertificateNotification';
 import '../css/workshopRating.css';
 
 const PrerecordedWorkshops = ({ studentId }) => {
@@ -32,6 +33,8 @@ const PrerecordedWorkshops = ({ studentId }) => {
   const [showRatingForm, setShowRatingForm] = useState(false);
   const [completedWorkshops, setCompletedWorkshops] = useState([]);
   const [workshopToRate, setWorkshopToRate] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationTitle, setNotificationTitle] = useState('');
 
   const handlePlayWorkshop = (workshop) => {
     setActiveWorkshop(workshop);
@@ -109,12 +112,39 @@ const PrerecordedWorkshops = ({ studentId }) => {
     }
   };
 
+  // Update the handleSubmitRating function in PrerecordedWorkshops.jsx
   const handleSubmitRating = (ratingData) => {
     console.log('Rating submitted:', ratingData);
-    // Here you would typically send this data to your backend
     
     // Add workshop to completed list so we don't ask for rating again
     setCompletedWorkshops([...completedWorkshops, ratingData.workshopId]);
+    
+    // Get the current user
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    // Create certificate for the completed workshop
+    if (workshopToRate) {
+      // Get existing certificates or create empty array
+      const existingCertificates = JSON.parse(localStorage.getItem(`certificates-${studentId}`)) || [];
+      
+      // Create new certificate
+      const newCertificate = {
+        id: `recorded-${workshopToRate.id}-${Date.now()}`,
+        workshopId: workshopToRate.id,
+        workshopTitle: workshopToRate.title,
+        instructorName: workshopToRate.instructor,
+        completionDate: new Date().toISOString(),
+        workshopType: 'Pre-recorded Workshop'
+      };
+      
+      // Add to existing certificates
+      const updatedCertificates = [...existingCertificates, newCertificate];
+      localStorage.setItem(`certificates-${studentId}`, JSON.stringify(updatedCertificates));
+      
+      // Show notification
+      setNotificationTitle(workshopToRate.title);
+      setShowNotification(true);
+    }
     
     // Close the rating form after a short delay
     setTimeout(() => {
@@ -246,6 +276,13 @@ const PrerecordedWorkshops = ({ studentId }) => {
           />
         </Modal.Body>
       </Modal>
+
+      {/* Notification for certificate */}
+      <CertificateNotification
+        show={showNotification}
+        onClose={() => setShowNotification(false)}
+        workshopTitle={notificationTitle}
+      />
     </div>
   );
 };

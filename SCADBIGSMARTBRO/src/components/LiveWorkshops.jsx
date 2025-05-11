@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, Button, Badge, Modal, Form, InputGroup, Row, Col } from 'react-bootstrap';
 import WorkshopRating from './WorkshopRating';
+import CertificateNotification from './CertificateNotification';
 import '../css/workshopRating.css';
 
 const LiveWorkshops = ({ studentId }) => {
@@ -54,6 +55,8 @@ const LiveWorkshops = ({ studentId }) => {
   const [showChat, setShowChat] = useState(true);
   const [showRatingForm, setShowRatingForm] = useState(false);
   const [completedWorkshops, setCompletedWorkshops] = useState([]);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationTitle, setNotificationTitle] = useState('');
 
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
@@ -97,10 +100,36 @@ const LiveWorkshops = ({ studentId }) => {
   
   const handleSubmitRating = (ratingData) => {
     console.log('Rating submitted:', ratingData);
-    // Here you would typically send this data to your backend
     
     // Add workshop to completed list so we don't ask for rating again
     setCompletedWorkshops([...completedWorkshops, ratingData.workshopId]);
+    
+    // Get the current user
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    // Create certificate for the completed workshop
+    if (activeWorkshop) {
+      // Get existing certificates or create empty array
+      const existingCertificates = JSON.parse(localStorage.getItem(`certificates-${studentId}`)) || [];
+      
+      // Create new certificate
+      const newCertificate = {
+        id: `live-${activeWorkshop.id}-${Date.now()}`,
+        workshopId: activeWorkshop.id,
+        workshopTitle: activeWorkshop.title,
+        instructorName: activeWorkshop.instructor,
+        completionDate: new Date().toISOString(),
+        workshopType: 'Live Workshop'
+      };
+      
+      // Add to existing certificates
+      const updatedCertificates = [...existingCertificates, newCertificate];
+      localStorage.setItem(`certificates-${studentId}`, JSON.stringify(updatedCertificates));
+      
+      // Show notification
+      setNotificationTitle(activeWorkshop.title);
+      setShowNotification(true);
+    }
     
     // Close the rating form after a short delay
     setTimeout(() => {
@@ -122,6 +151,10 @@ const LiveWorkshops = ({ studentId }) => {
     
     setChatMessages([...chatMessages, newChatMessage]);
     setNewMessage('');
+    
+    // Create a notification for other users when a message is sent
+    // In a real app, this would only be visible to other participants
+    createChatNotification(activeWorkshop.id, activeWorkshop.title, newMessage.trim());
     
     // Simulate response from other participants
     if (Math.random() > 0.5) {
@@ -146,8 +179,41 @@ const LiveWorkshops = ({ studentId }) => {
         };
         
         setChatMessages(prev => [...prev, responseMessage]);
+        
+        // Also create notification for simulated responses
+        // This makes the demonstration more interactive
+        createChatNotification(activeWorkshop.id, activeWorkshop.title, randomResponse, randomParticipant);
       }, 2000);
     }
+  };
+
+  // Add this new function to create chat notifications
+  const createChatNotification = (workshopId, workshopTitle, message, sender = null) => {
+    // Skip creating notifications for your own messages in a real app
+    // For demo purposes, we're creating them for both so you can see the functionality
+    
+    // Get existing notifications or create empty array
+    const existingNotifications = JSON.parse(localStorage.getItem('studentNotifications') || '[]');
+    
+    // Create notification object
+    const newNotification = {
+      id: `workshop-chat-${workshopId}-${Date.now()}`,
+      title: `New message in ${workshopTitle}`,
+      message: sender 
+        ? `${sender}: ${message.substring(0, 30)}${message.length > 30 ? '...' : ''}`
+        : `${message.substring(0, 30)}${message.length > 30 ? '...' : ''}`,
+      date: new Date().toISOString(),
+      type: 'workshop',
+      workshopId: workshopId,
+      workshopTitle: workshopTitle,
+      sender: sender || 'You'
+    };
+    
+    // Add to existing notifications
+    const updatedNotifications = [newNotification, ...existingNotifications];
+    
+    // Store in localStorage (limit to most recent 50 notifications to prevent storage issues)
+    localStorage.setItem('studentNotifications', JSON.stringify(updatedNotifications.slice(0, 50)));
   };
 
   const handleNotesChange = (e) => {
@@ -364,6 +430,13 @@ const LiveWorkshops = ({ studentId }) => {
           />
         </Modal.Body>
       </Modal>
+
+      {/* Notification for certificate */}
+      <CertificateNotification
+        show={showNotification}
+        onClose={() => setShowNotification(false)}
+        workshopTitle={notificationTitle}
+      />
     </div>
   );
 };

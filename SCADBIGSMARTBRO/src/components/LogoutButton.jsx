@@ -1,36 +1,28 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
-function LogoutButton({ className }) {
+const LogoutButton = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Get the current user data before clearing
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    
-    // We want to preserve studentProfile data but remove session data
-    // We don't need to do anything with studentProfile here
-    // as our login handler now properly handles existing profile data
-    
-    // Remove session data
+    // Clear user data from localStorage
     localStorage.removeItem('currentUser');
-    localStorage.removeItem('companyName');
-    // Add any other session items to clear from localStorage
+    localStorage.removeItem('userRole');
     
-    // Navigate to login page
-    navigate('/');
+    // Redirect to login page
+    navigate('/login');
   };
 
   return (
     <Button 
       variant="outline-danger" 
-      onClick={handleLogout} 
-      className={className || 'logout-btn'}
+      onClick={handleLogout}
+      className="logout-button"
     >
       Logout
     </Button>
   );
-}
+};
 
 export default LogoutButton;

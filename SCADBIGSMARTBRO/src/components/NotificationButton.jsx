@@ -26,6 +26,19 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
     return () => clearInterval(interval);
   }, [userRole]);
   
+  // Add this useEffect to listen for the custom event
+  useEffect(() => {
+    const handleRefreshNotifications = () => {
+      loadNotifications();
+    };
+    
+    window.addEventListener('refresh-notifications', handleRefreshNotifications);
+    
+    return () => {
+      window.removeEventListener('refresh-notifications', handleRefreshNotifications);
+    };
+  }, []);
+  
   // Function to load notifications from localStorage
   const loadNotifications = () => {
     if (userRole === 'company') {
@@ -88,7 +101,7 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
     }
   };
 
-  // Load student-specific notifications (internship cycle notifications)
+  // Update the loadStudentNotifications function to include workshop chat notifications
   const loadStudentNotifications = () => {
     try {
       // Get current user
@@ -148,7 +161,7 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
         }
       }
       
-      // Get workshop notifications from localStorage
+      // Get workshop notifications from localStorage (includes chat messages now)
       const workshopNotifications = JSON.parse(localStorage.getItem('studentNotifications') || '[]');
       
       // Add workshop notifications to all notifications
@@ -214,7 +227,7 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
     }
   };
 
-  // Render notification item based on type
+  // Update the renderNotificationItem function to handle workshop chat messages
   const renderNotificationItem = (notification) => {
     if (userRole === 'company' && notification.type === 'application') {
       return (
@@ -243,9 +256,12 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
       return (
         <>
           <div>
+            <i className="bi bi-chat-dots me-2 text-primary"></i>
             <strong>{notification.title}</strong>
           </div>
-          <div>{notification.message}</div>
+          <div>
+            <span className="fst-italic">{notification.sender}:</span> {notification.message}
+          </div>
           <small className="text-muted">
             {new Date(notification.date).toLocaleString()}
           </small>

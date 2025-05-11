@@ -72,7 +72,8 @@ export default function LoginPage() {
           major: user.major,
           bio: user.bio,
           skills: user.skills,
-          location: user.location
+          location: user.location,
+          pro: user.pro  // Add this line to include the pro property
         } : {})
       }));
       

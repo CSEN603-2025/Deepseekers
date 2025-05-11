@@ -1,0 +1,45 @@
+.certification-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+}
+
+.certification-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.certificate-icon {
+  font-size: 2rem;
+  color: #007bff;
+  text-align: center;
+}
+
+.certificate-details {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.certificate-date-badge, .certificate-type-badge {
+  font-weight: normal;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #dee2e6;
+}
+
+.empty-certificates {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 40px;
+}
+
+.empty-certificates i {
+  opacity: 0.5;
+}
+
+.my-certifications h4 {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e9ecef;
+}
