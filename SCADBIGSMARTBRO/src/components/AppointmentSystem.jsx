@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Badge, Container, Row, Col } from 'react-bootstrap';
+import { BsCircleFill, BsCameraVideoFill } from 'react-icons/bs';
 import { students } from '../Data/UserData';
 import '../css/AppointmentSystem.css';
 
 const AppointmentSystem = ({ userType, studentId }) => {
   const [showModal, setShowModal] = useState(false);
   const [appointments, setAppointments] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState({});
   const [newAppointment, setNewAppointment] = useState({
     date: '',
     time: '',
@@ -19,6 +21,23 @@ const AppointmentSystem = ({ userType, studentId }) => {
   useEffect(() => {
     const storedAppointments = JSON.parse(localStorage.getItem('appointments')) || [];
     setAppointments(storedAppointments);
+
+    // Simulate online status (dummy implementation)
+    const simulateOnlineStatus = () => {
+      const mockOnlineStatus = {};
+      students.forEach(student => {
+        // Randomly set some students as online (70% chance)
+        mockOnlineStatus[student.gucId] = Math.random() > 0.3;
+      });
+      setOnlineUsers(mockOnlineStatus);
+    };
+    
+    // Initial simulation
+    simulateOnlineStatus();
+    
+    // Update online status every 30 seconds
+    const interval = setInterval(simulateOnlineStatus, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSubmit = (e) => {
@@ -108,6 +127,30 @@ const AppointmentSystem = ({ userType, studentId }) => {
     }
   };
 
+  // Function to initiate a video call
+  const initiateVideoCall = (appointment) => {
+    // In a real application, this would connect to your video call service
+    // For now, we'll just show a mock link and record the call in localStorage
+    
+    // Create a record of this call
+    const callHistory = JSON.parse(localStorage.getItem('callHistory') || '[]');
+    callHistory.push({
+      id: Date.now(),
+      appointmentId: appointment.id,
+      startTime: new Date().toISOString(),
+      participants: [appointment.studentId],
+      status: 'active'
+    });
+    localStorage.setItem('callHistory', JSON.stringify(callHistory));
+    
+    // In a real app, this would open your video call interface
+    // For demo, we'll show an alert
+    alert(`Starting video call for appointment: ${appointment.purpose}`);
+    
+    // You could also open a new window/tab with a mock video call interface
+    // window.open(`/video-call/${appointment.id}`, '_blank');
+  };
+
   return (
     <Container className="appointment-system my-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -124,16 +167,49 @@ const AppointmentSystem = ({ userType, studentId }) => {
             <Col key={apt.id} xs={12} className="mb-3">
               <div className="appointment-card">
                 <div className="appointment-info">
-                  <h5>{apt.purpose}</h5>
-                  <p>Date: {apt.date} at {apt.time}</p>
-                  <p>
+                  <div className="d-flex justify-content-between align-items-start mb-2">
+                    <h5>{apt.purpose}</h5>
+                    {userType === 'student' ? (
+                      <Badge bg="info">SCAD</Badge>
+                    ) : (
+                      <div className="online-status-indicator">
+                        {onlineUsers[apt.studentId] ? (
+                          <Badge bg="success" className="d-flex align-items-center">
+                            <BsCircleFill className="me-1" size={8} /> Online
+                          </Badge>
+                        ) : (
+                          <Badge bg="secondary" className="d-flex align-items-center">
+                            <BsCircleFill className="me-1" size={8} /> Offline
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <p className="mb-2">Date: {apt.date} at {apt.time}</p>
+                  <p className="mb-2">
                     {apt.requestedBy === 'student' 
                       ? `Requested by: ${apt.studentName} (${apt.studentId})`
                       : `Scheduled by SCAD for: ${apt.studentName} (${apt.studentId})`}
                   </p>
-                  <Badge bg={getStatusBadgeVariant(apt.status)}>
-                    {apt.status.toUpperCase()}
-                  </Badge>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Badge bg={getStatusBadgeVariant(apt.status)}>
+                      {apt.status.toUpperCase()}
+                    </Badge>
+                    
+                    {/* Video Call Button for approved appointments with online users */}
+                    {apt.status === 'approved' && 
+                     ((userType === 'student' && onlineUsers[studentId]) || 
+                      (userType === 'scad' && onlineUsers[apt.studentId])) && (
+                      <Button 
+                        variant="success" 
+                        size="sm" 
+                        className="video-call-button"
+                        onClick={() => initiateVideoCall(apt)}
+                      >
+                        <BsCameraVideoFill className="me-1" /> Start Video Call
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 {apt.status === 'pending' && apt.requestedBy !== userType && (
                   <div className="appointment-actions">
