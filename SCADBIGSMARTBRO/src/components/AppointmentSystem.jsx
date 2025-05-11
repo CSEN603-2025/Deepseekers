@@ -49,11 +49,55 @@ const AppointmentSystem = ({ userType, studentId }) => {
   };
 
   const handleStatusChange = (appointmentId, newStatus) => {
-    const updatedAppointments = appointments.map(apt => 
-      apt.id === appointmentId ? { ...apt, status: newStatus } : apt
-    );
+    const updatedAppointments = appointments.map(apt => {
+      if (apt.id === appointmentId) {
+        // Create a notification when the status changes to approved
+        if (newStatus === 'approved') {
+          createAppointmentNotification(apt);
+        }
+        return { ...apt, status: newStatus };
+      }
+      return apt;
+    });
+    
     localStorage.setItem('appointments', JSON.stringify(updatedAppointments));
     setAppointments(updatedAppointments);
+    
+    // Refresh notifications by triggering a custom event
+    const event = new CustomEvent('refresh-notifications');
+    window.dispatchEvent(event);
+  };
+
+  // Function to create a notification when an appointment is approved
+  const createAppointmentNotification = (appointment) => {
+    try {
+      // Check if the student is a pro member
+      const student = students.find(s => s.gucId === appointment.studentId);
+      
+      if (student && student.pro) {
+        // Get existing notifications
+        const notifications = JSON.parse(localStorage.getItem('studentNotifications') || '[]');
+        
+        // Create a new notification
+        const newNotification = {
+          id: `appointment-${appointment.id}-${Date.now()}`,
+          title: 'Appointment Approved',
+          message: `Your appointment on ${appointment.date} at ${appointment.time} has been approved.`,
+          date: new Date().toISOString(),
+          type: 'appointment',
+          appointmentId: appointment.id,
+          read: false
+        };
+        
+        // Add notification to the beginning of the array (newest first)
+        notifications.unshift(newNotification);
+        
+        // Update localStorage
+        localStorage.setItem('studentNotifications', JSON.stringify(notifications));
+      }
+    } catch (error) {
+      console.error("Error creating appointment notification:", error);
+    }
   };
 
   const getStatusBadgeVariant = (status) => {

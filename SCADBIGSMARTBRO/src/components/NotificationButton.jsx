@@ -221,9 +221,20 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
     }
     
     // For student notifications, navigate to relevant page or show more details
-    if (userRole === 'student' && notification.type === 'cycle') {
-      // If there's a specific action for cycle notifications, it would go here
-      // For example: navigate to internships page
+    if (userRole === 'student') {
+      if (notification.type === 'cycle') {
+        // If there's a specific action for cycle notifications, it would go here
+        // For example: navigate to internships page
+      } else if (notification.type === 'appointment') {
+        // Navigate to appointments page or scroll to appointments section
+        // This depends on your app's routing structure
+        if (window.location.pathname !== '/profile') {
+          window.location.href = '/profile#appointments';
+        } else {
+          // If already on profile page, scroll to appointments section
+          document.getElementById('appointments-section')?.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
   };
 
@@ -262,6 +273,19 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
           <div>
             <span className="fst-italic">{notification.sender}:</span> {notification.message}
           </div>
+          <small className="text-muted">
+            {new Date(notification.date).toLocaleString()}
+          </small>
+        </>
+      );
+    } else if (userRole === 'student' && notification.type === 'appointment') {
+      return (
+        <>
+          <div>
+            <i className="bi bi-calendar-check me-2 text-success"></i>
+            <strong>{notification.title}</strong>
+          </div>
+          <div>{notification.message}</div>
           <small className="text-muted">
             {new Date(notification.date).toLocaleString()}
           </small>

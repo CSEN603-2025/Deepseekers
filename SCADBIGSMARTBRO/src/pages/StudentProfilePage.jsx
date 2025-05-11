@@ -201,6 +201,7 @@ function StudentProfilePage() {
                 profileType="student"
                 userData={currentUser}
                 onEditClick={handleEditClick}
+                isPro={currentUser.pro}
             />
             
             {/* Profile details section */}
