@@ -309,7 +309,7 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
       <div style={{ textAlign: 'center', marginTop: '10px' }}>
         <Button 
           variant="outline-primary" 
-          onClick={() => setShowNotifications(true)}
+          onClick={() => setShowNotifications(!showNotifications)} // Toggle instead of just setting to true
           style={{ 
             borderRadius: '50%', 
             width: '42px', 
