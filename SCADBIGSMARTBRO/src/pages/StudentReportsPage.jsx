@@ -8,6 +8,7 @@ import {
   Button,
   Modal,
   Form,
+  Alert,
 } from "react-bootstrap";
 import "../css/StudentReportsPage.css";
 import { coursesByMajor } from "../Data/UserData";
@@ -15,11 +16,18 @@ import { coursesByMajor } from "../Data/UserData";
 function StudentReportsPage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [finalizedReports, setFinalizedReports] = useState([]);
+  const [filteredReports, setFilteredReports] = useState([]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showAppealModal, setShowAppealModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState("");
+  const [appealMessage, setAppealMessage] = useState("");
+  const [appealText, setAppealText] = useState("");
+  
+  // Filter state
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     // Get current user
@@ -31,6 +39,22 @@ function StudentReportsPage() {
     // Load evaluations and reports
     loadUserData();
   }, []);
+  
+  // Filter reports when finalizedReports or statusFilter changes
+  useEffect(() => {
+    if (finalizedReports.length === 0) {
+      setFilteredReports([]);
+      return;
+    }
+    
+    if (statusFilter === "all") {
+      setFilteredReports(finalizedReports);
+      return;
+    }
+    
+    const filtered = finalizedReports.filter(report => report.status === statusFilter);
+    setFilteredReports(filtered);
+  }, [finalizedReports, statusFilter]);
 
   const loadUserData = () => {
     const userId = JSON.parse(localStorage.getItem("currentUser"))?.id;
@@ -80,6 +104,14 @@ function StudentReportsPage() {
         date: report.date,
         isFinalized: !!matchingEval, // Consider finalized if it has both report and evaluation
         isSubmitted: report.isSubmitted || false,
+        status: report.status || (report.isSubmitted ? "pending" : ""),
+        statusComment: report.statusComment || "",
+        reviewedBy: report.reviewedBy || null,
+        reviewedByName: report.reviewedByName || "",
+        reviewDate: report.reviewDate || null,
+        hasAppeal: report.hasAppeal || false,
+        appealText: report.appealText || "",
+        appealDate: report.appealDate || null,
       });
     });
 
@@ -107,11 +139,14 @@ function StudentReportsPage() {
           date: evaluation.date,
           isFinalized: false, // Not finalized because it has no report
           isSubmitted: false,
+          status: "",
+          statusComment: "",
         });
       }
     });
 
     setFinalizedReports(combinedReports);
+    setFilteredReports(combinedReports);
   };
 
   const formatDate = (dateString) => {
@@ -133,6 +168,64 @@ function StudentReportsPage() {
     setSelectedItem(item);
     setShowSubmitModal(true);
     setSubmissionMessage("");
+  };
+  
+  const handleAppealReport = (item) => {
+    setSelectedItem(item);
+    setShowAppealModal(true);
+    setAppealText("");
+    setAppealMessage("");
+  };
+  
+  const submitAppeal = () => {
+    if (!selectedItem || !appealText.trim()) return;
+    
+    setIsSubmitting(true);
+    
+    // Simulate submission (in a real app, this would be an API call)
+    setTimeout(() => {
+      // Update the report with appeal information
+      const savedReports = localStorage.getItem("internshipReports") || "[]";
+      const reports = JSON.parse(savedReports);
+      
+      const reportIndex = reports.findIndex(
+        (report) => report.id === selectedItem.reportId
+      );
+      
+      if (reportIndex >= 0) {
+        reports[reportIndex] = {
+          ...reports[reportIndex],
+          hasAppeal: true,
+          appealText: appealText,
+          appealDate: new Date().toISOString(),
+        };
+        
+        localStorage.setItem("internshipReports", JSON.stringify(reports));
+        
+        // Update state
+        setFinalizedReports((prev) =>
+          prev.map((report) =>
+            report.id === selectedItem.id
+              ? { 
+                  ...report, 
+                  hasAppeal: true, 
+                  appealText: appealText,
+                  appealDate: new Date().toISOString()
+                }
+              : report
+          )
+        );
+        
+        setIsSubmitting(false);
+        setAppealMessage("Your appeal has been successfully submitted.");
+        
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          setShowAppealModal(false);
+          setAppealMessage("");
+        }, 2000);
+      }
+    }, 1500);
   };
 
   const handleFinalSubmission = () => {
@@ -190,24 +283,71 @@ function StudentReportsPage() {
       return course ? `${course.code}: ${course.name}` : "Unknown Course";
     });
   };
+  
+  const getStatusBadge = (status) => {
+    if (!status) return null;
+    
+    switch (status) {
+      case "pending":
+        return <Badge bg="warning" text="dark">Pending Review</Badge>;
+      case "accepted":
+        return <Badge bg="success">Accepted</Badge>;
+      case "rejected":
+        return <Badge bg="danger">Rejected</Badge>;
+      case "flagged":
+        return <Badge bg="info">Flagged</Badge>;
+      default:
+        return null;
+    }
+  };
 
   return (
     <>
       <Container className="student-reports-container">
-        <h2 className="page-title">Finalized Internship Reports</h2>
+        <h2 className="page-title">Internship Reports</h2>
         <p className="page-description">
-          View and submit your complete internship reports with company
-          evaluations.
+          View and submit your internship reports with company evaluations.
         </p>
+        
+        {/* Filter controls */}
+        <div className="filter-container mb-4">
+          <Row>
+            <Col md={6} lg={4}>
+              <Form.Group>
+                <Form.Label>Filter by Status</Form.Label>
+                <Form.Select 
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">All Reports</option>
+                  <option value="pending">Pending Review</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="flagged">Flagged</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={6} lg={4} className="d-flex align-items-end">
+              <Button 
+                variant="outline-secondary" 
+                className="mb-3"
+                onClick={() => setStatusFilter("all")}
+              >
+                Clear Filter
+              </Button>
+            </Col>
+          </Row>
+        </div>
 
         <Row className="mt-4">
-          {finalizedReports.length > 0 ? (
-            finalizedReports.map((report) => (
+          {filteredReports.length > 0 ? (
+            filteredReports.map((report) => (
               <Col md={6} lg={4} key={report.id} className="mb-4">
                 <Card
                   className={`finalized-report-card ${
                     report.isFinalized ? "complete" : "incomplete"
-                  }`}
+                  } ${report.status === "rejected" ? "rejected" : ""} 
+                    ${report.status === "flagged" ? "flagged" : ""}`}
                 >
                   <Card.Header>
                     <div>
@@ -221,9 +361,11 @@ function StudentReportsPage() {
                         </Badge>
                       )}
                       {report.isSubmitted ? (
-                        <Badge bg="info" className="status-badge">
-                          Submitted
-                        </Badge>
+                        getStatusBadge(report.status) || (
+                          <Badge bg="info" className="status-badge">
+                            Submitted
+                          </Badge>
+                        )
                       ) : report.isFinalized ? (
                         <Badge bg="warning" className="status-badge">
                           Ready to Submit
@@ -233,12 +375,28 @@ function StudentReportsPage() {
                           Incomplete
                         </Badge>
                       )}
+                      
+                      {report.hasAppeal && (
+                        <Badge bg="primary" className="status-badge ms-1">
+                          Appealed
+                        </Badge>
+                      )}
                     </div>
                   </Card.Header>
                   <Card.Body>
                     <p className="report-date">
                       Last Updated: {formatDate(report.date)}
                     </p>
+                    
+                    {report.status === "rejected" || report.status === "flagged" ? (
+                      <Alert variant={report.status === "rejected" ? "danger" : "info"} className="mb-3">
+                        <small>
+                          {report.status === "rejected" ? "Rejected" : "Flagged"} on {formatDate(report.reviewDate)}
+                          {report.statusComment && <div className="mt-1"><strong>Comment:</strong> {report.statusComment}</div>}
+                        </small>
+                      </Alert>
+                    ) : null}
+                    
                     <div className="report-components">
                       <div className="component">
                         <span className="component-label">Report:</span>
@@ -278,6 +436,15 @@ function StudentReportsPage() {
                           Submit Report
                         </Button>
                       )}
+                      
+                      {(report.status === "rejected" || report.status === "flagged") && !report.hasAppeal && (
+                        <Button
+                          variant="warning"
+                          onClick={() => handleAppealReport(report)}
+                        >
+                          Appeal Decision
+                        </Button>
+                      )}
                     </div>
                   </Card.Body>
                 </Card>
@@ -287,11 +454,17 @@ function StudentReportsPage() {
             <Col xs={12}>
               <div className="empty-state">
                 <h4>No Reports Found</h4>
-                <p>
-                  You haven't created any evaluations or reports yet. Complete
-                  your internship and create reports (In Internships tab) to see
-                  them here.
-                </p>
+                {statusFilter !== "all" ? (
+                  <p>
+                    No reports with status "{statusFilter}" found. Try changing the filter or create new reports.
+                  </p>
+                ) : (
+                  <p>
+                    You haven't created any evaluations or reports yet. Complete
+                    your internship and create reports (In Internships tab) to see
+                    them here.
+                  </p>
+                )}
               </div>
             </Col>
           )}
@@ -304,6 +477,7 @@ function StudentReportsPage() {
         onHide={() => setShowDetailsModal(false)}
         size="lg"
         centered
+        className="report-detail-modal"
       >
         <Modal.Header closeButton>
           <Modal.Title>
@@ -322,6 +496,49 @@ function StudentReportsPage() {
                 <span className="detail-label">Last Updated:</span>{" "}
                 {formatDate(selectedItem.date)}
               </div>
+              
+              {/* Show report status if submitted */}
+              {selectedItem.isSubmitted && (
+                <div className="detail-header">
+                  <span className="detail-label">Status:</span>{" "}
+                  {getStatusBadge(selectedItem.status)}
+                  
+                  {/* Show review date if available */}
+                  {selectedItem.reviewDate && (
+                    <span className="ms-2 text-muted small">
+                      (Reviewed on {formatDate(selectedItem.reviewDate)})
+                    </span>
+                  )}
+                </div>
+              )}
+              
+              {/* Show faculty feedback if rejected or flagged */}
+              {(selectedItem.status === "rejected" || selectedItem.status === "flagged") && selectedItem.statusComment && (
+                <div className="detail-content mt-3">
+                  <h5>{selectedItem.status === "rejected" ? "Rejection" : "Flag"} Feedback:</h5>
+                  <div className="content-box feedback-box">
+                    {selectedItem.statusComment}
+                    {selectedItem.reviewedByName && (
+                      <div className="text-muted mt-2 small">
+                        - {selectedItem.reviewedByName}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Show appeal if exists */}
+              {selectedItem.hasAppeal && (
+                <div className="detail-content mt-3">
+                  <h5>Your Appeal:</h5>
+                  <div className="content-box appeal-box">
+                    {selectedItem.appealText}
+                    <div className="text-muted mt-2 small">
+                      Submitted on {formatDate(selectedItem.appealDate)}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {selectedItem.hasEvaluation && (
                 <>
@@ -339,7 +556,7 @@ function StudentReportsPage() {
                   </div>
 
                   <div className="detail-content mt-4">
-                    <h5>Company Evaluation:</h5>
+                    <h5>Your Evaluation of the Company:</h5>
                     <div className="content-box">
                       {selectedItem.evaluationText}
                     </div>
@@ -390,13 +607,26 @@ function StudentReportsPage() {
             </div>
           )}
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className="d-flex justify-content-between">
           <Button
             variant="secondary"
             onClick={() => setShowDetailsModal(false)}
           >
             Close
           </Button>
+          
+          {/* Add appeal button in the modal footer */}
+          {selectedItem && (selectedItem.status === "rejected" || selectedItem.status === "flagged") && !selectedItem.hasAppeal && (
+            <Button
+              variant="warning"
+              onClick={() => {
+                setShowDetailsModal(false);
+                handleAppealReport(selectedItem);
+              }}
+            >
+              Appeal Decision
+            </Button>
+          )}
         </Modal.Footer>
       </Modal>
 
@@ -405,6 +635,7 @@ function StudentReportsPage() {
         show={showSubmitModal}
         onHide={() => !isSubmitting && setShowSubmitModal(false)}
         centered
+        className="submit-modal"
       >
         <Modal.Header closeButton>
           <Modal.Title>Submit Final Report</Modal.Title>
@@ -443,6 +674,79 @@ function StudentReportsPage() {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Submitting..." : "Submit Report"}
+              </Button>
+            </>
+          )}
+        </Modal.Footer>
+      </Modal>
+      
+      {/* Appeal Modal */}
+      <Modal
+        show={showAppealModal}
+        onHide={() => !isSubmitting && setShowAppealModal(false)}
+        centered
+        className="appeal-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Appeal Report Decision</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {appealMessage ? (
+            <div className="submission-success">
+              <p className="text-success">{appealMessage}</p>
+            </div>
+          ) : (
+            <>
+              <p>
+                You are appealing the faculty's decision for your report on{" "}
+                <strong>{selectedItem?.companyName}</strong>.
+              </p>
+              
+              {selectedItem && (
+                <Alert variant={selectedItem.status === "rejected" ? "danger" : "info"} className="mb-3">
+                  <strong>Decision:</strong> {selectedItem.status === "rejected" ? "Rejected" : "Flagged"}
+                  {selectedItem.statusComment && (
+                    <div className="mt-1">
+                      <strong>Comment:</strong> {selectedItem.statusComment}
+                    </div>
+                  )}
+                </Alert>
+              )}
+              
+              <Form.Group className="mb-3">
+                <Form.Label>Appeal Explanation</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={5}
+                  value={appealText}
+                  onChange={(e) => setAppealText(e.target.value)}
+                  placeholder="Explain why you believe this decision should be reconsidered. Provide specific details and address the feedback provided."
+                />
+                {appealText.trim() === "" && (
+                  <Form.Text className="text-danger">
+                    Please provide an explanation for your appeal.
+                  </Form.Text>
+                )}
+              </Form.Group>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          {!appealMessage && (
+            <>
+              <Button
+                variant="secondary"
+                onClick={() => setShowAppealModal(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={submitAppeal}
+                disabled={isSubmitting || appealText.trim() === ""}
+              >
+                {isSubmitting ? "Submitting..." : "Submit Appeal"}
               </Button>
             </>
           )}
