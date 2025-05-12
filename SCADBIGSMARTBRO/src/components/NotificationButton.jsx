@@ -304,7 +304,7 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
   };
 
   return (
-    <>
+    <div className="position-relative">
       {/* Notification Bell Button */}
       <div style={{ textAlign: 'center', marginTop: '10px' }}>
         <Button 
@@ -337,72 +337,68 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
         </Button>
       </div>
       
-      {/* Notifications Modal */}
-      <Modal 
-        show={showNotifications} 
-        onHide={() => setShowNotifications(false)}
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <BsBell className="me-2" /> Notifications
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ maxHeight: '400px', overflow: 'auto' }}>
-          {notifications.length === 0 ? (
-            <div className="text-center py-4 text-muted">
-              <p>
-                {userRole === 'company' 
-                  ? 'No applications received yet' 
-                  : 'No notifications yet'}
-              </p>
-            </div>
-          ) : (
-            <ListGroup variant="flush">
+      {/* Notifications Dropdown */}
+      {showNotifications && (
+        <div 
+          className="position-absolute end-0 mt-2 notification-dropdown" 
+          style={{ 
+            width: '350px', 
+            maxHeight: '500px', 
+            overflowY: 'auto', 
+            zIndex: 1000, 
+            borderRadius: '8px', 
+            boxShadow: '0 5px 15px rgba(0,0,0,0.2)', 
+            background: 'white', // Explicitly set white background
+            border: '1px solid #ddd' 
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
+            <h6 className="m-0">Notifications</h6>
+            {notifications.length > 0 && (
+              <Button 
+                variant="link" 
+                size="sm" 
+                onClick={handleMarkAllAsRead}
+                style={{
+                  color: 'var(--primary)',
+                  textDecoration: 'underline',
+                  padding: '0',
+                  fontSize: '0.875rem'
+                }}
+              >
+                Mark all as read
+              </Button>
+            )}
+          </div>
+          
+          {notifications.length > 0 ? (
+            <div>
               {notifications.map(notification => (
-                <ListGroup.Item 
+                <div 
                   key={notification.id} 
-                  action
+                  className={`notification-item p-3 border-bottom ${notification.read ? '' : 'unread'}`}
                   onClick={() => handleNotificationClick(notification)}
                   style={{ 
-                    backgroundColor: notification.read ? 'inherit' : 'rgba(96, 163, 217, 0.1)', 
-                    borderLeft: notification.read ? 'none' : '3px solid var(--royal-blue)',
-                    padding: '10px',
-                    transition: 'all 0.2s ease',
-                    position: 'relative'
+                    cursor: 'pointer', 
+                    backgroundColor: notification.read ? 'white' : '#f0f7ff',
+                    transition: 'background-color 0.2s'
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = notification.read ? '#f8f9fa' : '#e6f2ff'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = notification.read ? 'white' : '#f0f7ff'}
                 >
                   {renderNotificationItem(notification)}
-                  {!notification.read && (
-                    <div 
-                      style={{
-                        position: 'absolute',
-                        right: '10px',
-                        top: '10px',
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--royal-blue)',
-                      }}
-                    />
-                  )}
-                </ListGroup.Item>
+                </div>
               ))}
-            </ListGroup>
+            </div>
+          ) : (
+            <div className="p-4 text-center text-muted">
+              <i className="bi bi-bell-slash mb-2 d-block" style={{ fontSize: '1.5rem' }}></i>
+              <p className="mb-0">No notifications yet</p>
+            </div>
           )}
-        </Modal.Body>
-        <Modal.Footer>
-          {unreadCount > 0 && (
-            <Button variant="link" size="sm" onClick={handleMarkAllAsRead}>
-              Mark all as read
-            </Button>
-          )}
-          <Button variant="secondary" onClick={() => setShowNotifications(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+        </div>
+      )}
+    </div>
   );
 }
 
