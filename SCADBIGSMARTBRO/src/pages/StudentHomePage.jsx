@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import NavigationBar from '../components/NavigationBar';
+import React, { useState, useEffect, useRef } from 'react';
+import { Container, Row, Col, Nav, Button, InputGroup, Form, Badge, Tabs, Tab, Accordion } from 'react-bootstrap';
 import Post from '../components/Post';
-import AppointmentSystem from '../components/AppointmentSystem';
-import StudentAssessmentsPage from './StudentAssessmentsPage';
 import WorkshopList from '../components/WorkshopList';
-import PrerecordedWorkshops from '../components/PrerecordedWorkshops'; // Add this import
-import LiveWorkshops from '../components/LiveWorkshops'; // Add this import
-import MyCertifications from '../components/MyCertifications'; // Add this import
-import { Container, Row, Col, Form, InputGroup, Button, Accordion, Badge, Tabs, Tab } from 'react-bootstrap';
+import AppointmentSystem from '../components/AppointmentSystem';
+import PrerecordedWorkshops from '../components/PrerecordedWorkshops';
+import LiveWorkshops from '../components/LiveWorkshops';
+import MyCertifications from '../components/MyCertifications';
+import VideoCallComponent from '../components/VideoCallComponent';
 import { companies } from '../Data/UserData';
-import { clearLocalStorage, clearSpecificLocalStorageData } from '../Data/ClearLocalStorage';
+import StudentAssessmentsPage from '../components/StudentAssessmentsPage';
 import '../css/studentHome.css';
-import '../css/liveWorkshops.css'; // Add this import
-//import { useEffect } from 'react';
+import '../css/liveWorkshops.css';
 
 const StudentHomePage = () => {
   const [internships, setInternships] = useState([]);
@@ -22,11 +20,17 @@ const StudentHomePage = () => {
   const [selectedIndustries, setSelectedIndustries] = useState([]);
   const [durationFilter, setDurationFilter] = useState('all');
   const [activeFilters, setActiveFilters] = useState(0);
-  const [activeTab, setActiveTab] = useState('availableInternships'); 
-  const [activeWorkshopTab, setActiveWorkshopTab] = useState('all'); // Add this line
-  const [studentMajor, setStudentMajor] = useState(''); // State to store the student's major
-  const [studentProfile, setStudentProfile] = useState(null); // State to store the student's profile
-
+  const [activeTab, setActiveTab] = useState('availableInternships');
+  const [activeWorkshopTab, setActiveWorkshopTab] = useState('all');
+  const [studentMajor, setStudentMajor] = useState('');
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [showVideoCall, setShowVideoCall] = useState(false);
+  const [incomingCall, setIncomingCall] = useState(null);
+  const [activeCall, setActiveCall] = useState(null);
+  
+  // Ref to keep track of interval
+  const callCheckIntervalRef = useRef(null);
+  
   // Map of majors to YouTube video IDs
   const majorVideos = {
     BI: 'fc9iL1ib-H4?si=WqWnKOh61kBnbeX2',
@@ -198,6 +202,160 @@ const StudentHomePage = () => {
     const event = new CustomEvent('refresh-notifications');
     window.dispatchEvent(event);
   }, []);
+
+  // Get current student ID - this should be fetched from localStorage
+  const getCurrentStudentId = () => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    return currentUser ? currentUser.gucId : null;
+  };
+  
+  // Load student profile data
+  useEffect(() => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser) {
+      setStudentProfile(currentUser);
+      setStudentMajor(currentUser.major || '');
+    }
+  }, []);
+  
+  // Check for incoming calls
+  useEffect(() => {
+    const studentId = getCurrentStudentId();
+    if (!studentId) return;
+    
+    // Function to check for active calls directed to this student
+    const checkForCalls = () => {
+      try {
+        const callHistory = JSON.parse(localStorage.getItem('callHistory') || '[]');
+        const activeCallForStudent = callHistory.find(call => 
+          call.participants && 
+          call.participants.includes(studentId) && 
+          call.status === 'active' && 
+          !call.rejected &&
+          !call.accepted
+        );
+        
+        if (activeCallForStudent) {
+          console.log("Found active call:", activeCallForStudent);
+          
+          // Find the appointment details
+          const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+          const appointment = appointments.find(apt => apt.id === activeCallForStudent.appointmentId);
+          
+          if (appointment) {
+            setIncomingCall({
+              ...activeCallForStudent,
+              purpose: appointment.purpose,
+              remoteUser: 'SCAD Officer'
+            });
+            
+            // Play sound for incoming call
+            const audio = new Audio('/sounds/call-ring.mp3');
+            audio.loop = true;
+            audio.play().catch(e => console.log('Audio play failed:', e));
+            
+            // Store audio element to stop it later
+            window.incomingCallAudio = audio;
+          }
+        }
+      } catch (error) {
+        console.error("Error checking for calls:", error);
+      }
+    };
+    
+    // Check immediately
+    checkForCalls();
+    
+    // Set up interval to check regularly (every 3 seconds)
+    callCheckIntervalRef.current = setInterval(checkForCalls, 3000);
+    
+    // Clean up
+    return () => {
+      if (callCheckIntervalRef.current) {
+        clearInterval(callCheckIntervalRef.current);
+      }
+      
+      // Stop any playing audio
+      if (window.incomingCallAudio) {
+        window.incomingCallAudio.pause();
+        window.incomingCallAudio = null;
+      }
+    };
+  }, []);
+  
+  // Handle accepting an incoming call
+  const handleAcceptCall = () => {
+    if (!incomingCall) return;
+    
+    // Stop the ringtone
+    if (window.incomingCallAudio) {
+      window.incomingCallAudio.pause();
+      window.incomingCallAudio = null;
+    }
+    
+    const callHistory = JSON.parse(localStorage.getItem('callHistory') || '[]');
+    const updatedCallHistory = callHistory.map(call => {
+      if (call.id === incomingCall.id) {
+        return { ...call, accepted: true };
+      }
+      return call;
+    });
+    
+    localStorage.setItem('callHistory', JSON.stringify(updatedCallHistory));
+    
+    // Start video call
+    setActiveCall(incomingCall);
+    setIncomingCall(null);
+    setShowVideoCall(true);
+  };
+  
+  // Handle rejecting an incoming call
+  const handleRejectCall = () => {
+    if (!incomingCall) return;
+    
+    // Stop the ringtone
+    if (window.incomingCallAudio) {
+      window.incomingCallAudio.pause();
+      window.incomingCallAudio = null;
+    }
+    
+    const callHistory = JSON.parse(localStorage.getItem('callHistory') || '[]');
+    const updatedCallHistory = callHistory.map(call => {
+      if (call.id === incomingCall.id) {
+        return {
+          ...call,
+          rejected: true,
+          status: 'rejected',
+          endTime: new Date().toISOString()
+        };
+      }
+      return call;
+    });
+    
+    localStorage.setItem('callHistory', JSON.stringify(updatedCallHistory));
+    setIncomingCall(null);
+  };
+  
+  // Handle ending an active call
+  const handleEndCall = () => {
+    if (!activeCall) return;
+    
+    const callHistory = JSON.parse(localStorage.getItem('callHistory') || '[]');
+    const updatedCallHistory = callHistory.map(call => {
+      if (call.id === activeCall.id) {
+        return {
+          ...call,
+          status: 'ended',
+          endTime: new Date().toISOString()
+        };
+      }
+      return call;
+    });
+    
+    localStorage.setItem('callHistory', JSON.stringify(updatedCallHistory));
+    setShowVideoCall(false);
+    setActiveCall(null);
+  };
 
   return (
     <div className="student-home">
@@ -466,6 +624,23 @@ const StudentHomePage = () => {
           </Tab>
         </Tabs>
       </Container>
+
+      {/* Video Call Component */}
+      <VideoCallComponent
+        isVisible={showVideoCall}
+        onHide={handleEndCall}
+        callData={activeCall}
+      />
+      
+      {/* Incoming Call Component */}
+      <VideoCallComponent
+        isVisible={incomingCall !== null}
+        onHide={handleRejectCall}
+        callData={incomingCall}
+        isIncoming={true}
+        onAccept={handleAcceptCall}
+        onReject={handleRejectCall}
+      />
     </div>
   );
 };
