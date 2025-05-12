@@ -226,6 +226,7 @@ function ScadReportsPage() {
                 <th>Internship Period</th>
                 <th>Status</th>
                 <th>Submission Date</th>
+                <th>Company Evaluation</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -271,6 +272,13 @@ function ScadReportsPage() {
                       {!report.status && <Badge bg="warning" text="dark">Pending</Badge>}
                     </td>
                     <td>{formatDate(report.submissionDate)}</td>
+                    <td>
+                      {matchingEval ? (
+                        <Badge bg="success">Available</Badge>
+                      ) : (
+                        <Badge bg="secondary">Not Available</Badge>
+                      )}
+                    </td>
                     <td>
                       <div className="d-flex flex-wrap gap-1">
                         <Button 
@@ -354,7 +362,7 @@ function ScadReportsPage() {
                   </div>
                   
                   <div className="detail-content mt-4">
-                    <h5>Student Company Evaluation:</h5>
+                    <h5>Student Evaluation to the Company:</h5>
                     <div className="content-box">
                       {selectedItem.evaluationText}
                     </div>
