@@ -1,0 +1,98 @@
+/* FacultyReportsPage.css */
+
+.faculty-reports-container {
+    padding-bottom: 2rem;
+  }
+  
+  .page-title {
+    color: #00447c;
+    margin-bottom: 0.5rem;
+  }
+  
+  .page-description {
+    color: #6c757d;
+    margin-bottom: 2rem;
+  }
+  
+  /* Fix for modal background transparency */
+  .modal-content {
+    background-color: white;
+    opacity: 1 !important;
+  }
+  
+  .modal-backdrop {
+    opacity: 0.5 !important;
+  }
+  
+  .filters-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+  }
+  
+  .empty-state h4 {
+    color: #00447c;
+    margin-bottom: 1rem;
+  }
+  
+  .empty-state p {
+    color: #6c757d;
+  }
+  
+  .status-badge {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+  }
+  
+  .detail-header {
+    margin-bottom: 10px;
+  }
+  
+  .detail-label {
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  .detail-content {
+    margin-top: 15px;
+  }
+  
+  .content-box {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+  }
+  
+  .company-eval-box {
+    background-color: #f0f8ff;
+    border-color: #d0e3fa;
+  }
+  
+  .helpful-courses-list li {
+    margin-bottom: 5px;
+  }
+  
+  .status-update-form {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+    border-left: 4px solid #00447c;
+    margin-bottom: 1.5rem;
+  }
+  
+  .status-update-form h5 {
+    color: #00447c;
+    margin-bottom: 1rem;
+  }
+  

@@ -1,3 +1,4 @@
+
 import React, {useState } from "react";
 import { Link } from "react-router-dom";
 import { Container, Card, Form, Button, Nav } from 'react-bootstrap';
@@ -73,7 +74,13 @@ export default function LoginPage() {
           bio: user.bio,
           skills: user.skills,
           location: user.location,
-          pro: user.pro  // Add this line to include the pro property
+          pro: user.pro  
+        } : {}),
+        ...(role === 'faculty' ? {
+          department: user.department,
+          position: user.position,
+          office: user.office,
+          research: user.research
         } : {})
       }));
       

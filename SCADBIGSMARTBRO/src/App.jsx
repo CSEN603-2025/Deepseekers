@@ -12,6 +12,9 @@ import ScadHomePage from "./pages/ScadHomePage";
 import ScadNavigationBar from "./components/ScadNavigationBar";
 import ScadCompanyApplications from "./pages/ScadCompanyApplications";
 import ScadReportsPage from "./pages/ScadReportsPage";
+import FacultyHomePage from "./pages/FacultyHomePage";
+import FacultyReportsPage from "./pages/FacultyReportsPage";
+import FacultyNavigationBar from "./components/FacultyNavigationBar";
 
 import "./App.css";
 
@@ -108,6 +111,30 @@ function App() {
           </main>
           </>}
           />
+        {/* Faculty Routes */}
+        <Route
+          path="/faculty/home"
+          element={
+            <>
+              <FacultyNavigationBar />
+              <main className="main-content">
+                <FacultyHomePage />
+              </main>
+            </>
+          }
+        />
+        <Route
+          path="/faculty/reports"
+          element={
+            <>
+              <FacultyNavigationBar />
+              <main className="main-content">
+                <FacultyReportsPage />
+              </main>
+            </>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );

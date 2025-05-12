@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Modal, Button, Form } from 'react-bootstrap';
 import InternshipsAppliedFor from './InternshipsAppliedFor';
@@ -88,6 +89,21 @@ function StudentInternshipTabs() {
   const getReports = () => {
     const reports = localStorage.getItem('internshipReports');
     return reports ? JSON.parse(reports) : [];
+  };
+  
+  // Helper function to get report status
+  const getReportStatus = (internshipId) => {
+    const reports = getReports();
+    const report = reports.find(
+      report => report.internshipId === internshipId && report.studentId === currentUser?.id
+    );
+    
+    return report ? {
+      status: report.status || 'pending',
+      comment: report.statusComment || '',
+      reviewedBy: report.reviewedByName || null,
+      reviewDate: report.reviewDate || null
+    } : null;
   };
 
   // Open evaluation modal
@@ -190,6 +206,9 @@ function StudentInternshipTabs() {
       report => report.internshipId === selectedInternship.id && report.studentId === currentUser.id
     );
     
+    // Preserve existing status information if it exists
+    const existingReport = reportIndex >= 0 ? reports[reportIndex] : {};
+    
     const newReport = {
       id: reportIndex >= 0 ? reports[reportIndex].id : Date.now(),
       internshipId: selectedInternship.id,
@@ -200,7 +219,14 @@ function StudentInternshipTabs() {
       introduction: reportIntro,
       body: reportBody,
       helpfulCourses: selectedCourses,
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      isSubmitted: true,
+      // Preserve existing status information
+      status: existingReport.status || 'pending',
+      statusComment: existingReport.statusComment || '',
+      reviewedBy: existingReport.reviewedBy || null,
+      reviewedByName: existingReport.reviewedByName || null,
+      reviewDate: existingReport.reviewDate || null
     };
     
     if (reportIndex >= 0) {
@@ -303,12 +329,46 @@ function StudentInternshipTabs() {
                               {hasEvaluation(internship.id) ? 'Edit Evaluation' : 'Add Evaluation'}
                             </button>
                             
-                            <button 
-                              className={`action-btn ${hasReport(internship.id) ? 'edit' : 'add'}`}
-                              onClick={() => handleOpenReport(internship)}
-                            >
-                              {hasReport(internship.id) ? 'Edit Report' : 'Add Report'}
-                            </button>
+                            <div className="report-actions">
+                              <button 
+                                className={`action-btn ${hasReport(internship.id) ? 'edit' : 'add'}`}
+                                onClick={() => handleOpenReport(internship)}
+                              >
+                                {hasReport(internship.id) ? 'Edit Report' : 'Add Report'}
+                              </button>
+                              
+                              {hasReport(internship.id) && (
+                                <div className="report-status-info">
+                                  {(() => {
+                                    const reportStatus = getReportStatus(internship.id);
+                                    if (!reportStatus) return null;
+                                    
+                                    return (
+                                      <>
+                                        <div className="status-badge-container">
+                                          <span className="status-label">Report Status:</span>
+                                          {reportStatus.status === 'pending' && <span className="status-badge pending">Pending Review</span>}
+                                          {reportStatus.status === 'accepted' && <span className="status-badge accepted">Accepted</span>}
+                                          {reportStatus.status === 'rejected' && <span className="status-badge rejected">Rejected</span>}
+                                          {reportStatus.status === 'flagged' && <span className="status-badge flagged">Flagged</span>}
+                                        </div>
+                                        {reportStatus.reviewDate && (
+                                          <div className="review-info">
+                                            <small>Reviewed on {formatDate(reportStatus.reviewDate)}</small>
+                                            {reportStatus.reviewedBy && <small> by {reportStatus.reviewedBy}</small>}
+                                          </div>
+                                        )}
+                                        {reportStatus.comment && (
+                                          <div className="status-comment">
+                                            <small><strong>Faculty Comment:</strong> {reportStatus.comment}</small>
+                                          </div>
+                                        )}
+                                      </>
+                                    );
+                                  })()} 
+                                </div>
+                              )}
+                            </div>
                           </>
                         )}
                         {internship.status.toLowerCase() !== 'internship_complete' && (

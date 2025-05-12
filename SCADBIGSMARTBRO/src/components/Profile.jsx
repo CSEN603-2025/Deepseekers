@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import '../css/StudentProfilePage.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button, Badge } from 'react-bootstrap';
 
 function Profile({ 
