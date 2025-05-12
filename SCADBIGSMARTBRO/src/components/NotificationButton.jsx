@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Badge, Modal, ListGroup } from 'react-bootstrap';
-import { BsBell } from 'react-icons/bs';
+import { BsBell, BsTrash } from 'react-icons/bs';
 
 /**
  * NotificationButton Component - Shows notifications based on user role
@@ -82,16 +82,22 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
         };
       });
       
+      // Also get call notifications
+      const callNotifications = JSON.parse(localStorage.getItem('companyNotifications') || '[]');
+      
+      // Combine all notifications
+      const allNotifications = [...companyApplications, ...callNotifications];
+      
       // Sort by date (newest first)
-      companyApplications.sort((a, b) => 
-        new Date(b.applicationDate) - new Date(a.applicationDate)
+      allNotifications.sort((a, b) => 
+        new Date(b.date || b.applicationDate) - new Date(a.date || a.applicationDate)
       );
       
       // Check read status against localStorage
       const readNotifications = JSON.parse(localStorage.getItem('companyReadNotifications') || '[]');
-      const notificationsWithReadStatus = companyApplications.map(app => ({
-        ...app,
-        read: readNotifications.includes(app.id)
+      const notificationsWithReadStatus = allNotifications.map(item => ({
+        ...item,
+        read: readNotifications.includes(item.id)
       }));
       
       setNotifications(notificationsWithReadStatus);
@@ -167,6 +173,12 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
       // Add workshop notifications to all notifications
       allNotifications = [...allNotifications, ...workshopNotifications];
       
+      // Get workshop notifications and call notifications from localStorage
+      const userNotifications = JSON.parse(localStorage.getItem('studentNotifications') || '[]');
+      
+      // Add these notifications to allNotifications
+      allNotifications = [...allNotifications, ...userNotifications];
+      
       // Sort by date (newest first)
       allNotifications.sort((a, b) => new Date(b.date) - new Date(a.date));
       
@@ -193,6 +205,59 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
     
     setNotifications(notifications.map(n => ({ ...n, read: true })));
     setUnreadCount(0);
+  };
+  
+  // NEW: Handle clearing all notifications
+  const handleClearAll = () => {
+    // Determine which storage key to use based on user role
+    const storageKey = userRole === 'company' ? 'appliedInternships' : 'studentNotifications';
+    
+    if (userRole === 'company') {
+      // For companies, we don't want to delete all applications,
+      // just clear the notifications for the current company
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (currentUser) {
+        const companyId = currentUser.id;
+        const companyName = currentUser.name;
+        
+        // Get all internships
+        const allInternships = JSON.parse(localStorage.getItem('postedInternships')) || [];
+        
+        // Filter internships belonging to this company
+        const companyInternshipIds = allInternships
+          .filter(internship => internship.companyId === companyId || internship.companyName === companyName)
+          .map(internship => internship.id);
+        
+        // Get all applications
+        const appliedInternships = JSON.parse(localStorage.getItem('appliedInternships')) || [];
+        
+        // Keep only applications that are not for this company's internships
+        const otherApplications = appliedInternships.filter(app => 
+          !companyInternshipIds.includes(app.internshipId)
+        );
+        
+        localStorage.setItem('appliedInternships', JSON.stringify(otherApplications));
+      }
+      
+      // Also clear company call notifications
+      localStorage.setItem('companyNotifications', JSON.stringify([]));
+    } else if (userRole === 'student') {
+      // For students, clear all workshop and appointment notifications
+      localStorage.setItem('studentNotifications', JSON.stringify([]));
+      
+      // We don't clear cycle notifications as they're system-generated
+    }
+    
+    // Clear the read notifications tracking
+    const readStorageKey = userRole === 'company' ? 'companyReadNotifications' : 'studentReadNotifications';
+    localStorage.setItem(readStorageKey, JSON.stringify([]));
+    
+    // Update state
+    setNotifications([]);
+    setUnreadCount(0);
+    
+    // Close the notifications dropdown
+    setShowNotifications(false);
   };
   
   // Handle clicking on a notification
@@ -255,6 +320,19 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
       return (
         <>
           <div>
+            <strong>{notification.title}</strong>
+          </div>
+          <div>{notification.message}</div>
+          <small className="text-muted">
+            {new Date(notification.date).toLocaleString()}
+          </small>
+        </>
+      );
+    } else if (notification.type === 'call') {
+      return (
+        <>
+          <div>
+            <i className="bi bi-telephone-x me-2 text-danger"></i>
             <strong>{notification.title}</strong>
           </div>
           <div>{notification.message}</div>
@@ -354,21 +432,38 @@ function NotificationButton({ onViewApplication, userRole = 'company' }) {
         >
           <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
             <h6 className="m-0">Notifications</h6>
-            {notifications.length > 0 && (
-              <Button 
-                variant="link" 
-                size="sm" 
-                onClick={handleMarkAllAsRead}
-                style={{
-                  color: 'var(--primary)',
-                  textDecoration: 'underline',
-                  padding: '0',
-                  fontSize: '0.875rem'
-                }}
-              >
-                Mark all as read
-              </Button>
-            )}
+            <div className="d-flex gap-2">
+              {notifications.length > 0 && (
+                <>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    onClick={handleMarkAllAsRead}
+                    style={{
+                      color: 'var(--primary)',
+                      textDecoration: 'underline',
+                      padding: '0',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    Mark all as read
+                  </Button>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    onClick={handleClearAll}
+                    style={{
+                      color: 'var(--danger)',
+                      textDecoration: 'underline',
+                      padding: '0',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <BsTrash className="me-1" /> Clear all
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
           
           {notifications.length > 0 ? (

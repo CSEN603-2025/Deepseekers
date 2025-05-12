@@ -26,90 +26,48 @@ const VideoCallComponent = ({
     // This is just a simulation - in a real app, you would use WebRTC
     const simulateLocalStream = () => {
       if (localVideoRef.current && isCameraOn) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 480;
-        const ctx = canvas.getContext('2d');
-        
-        // Fill with a gradient background
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, '#003b73');
-        gradient.addColorStop(1, '#0074b7');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Add text for user name
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '24px Arial';
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        const userName = currentUser ? currentUser.name : 'You';
-        ctx.fillText(userName, 20, 40);
-        
-        // Convert canvas to video stream
-        const stream = canvas.captureStream(30);
-        localVideoRef.current.srcObject = stream;
+        // Simulation code
       }
     };
     
     const simulateRemoteStream = () => {
-      if (remoteVideoRef.current) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 480;
-        const ctx = canvas.getContext('2d');
-        
-        // Fill with a different gradient background
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, '#8ecae6');
-        gradient.addColorStop(1, '#219ebc');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Add text for remote user name
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '24px Arial';
-        const remoteName = callData?.remoteUser || 'Remote User';
-        ctx.fillText(remoteName, 20, 40);
-        
-        // Convert canvas to video stream
-        const stream = canvas.captureStream(30);
-        remoteVideoRef.current.srcObject = stream;
-      }
+      // Simulation code
     };
 
     // Start simulations if not incoming or if call is accepted
     if (!isIncoming || callStatus === 'connected') {
-      simulateLocalStream();
-      simulateRemoteStream();
+      // Simulation code
     }
 
     // Cleanup function
     return () => {
-      if (localVideoRef.current) {
-        const stream = localVideoRef.current.srcObject;
-        if (stream) {
-          const tracks = stream.getTracks();
-          tracks.forEach(track => track.stop());
-        }
-      }
-      
-      if (remoteVideoRef.current) {
-        const stream = remoteVideoRef.current.srcObject;
-        if (stream) {
-          const tracks = stream.getTracks();
-          tracks.forEach(track => track.stop());
-        }
-      }
-      
-      if (screenShareRef.current) {
-        const stream = screenShareRef.current.srcObject;
-        if (stream) {
-          const tracks = stream.getTracks();
-          tracks.forEach(track => track.stop());
-        }
-      }
+      // Cleanup code
     };
   }, [isVisible, isCameraOn, callData, isIncoming, callStatus]);
+
+  useEffect(() => {
+    let localStream;
+    if (isVisible && isCameraOn) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(stream => {
+          localStream = stream;
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = stream;
+          }
+        });
+    } else if (localVideoRef.current) {
+      // Stop the camera if turning off
+      const tracks = localVideoRef.current.srcObject?.getTracks?.() || [];
+      tracks.forEach(track => track.stop());
+      localVideoRef.current.srcObject = null;
+    }
+    return () => {
+      // Cleanup on unmount or when camera is turned off
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [isVisible, isCameraOn]);
 
   // Handle accepting incoming call
   const handleAcceptCall = () => {
@@ -119,6 +77,9 @@ const VideoCallComponent = ({
 
   // Handle rejecting incoming call
   const handleRejectCall = () => {
+    // Create a notification for the caller that their call was rejected
+    createCallNotification('rejected');
+    
     if (onReject) onReject();
   };
 
@@ -139,8 +100,71 @@ const VideoCallComponent = ({
       });
       localStorage.setItem('callHistory', JSON.stringify(updatedCallHistory));
     }
-    
+
+    // Always send notification to the student when someone leaves the call
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { name: 'User' };
+      const notification = {
+        id: `call-${callData?.id || Date.now()}-ended`,
+        title: 'Call Ended',
+        message: `${currentUser.name} left the call${callData?.purpose ? ` regarding ${callData.purpose}` : ''}`,
+        date: new Date().toISOString(),
+        type: 'call',
+        callId: callData?.id,
+        callStatus: 'ended',
+        remoteUser: currentUser.name,
+        read: false
+      };
+      // Always push to studentNotifications
+      const studentNotifications = JSON.parse(localStorage.getItem('studentNotifications') || '[]');
+      studentNotifications.push(notification);
+      localStorage.setItem('studentNotifications', JSON.stringify(studentNotifications));
+      window.dispatchEvent(new CustomEvent('refresh-notifications'));
+    } catch (error) {
+      console.error('Error creating call notification:', error);
+    }
+
     onHide();
+  };
+
+  // Create a call notification for the other party
+  const createCallNotification = (status) => {
+    try {
+      // Get current user
+      const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { name: 'User' };
+      
+      // Determine who should receive the notification (the other party)
+      const isCompany = currentUser.role === 'company';
+      const recipientRole = isCompany ? 'student' : 'company';
+      
+      // Create a notification object with custom message for call ending
+      const notification = {
+        id: `call-${callData?.id || Date.now()}-${status}`,
+        title: status === 'ended' ? 'Call Ended' : 'Call Rejected',
+        message: status === 'ended' 
+          ? `${currentUser.name} left the call ${callData?.purpose ? `regarding ${callData.purpose}` : ''}`
+          : `${currentUser.name} declined your call ${callData?.purpose ? `regarding ${callData.purpose}` : ''}`,
+        date: new Date().toISOString(),
+        type: 'call',
+        callId: callData?.id,
+        callStatus: status,
+        remoteUser: currentUser.name,
+        read: false
+      };
+      
+      // Save notification based on recipient role
+      const storageKey = recipientRole === 'company' ? 'companyNotifications' : 'studentNotifications';
+      const existingNotifications = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      existingNotifications.push(notification);
+      localStorage.setItem(storageKey, JSON.stringify(existingNotifications));
+      
+      // Dispatch a custom event to refresh notifications if the user is online
+      window.dispatchEvent(new CustomEvent('refresh-notifications'));
+      
+      console.log(`Call ${status} notification created for ${recipientRole}`);
+    } catch (error) {
+      console.error('Error creating call notification:', error);
+    }
   };
 
   // Add a function to handle screen sharing
@@ -202,8 +226,8 @@ const VideoCallComponent = ({
             minHeight: "400px", 
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between", // Changed to space-between
-            animation: "none" // Explicitly disable animation
+            justifyContent: "space-between",
+            animation: "none"
           }}>
             <div className="incoming-call-header" style={{ 
               marginTop: "0", 
@@ -291,6 +315,9 @@ const VideoCallComponent = ({
                   muted 
                   playsInline
                 />
+                <div className="local-user-name">
+                  [You]
+                </div>
               </div>
             </div>
             
