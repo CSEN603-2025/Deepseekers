@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Badge, Button, Modal, Table, Form } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge, Button, Modal, Table, Form, ProgressBar } from 'react-bootstrap';
 import '../css/StudentReportsPage.css'; // Shared styling for reports
 import '../css/ScadReportsPage.css'; // Specific styling for SCAD reports page
 import { coursesByMajor, students as defaultStudents } from '../Data/UserData';
@@ -10,6 +10,12 @@ function ScadReportsPage() {
   const [companyEvaluations, setCompanyEvaluations] = useState([]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  
+  // State for advanced statistics
+  const [averageReviewTime, setAverageReviewTime] = useState(0);
+  const [topCourses, setTopCourses] = useState([]);
+  const [topRatedCompanies, setTopRatedCompanies] = useState([]);
+  const [topCompaniesByCount, setTopCompaniesByCount] = useState([]);
   
   // New state for filters
   const [statusFilter, setStatusFilter] = useState('all');
@@ -59,6 +65,13 @@ function ScadReportsPage() {
       // Find student info from parsedStudents (which includes both localStorage and default students)
       const student = parsedStudents.find(s => s.id === report.studentId);
       
+      // For checking company evaluations
+      const savedCompanyEvals = localStorage.getItem('CompanyEvaluations') || '[]';
+      const companyEvals = JSON.parse(savedCompanyEvals);
+      const matchingCompanyEval = companyEvals.find(
+        evaluation => evaluation.studentId === report.studentId && evaluation.internshipId === report.internshipId
+      );
+      
       return {
         ...report,
         studentName: student ? student.name : 'Unknown Student',
@@ -67,11 +80,17 @@ function ScadReportsPage() {
         evaluationText: matchingEval?.text || '',
         recommend: matchingEval?.recommend || false,
         status: report.status || 'pending', // Default to 'pending' if no status is set
+        companyEvaluation: matchingCompanyEval || null,
+        reviewDate: report.reviewDate || null,
+        submissionDate: report.submissionDate || report.date // Ensure submissionDate is set
       };
     });
     
     setSubmittedReports(reportsWithEvaluations);
     setFilteredReports(reportsWithEvaluations); // Initialize filtered reports with all reports
+    
+    // Calculate advanced statistics
+    calculateAdvancedStatistics(reportsWithEvaluations, companyEvaluations, parsedStudents);
   };
   const loadCompanyEvaluations = (parsedStudents) => {
     const savedCompanyEvals = localStorage.getItem('CompanyEvaluations') || '[]';
@@ -88,6 +107,99 @@ function ScadReportsPage() {
     });
     
     setCompanyEvaluations(enrichedEvals);
+  };
+  
+  // Function to calculate advanced statistics
+  const calculateAdvancedStatistics = (reports, evaluations, students) => {
+    // 1. Calculate average review time
+    const reviewedReports = reports.filter(report => report.reviewDate && report.submissionDate);
+    if (reviewedReports.length > 0) {
+      const totalReviewTimeHours = reviewedReports.reduce((total, report) => {
+        const submissionDate = new Date(report.submissionDate);
+        const reviewDate = new Date(report.reviewDate);
+        const diffHours = (reviewDate - submissionDate) / (1000 * 60 * 60); // Convert ms to hours
+        return total + diffHours;
+      }, 0);
+      setAverageReviewTime(totalReviewTimeHours / reviewedReports.length);
+    } else {
+      setAverageReviewTime(0);
+    }
+    
+    // 2. Find most frequently used courses in internships
+    const courseFrequency = {};
+    reports.forEach(report => {
+      if (report.helpfulCourses && report.helpfulCourses.length > 0) {
+        report.helpfulCourses.forEach(courseId => {
+          // Find the course name
+          const student = students.find(s => s.id === report.studentId);
+          if (student && student.major) {
+            const majorCourses = coursesByMajor[student.major] || [];
+            const course = majorCourses.find(c => c.id === courseId);
+            if (course) {
+              const courseName = `${course.code}: ${course.name}`;
+              courseFrequency[courseName] = (courseFrequency[courseName] || 0) + 1;
+            }
+          }
+        });
+      }
+    });
+    
+    // Convert to array and sort by frequency
+    const sortedCourses = Object.entries(courseFrequency)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5); // Top 5 courses
+    
+    setTopCourses(sortedCourses);
+    
+    // 3. Find top rated companies based on student evaluations
+    const companyRatings = {};
+    const companyEvaluationCounts = {};
+    
+    // Get all student evaluations of companies
+    const savedEvaluations = localStorage.getItem('studentCompanyEvaluations') || '[]';
+    const studentEvals = JSON.parse(savedEvaluations);
+    
+    studentEvals.forEach(evaluation => {
+      if (evaluation.companyName && evaluation.recommend !== undefined) {
+        // Using recommend as a binary rating (true = 1, false = 0)
+        companyRatings[evaluation.companyName] = companyRatings[evaluation.companyName] || 0;
+        companyRatings[evaluation.companyName] += evaluation.recommend ? 1 : 0;
+        
+        companyEvaluationCounts[evaluation.companyName] = (companyEvaluationCounts[evaluation.companyName] || 0) + 1;
+      }
+    });
+    
+    // Calculate average rating for each company
+    const companyAvgRatings = Object.keys(companyRatings).map(company => ({
+      name: company,
+      rating: companyRatings[company] / companyEvaluationCounts[company], // Average rating (0-1)
+      count: companyEvaluationCounts[company]
+    }));
+    
+    // Sort by rating and get top 5
+    const topRated = companyAvgRatings
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 5);
+    
+    setTopRatedCompanies(topRated);
+    
+    // 4. Find top companies by internship count
+    const companyInternshipCounts = {};
+    
+    reports.forEach(report => {
+      if (report.companyName) {
+        companyInternshipCounts[report.companyName] = (companyInternshipCounts[report.companyName] || 0) + 1;
+      }
+    });
+    
+    // Convert to array and sort by count
+    const sortedCompanies = Object.entries(companyInternshipCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5); // Top 5 companies
+    
+    setTopCompaniesByCount(sortedCompanies);
   };
 
     // Report status will be managed by Faculty academics in a separate page
@@ -164,6 +276,159 @@ function ScadReportsPage() {
       <p className="page-description">
         View submitted student reports and company evaluations in a consolidated view.
       </p>
+      
+      {/* Statistics Dashboard */}
+      <div className="statistics-dashboard mb-4">
+        <h4>Report Statistics</h4>
+        <Row className="mt-3">
+          <Col md={3} sm={6} className="mb-3">
+            <Card className="text-center h-100">
+              <Card.Body>
+                <h2>{submittedReports.filter(r => r.status === 'pending').length}</h2>
+                <p>Pending Reports</p>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3} sm={6} className="mb-3">
+            <Card className="text-center h-100">
+              <Card.Body>
+                <h2>{submittedReports.filter(r => r.status === 'accepted').length}</h2>
+                <p>Accepted Reports</p>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3} sm={6} className="mb-3">
+            <Card className="text-center h-100">
+              <Card.Body>
+                <h2>{submittedReports.filter(r => r.status === 'rejected').length}</h2>
+                <p>Rejected Reports</p>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3} sm={6} className="mb-3">
+            <Card className="text-center h-100">
+              <Card.Body>
+                <h2>{submittedReports.filter(r => r.status === 'flagged').length}</h2>
+                <p>Flagged Reports</p>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        
+        {/* Advanced Statistics */}
+        <h4 className="mt-4">Advanced Analytics</h4>
+        <Row className="mt-3">
+          {/* Average Review Time */}
+          <Col md={6} className="mb-3">
+            <Card className="h-100">
+              <Card.Body>
+                <h5>Average Review Time</h5>
+                <div className="d-flex align-items-center justify-content-between">
+                  <h3>{averageReviewTime.toFixed(1)} hours</h3>
+                  <div className="text-muted">per report</div>
+                </div>
+                <div className="mt-2">
+                  <small className="text-muted">
+                    Based on {submittedReports.filter(r => r.reviewDate && r.submissionDate).length} reviewed reports
+                  </small>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          
+          {/* Most Frequently Used Courses */}
+          <Col md={6} className="mb-3">
+            <Card className="h-100">
+              <Card.Body>
+                <h5>Most Used Courses in Internships</h5>
+                {topCourses.length > 0 ? (
+                  <div>
+                    {topCourses.map((course, index) => (
+                      <div key={index} className="mb-2">
+                        <div className="d-flex justify-content-between">
+                          <span>{course.name}</span>
+                          <span className="badge bg-info">{course.count}</span>
+                        </div>
+                        <ProgressBar 
+                          now={(course.count / topCourses[0].count) * 100} 
+                          variant="info" 
+                          style={{ height: '8px' }} 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted">No course data available</p>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+          
+          {/* Top Rated Companies */}
+          <Col md={6} className="mb-3">
+            <Card className="h-100">
+              <Card.Body>
+                <h5>Top Rated Companies</h5>
+                {topRatedCompanies.length > 0 ? (
+                  <div>
+                    {topRatedCompanies.map((company, index) => (
+                      <div key={index} className="mb-2">
+                        <div className="d-flex justify-content-between">
+                          <span>{company.name}</span>
+                          <span className="badge bg-success">
+                            {(company.rating * 100).toFixed(0)}% recommended
+                          </span>
+                        </div>
+                        <ProgressBar 
+                          now={company.rating * 100} 
+                          variant="success" 
+                          style={{ height: '8px' }} 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted">No company ratings available</p>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+          
+          {/* Top Companies by Internship Count */}
+          <Col md={6} className="mb-3">
+            <Card className="h-100">
+              <Card.Body>
+                <h5>Top Companies by Internship Count</h5>
+                {topCompaniesByCount.length > 0 ? (
+                  <div>
+                    {topCompaniesByCount.map((company, index) => (
+                      <div key={index} className="mb-2">
+                        <div className="d-flex justify-content-between">
+                          <span>{company.name}</span>
+                          <span className="badge bg-primary">{company.count}</span>
+                        </div>
+                        <ProgressBar 
+                          now={(company.count / topCompaniesByCount[0].count) * 100} 
+                          variant="primary" 
+                          style={{ height: '8px' }} 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted">No internship count data available</p>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        
+        <div className="text-end">
+          <Button variant="outline-primary" size="sm" onClick={() => window.print()}>
+            Generate Report
+          </Button>
+        </div>
+      </div>
       
       <div className="filters-container row mb-4">
         <div className="col-md-4">
@@ -471,7 +736,8 @@ function ScadReportsPage() {
             </div>
           )}
         </Modal.Body>
-        <Modal.Footer>          <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
             Close
           </Button>
         </Modal.Footer>

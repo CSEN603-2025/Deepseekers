@@ -11,6 +11,7 @@ import { companies } from '../Data/UserData';
 import StudentAssessmentsPage from '../components/StudentAssessmentsPage';
 import '../css/studentHome.css';
 import '../css/liveWorkshops.css';
+import RecommendedCompanies from '../components/RecommendedCompanies';
 
 const StudentHomePage = () => {
   const [internships, setInternships] = useState([]);
@@ -27,6 +28,7 @@ const StudentHomePage = () => {
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [incomingCall, setIncomingCall] = useState(null);
   const [activeCall, setActiveCall] = useState(null);
+  const [interests, setInterests] = useState(['Web Development', 'Mobile Apps', 'Data Science']);
   
   // Ref to keep track of interval
   const callCheckIntervalRef = useRef(null);
@@ -621,6 +623,20 @@ const StudentHomePage = () => {
                 <p>This feature is only available for Pro students.</p>
               </div>
             )}
+          </Tab>
+
+          <Tab eventKey="recommendedCompanies" title="Recommended Companies">
+            <Row className="mb-3">
+              <Col>
+                <h4>Companies Recommended For You</h4>
+                <p className="text-muted">Based on your interests, industry preferences, and recommendations from past interns</p>
+              </Col>
+            </Row>
+            <RecommendedCompanies 
+              studentInterests={interests} 
+              studentMajor={studentMajor} 
+              onSetInterests={(newInterests) => setInterests(newInterests)}
+            />
           </Tab>
         </Tabs>
       </Container>
