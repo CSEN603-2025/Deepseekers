@@ -8,7 +8,7 @@ import LiveWorkshops from '../components/LiveWorkshops';
 import MyCertifications from '../components/MyCertifications';
 import VideoCallComponent from '../components/VideoCallComponent';
 import { companies } from '../Data/UserData';
-import StudentAssessmentsPage from '../components/StudentAssessmentsPage';
+import StudentAssessmentsPage from '../pages/StudentAssessmentsPage';
 import '../css/studentHome.css';
 import '../css/liveWorkshops.css';
 import RecommendedCompanies from '../components/RecommendedCompanies';

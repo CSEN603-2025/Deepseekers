@@ -10,6 +10,7 @@ import { BsEye } from 'react-icons/bs';
  */
 function ProfileViewsButton() {
   const [showViews, setShowViews] = useState(false);
+  const [showProModal, setShowProModal] = useState(false);
   const [profileViews, setProfileViews] = useState([]);
   const [viewCount, setViewCount] = useState(0);
   const [isPro, setIsPro] = useState(false);
@@ -87,13 +88,17 @@ function ProfileViewsButton() {
         setViewCount(0);
       }
     } else {
-      // Show upgrade prompt for non-PRO users
-      alert("This feature is only available for PRO students. Please upgrade to view your profile visitors.");
+      // Show upgrade modal instead of alert
+      setShowProModal(true);
     }
   };
   
   const handleCloseViews = () => {
     setShowViews(false);
+  };
+
+  const handleCloseProModal = () => {
+    setShowProModal(false);
   };
   
   const formatDate = (dateString) => {
@@ -171,6 +176,21 @@ function ProfileViewsButton() {
             </div>
           )}
         </Modal.Body>
+      </Modal>
+
+      {/* Simple Pro feature modal */}
+      <Modal show={showProModal} onHide={handleCloseProModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Pro Feature</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-0">This feature is only available for PRO students. Please upgrade to view your profile visitors.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseProModal}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );
