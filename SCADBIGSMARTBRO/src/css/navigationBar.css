@@ -2,31 +2,96 @@
 
 .custom-navbar {
   background-color: #00447c; /* Dark blue color matching your image */
-  padding: 0.75rem 0;
+  padding: 1rem 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.custom-navbar .navbar-nav .nav-link {
-  color: rgba(255, 255, 255, 0.85) !important;
+/* Faculty navbar specific styles */
+.faculty-navbar {
+  padding: 0.8rem 0;
+  height: auto;
+}
+
+.navbar-brand-container {
+  padding: 0;
+  margin-right: 0;
+}
+
+.faculty-text {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-left: 2.5rem;
+  opacity: 0.95;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation menu styling */
+.nav-menu {
+  display: flex;
+  align-items: center;
+}
+
+.nav-menu .nav-link {
+  color: rgba(255, 255, 255, 0.7) !important;
   padding: 0.5rem 1rem;
-  transition: color 0.2s;
+  margin: 0 0.25rem;
+  position: relative;
+  transition: color 0.2s ease;
+  font-size: 0.95rem;
 }
 
-.custom-navbar .navbar-nav .nav-link:hover {
-  color: #ffffff !important;
+.nav-menu .nav-link:hover {
+  color: white !important;
 }
 
-.custom-navbar .brand-text {
-  color: #bfd7ed;
-  font-size: 1.4rem;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.brand-text {
+.nav-menu .nav-link.active {
+  color: white !important;
   font-weight: 500;
-  font-size: 1.25rem;
-  padding-left: 0; /* Remove default padding */
-  margin-right: 2rem !important; /* Push nav items away from brand */
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Logo styles */
+.navbar-logo {
+  height: 105px; /* 3x bigger (35px * 3) */
+  width: auto;
+  filter: brightness(0) invert(1); /* Make logo white */
+  margin-left: -15px; /* Position logo further to the left */
+  margin-top: -25px;
+  margin-bottom: -25px;
+}
+
+/* Logout button styling */
+.logout-btn {
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .navbar-logo-container {
+    margin-left: 0;
+  }
 }
 
 /* PRO badge styling */

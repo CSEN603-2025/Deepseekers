@@ -1,11 +1,13 @@
 
 import React, {useState } from "react";
 import { Link } from "react-router-dom";
-import { Container, Card, Form, Button, Nav } from 'react-bootstrap';
+import { Container, Card, Form, Button, Nav, Row, Col, InputGroup, Image } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import '../css/login.css';
 import { findUserByCredentials } from '../Data/UserData';
+import { FaUser, FaLock, FaGraduationCap, FaBuilding, FaUserTie, FaChalkboardTeacher } from 'react-icons/fa';
+import SCADLogo from '../assets/SCAD_Logo.png';
 
 export default function LoginPage() {
   const [role, setRole] = useState("student");
@@ -98,47 +100,108 @@ export default function LoginPage() {
   
   return (
     <div className="login-container">
-      <Card className="login-card">
-        <Card.Title className="login-title mb-3">Internship Portal Login</Card.Title>
-
-        <Nav variant="tabs" activeKey={role} onSelect={(k) => setRole(k)} className="custom-tabs mb-4 d-flex justify-content-center">
-          <Nav.Item><Nav.Link eventKey="student">Student</Nav.Link></Nav.Item>
-          <Nav.Item><Nav.Link eventKey="company">Company</Nav.Link></Nav.Item>
-          <Nav.Item><Nav.Link eventKey="scad">SCAD Member</Nav.Link></Nav.Item>
-          <Nav.Item><Nav.Link className="flex-fill text-center" eventKey="faculty">Faculty Academic</Nav.Link></Nav.Item>
-        </Nav>
-
-        <Form>
-          <Form.Group className="mb-3">
-            <Form.Label>Email</Form.Label>
-            <Form.Control type="email" placeholder="Enter email"
-              value={email} onChange={(e) => setEmail(e.target.value)} />
-          </Form.Group>
-
-          <Form.Group className="mb-4">
-            <Form.Label>Password</Form.Label>
-            <Form.Control type="password" placeholder="Password"
-              value={password} onChange={(e) => setPassword(e.target.value)} />
-          </Form.Group>
-
-          <Button className="btn-login w-100" onClick={handleLogin}>Login</Button>
-        </Form>
-
-        {role === 'company' && (
-          <div className="text-center mt-3">
-            <Link to="/register" className="register-link">
-              New company? Register here
-            </Link>
+      <div className="login-card-wrapper">
+        {/* Left side - Welcome section */}
+        <div className="welcome-section">
+          <div className="logo-container">
+            <Image src={SCADLogo} alt="SCAD Logo" className="scad-logo" />
           </div>
-        )}
-
-        {message && (
-          <div className="mt-3 text-center">
-            <p>{message}</p>
+          <h1>WELCOME</h1>
+          <h2>GUC INTERNSHIP PORTAL</h2>
+          <p>Connect with top companies, track your applications, and manage your internship journey all in one place.</p>
+          
+          <div className="welcome-features">
+            <div className="feature-item">
+              <div className="feature-icon">✓</div>
+              <div className="feature-text">Access to exclusive internship opportunities</div>
+            </div>
+            <div className="feature-item">
+              <div className="feature-icon">✓</div>
+              <div className="feature-text">Track application status in real-time</div>
+            </div>
+            <div className="feature-item">
+              <div className="feature-icon">✓</div>
+              <div className="feature-text">Connect with faculty advisors and SCAD members</div>
+            </div>
           </div>
-        )}
+        </div>
+        
+        {/* Right side - Login form */}
+        <Card className="login-card">
+          <Card.Body>
+            <div className="text-center mb-4">
+              <h2 className="login-title">Sign In</h2>
+              <p className="login-subtitle">Access your internship portal account</p>
+            </div>
 
-      </Card>
+            <div className="role-selector mb-4">
+              <div className={`role-option ${role === 'student' ? 'active' : ''}`} onClick={() => setRole('student')}>
+                <FaGraduationCap className="role-icon" />
+                <span>Student</span>
+              </div>
+              <div className={`role-option ${role === 'company' ? 'active' : ''}`} onClick={() => setRole('company')}>
+                <FaBuilding className="role-icon" />
+                <span>Company</span>
+              </div>
+              <div className={`role-option ${role === 'scad' ? 'active' : ''}`} onClick={() => setRole('scad')}>
+                <FaUserTie className="role-icon" />
+                <span>SCAD</span>
+              </div>
+              <div className={`role-option ${role === 'faculty' ? 'active' : ''}`} onClick={() => setRole('faculty')}>
+                <FaChalkboardTeacher className="role-icon" />
+                <span>Faculty</span>
+              </div>
+            </div>
+
+            <Form>
+              <Form.Group className="mb-3">
+                <InputGroup>
+                  <InputGroup.Text className="input-icon-wrapper">
+                    <FaUser className="input-icon" />
+                  </InputGroup.Text>
+                  <Form.Control 
+                    type="email" 
+                    placeholder="Email Address"
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                  />
+                </InputGroup>
+              </Form.Group>
+
+              <Form.Group className="mb-4">
+                <InputGroup>
+                  <InputGroup.Text className="input-icon-wrapper">
+                    <FaLock className="input-icon" />
+                  </InputGroup.Text>
+                  <Form.Control 
+                    type="password" 
+                    placeholder="Password"
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                  />
+                </InputGroup>
+              </Form.Group>
+
+              {/* Removed Remember me and Forgot Password */}
+              <div className="mb-4"></div>
+
+              <Button className="btn-login w-100" onClick={handleLogin}>Sign In</Button>
+              
+              {role === 'company' && (
+                <div className="text-center mt-4">
+                  <p className="register-prompt">Don't have an account? <Link to="/register" className="register-link">Register here</Link></p>
+                </div>
+              )}
+            </Form>
+
+            {message && (
+              <div className="message-container mt-3">
+                <p className={message.includes("Welcome") ? "success-message" : "error-message"}>{message}</p>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      </div>
     </div>
   );
 }
