@@ -1,0 +1,131 @@
+.analytics-card {
+  border-radius: 12px;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+.analytics-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.analytics-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #003b73;
+  animation: countUp 0.8s ease-out forwards;
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
+.analytics-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+
+
+.analytics-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  animation: fadeIn 0.5s ease-in-out;
+  transition: transform 0.3s ease;
+}
+
+.analytics-card:hover .analytics-icon {
+  transform: scale(1.1);
+}
+
+.icon-pending {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.icon-accepted {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.icon-rejected {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.icon-flagged {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+.analytics-container {
+  margin-bottom: 2rem;
+}
+
+.dashboard-title {
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #003b73;
+  animation: fadeIn 0.8s ease-in-out;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.dashboard-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #003b73;
+  border-radius: 2px;
+}
+
+.view-all-btn {
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.8s ease-in-out;
+  animation-delay: 0.8s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.view-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 59, 115, 0.2);
+}

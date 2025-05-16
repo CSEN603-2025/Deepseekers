@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { FaHourglassHalf, FaCheckCircle, FaTimesCircle, FaFlag } from 'react-icons/fa';
+import '../css/FacultyHomePage.css';
 
 function FacultyHomePage() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -44,7 +46,6 @@ function FacultyHomePage() {
 
   return (
     <Container className="mt-4">
-      <h2 className="mb-4">Faculty Academic Dashboard</h2>
       
       {currentUser && (
         <div className="mb-4">
@@ -53,64 +54,58 @@ function FacultyHomePage() {
         </div>
       )}
       
-      <Row className="mb-4">
-        <Col md={12}>
-          <Card className="shadow-sm">
-            <Card.Header as="h5" style={{ backgroundColor: '#003b73', color: 'white' }}>Internship Reports Overview</Card.Header>
-            <Card.Body>
-              <Row>
-                <Col md={3} className="mb-3">
-                  <Card className="text-center h-100" style={{ borderColor: '#003b73' }}>
-                    <Card.Body>
-                      <h3 style={{ color: '#003b73' }}>{reportStats.pending}</h3>
-                      <p className="mb-0">Pending Reports</p>
-                    </Card.Body>
+      <h4 className="dashboard-title">Internship Reports Overview</h4>
+      <Row className="analytics-container">
+        <Col md={3} className="mb-3">
+          <div className="analytics-card">
+            <div className="analytics-icon icon-pending">
+              <FaHourglassHalf />
+            </div>
+            <div className="analytics-value">{reportStats.pending}</div>
+            <div className="analytics-label">Pending Reports</div>
 
-                  </Card>
-                </Col>
-                
-                <Col md={3} className="mb-3">
-                  <Card className="text-center h-100" style={{ borderColor: '#003b73' }}>
-                    <Card.Body>
-                      <h3 style={{ color: '#003b73' }}>{reportStats.accepted}</h3>
-                      <p className="mb-0">Accepted Reports</p>
-                    </Card.Body>
+          </div>
+        </Col>
+        
+        <Col md={3} className="mb-3">
+          <div className="analytics-card">
+            <div className="analytics-icon icon-accepted">
+              <FaCheckCircle />
+            </div>
+            <div className="analytics-value">{reportStats.accepted}</div>
+            <div className="analytics-label">Accepted Reports</div>
 
-                  </Card>
-                </Col>
-                
-                <Col md={3} className="mb-3">
-                  <Card className="text-center h-100" style={{ borderColor: '#003b73' }}>
-                    <Card.Body>
-                      <h3 style={{ color: '#003b73' }}>{reportStats.rejected}</h3>
-                      <p className="mb-0">Rejected Reports</p>
-                    </Card.Body>
+          </div>
+        </Col>
+        
+        <Col md={3} className="mb-3">
+          <div className="analytics-card">
+            <div className="analytics-icon icon-rejected">
+              <FaTimesCircle />
+            </div>
+            <div className="analytics-value">{reportStats.rejected}</div>
+            <div className="analytics-label">Rejected Reports</div>
 
-                  </Card>
-                </Col>
-                
-                <Col md={3} className="mb-3">
-                  <Card className="text-center h-100" style={{ borderColor: '#003b73' }}>
-                    <Card.Body>
-                      <h3 style={{ color: '#003b73' }}>{reportStats.flagged}</h3>
-                      <p className="mb-0">Flagged Reports</p>
-                    </Card.Body>
+          </div>
+        </Col>
+        
+        <Col md={3} className="mb-3">
+          <div className="analytics-card">
+            <div className="analytics-icon icon-flagged">
+              <FaFlag />
+            </div>
+            <div className="analytics-value">{reportStats.flagged}</div>
+            <div className="analytics-label">Flagged Reports</div>
 
-                  </Card>
-                </Col>
-              </Row>
-              
-              <div className="text-center mt-3">
-                <Link to="/faculty/reports" className="btn" style={{ backgroundColor: '#003b73', color: 'white' }}>
-                  View All Reports
-                </Link>
-              </div>
-            </Card.Body>
-          </Card>
+          </div>
         </Col>
       </Row>
       
-      {/* Faculty Resources section removed */}
+      <div className="text-center mb-4">
+        <Link to="/faculty/reports" className="btn view-all-btn" style={{ backgroundColor: '#003b73', color: 'white' }}>
+          View All Reports
+        </Link>
+      </div>
     </Container>
   );
 }

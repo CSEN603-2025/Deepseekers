@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Modal, Table, Form, ProgressBar } from 'react-bootstrap';
+import { FaHourglassHalf, FaCheckCircle, FaTimesCircle, FaFlag } from 'react-icons/fa';
 import '../css/StudentReportsPage.css'; // Shared styling for reports
 import '../css/FacultyReportsPage.css'; // Specific styling for Faculty reports page
+import '../css/FacultyHomePage.css'; // Import the same styling used in FacultyHomePage
 import { coursesByMajor, students as defaultStudents } from '../Data/UserData';
 
 function FacultyReportsPage() {
@@ -432,163 +434,140 @@ function FacultyReportsPage() {
       
       {/* Statistics Dashboard */}
       <div className="statistics-dashboard mb-4">
-        <h4>Report Statistics</h4>
-        <Row className="mt-3">
+        <h4 className="dashboard-title">Report Statistics</h4>
+        <Row className="analytics-container">
           <Col md={3} sm={6} className="mb-3">
-            <Card className="text-center h-100">
-              <Card.Body>
-                <h2>{submittedReports.filter(r => r.status === 'pending').length}</h2>
-                <p>Pending Reports</p>
-              </Card.Body>
-            </Card>
+            <div className="analytics-card">
+              <div className="analytics-icon icon-pending">
+                <FaHourglassHalf />
+              </div>
+              <div className="analytics-value">{submittedReports.filter(r => r.status === 'pending').length}</div>
+              <div className="analytics-label">Pending Reports</div>
+            </div>
           </Col>
           <Col md={3} sm={6} className="mb-3">
-            <Card className="text-center h-100">
-              <Card.Body>
-                <h2>{submittedReports.filter(r => r.status === 'accepted').length}</h2>
-                <p>Accepted Reports</p>
-              </Card.Body>
-            </Card>
+            <div className="analytics-card">
+              <div className="analytics-icon icon-accepted">
+                <FaCheckCircle />
+              </div>
+              <div className="analytics-value">{submittedReports.filter(r => r.status === 'accepted').length}</div>
+              <div className="analytics-label">Accepted Reports</div>
+            </div>
           </Col>
           <Col md={3} sm={6} className="mb-3">
-            <Card className="text-center h-100">
-              <Card.Body>
-                <h2>{submittedReports.filter(r => r.status === 'rejected').length}</h2>
-                <p>Rejected Reports</p>
-              </Card.Body>
-            </Card>
+            <div className="analytics-card">
+              <div className="analytics-icon icon-rejected">
+                <FaTimesCircle />
+              </div>
+              <div className="analytics-value">{submittedReports.filter(r => r.status === 'rejected').length}</div>
+              <div className="analytics-label">Rejected Reports</div>
+            </div>
           </Col>
           <Col md={3} sm={6} className="mb-3">
-            <Card className="text-center h-100">
-              <Card.Body>
-                <h2>{submittedReports.filter(r => r.status === 'flagged').length}</h2>
-                <p>Flagged Reports</p>
-              </Card.Body>
-            </Card>
+            <div className="analytics-card">
+              <div className="analytics-icon icon-flagged">
+                <FaFlag />
+              </div>
+              <div className="analytics-value">{submittedReports.filter(r => r.status === 'flagged').length}</div>
+              <div className="analytics-label">Flagged Reports</div>
+            </div>
           </Col>
         </Row>
         
         {/* Advanced Statistics */}
-        <h4 className="mt-4">Advanced Analytics</h4>
-        <Row className="mt-3">
+        <h4 className="advanced-analytics-title mt-4">Advanced Analytics</h4>
+        <Row>
           {/* Average Review Time */}
-          <Col md={6} className="mb-3">
-            <Card className="h-100">
-              <Card.Body>
-                <h5>Average Review Time</h5>
-                <div className="d-flex align-items-center justify-content-between">
-                  <h3>{averageReviewTime.toFixed(1)} hours</h3>
-                  <div className="text-muted">per report</div>
-                </div>
-                <div className="mt-2">
-                  <small className="text-muted">
-                    Based on {submittedReports.filter(r => r.reviewDate && r.submissionDate).length} reviewed reports
-                  </small>
-                </div>
-              </Card.Body>
-            </Card>
+          <Col md={6} lg={3} className="mb-3">
+            <div className="analytics-box">
+              <div className="analytics-box-title">Average Review Time</div>
+              <div className="analytics-value-large">{averageReviewTime.toFixed(1)} hours</div>
+              <div className="analytics-subtitle">
+                Based on {submittedReports.filter(r => r.reviewDate && r.submissionDate).length} reviewed reports
+              </div>
+            </div>
           </Col>
           
           {/* Most Frequently Used Courses */}
-          <Col md={6} className="mb-3">
-            <Card className="h-100">
-              <Card.Body>
-                <h5>Most Used Courses in Internships</h5>
-                {topCourses.length > 0 ? (
-                  <div>
-                    {topCourses.map((course, index) => (
-                      <div key={index} className="mb-2">
-                        <div className="d-flex justify-content-between">
-                          <span>{course.name}</span>
-                          <span className="badge bg-info">{course.count}</span>
-                        </div>
-                        <ProgressBar 
-                          now={(course.count / topCourses[0].count) * 100} 
-                          variant="info" 
-                          style={{ height: '8px' }} 
-                        />
+          <Col md={6} lg={3} className="mb-3">
+            <div className="analytics-box">
+              <div className="analytics-box-title">Most Used Courses in Internships</div>
+              {topCourses.length > 0 ? (
+                <div>
+                  {topCourses.slice(0, 4).map((course, index) => (
+                    <div key={index} className="analytics-item">
+                      <div className="analytics-item-header">
+                        <span>{course.name}</span>
+                        <span className="analytics-badge bg-info">{course.count}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted">No course data available</p>
-                )}
-              </Card.Body>
-            </Card>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="analytics-subtitle">No course data available</div>
+              )}
+            </div>
           </Col>
           
           {/* Top Rated Companies */}
-          <Col md={6} className="mb-3">
-            <Card className="h-100">
-              <Card.Body>
-                <h5>Top Rated Companies</h5>
-                {topRatedCompanies.length > 0 ? (
-                  <div>
-                    {topRatedCompanies.map((company, index) => (
-                      <div key={index} className="mb-2">
-                        <div className="d-flex justify-content-between">
-                          <span>{company.name}</span>
-                          <span className="badge bg-success">
-                            {(company.rating * 100).toFixed(0)}% recommended
-                          </span>
-                        </div>
-                        <ProgressBar 
-                          now={company.rating * 100} 
-                          variant="success" 
-                          style={{ height: '8px' }} 
-                        />
+          <Col md={6} lg={3} className="mb-3">
+            <div className="analytics-box">
+              <div className="analytics-box-title">Top Rated Companies</div>
+              {topRatedCompanies.length > 0 ? (
+                <div>
+                  {topRatedCompanies.slice(0, 4).map((company, index) => (
+                    <div key={index} className="analytics-item">
+                      <div className="analytics-item-header">
+                        <span>{company.name}</span>
+                        <span className="analytics-badge bg-success">
+                          {(company.rating * 100).toFixed(0)}%
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted">No company ratings available</p>
-                )}
-              </Card.Body>
-            </Card>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="analytics-subtitle">No company ratings available</div>
+              )}
+            </div>
           </Col>
           
           {/* Top Companies by Internship Count */}
-          <Col md={6} className="mb-3">
-            <Card className="h-100">
-              <Card.Body>
-                <h5>Top Companies by Internship Count</h5>
-                {topCompaniesByCount.length > 0 ? (
-                  <div>
-                    {topCompaniesByCount.map((company, index) => (
-                      <div key={index} className="mb-2">
-                        <div className="d-flex justify-content-between">
-                          <span>{company.name}</span>
-                          <span className="badge bg-primary">{company.count}</span>
-                        </div>
-                        <ProgressBar 
-                          now={(company.count / topCompaniesByCount[0].count) * 100} 
-                          variant="primary" 
-                          style={{ height: '8px' }} 
-                        />
+          <Col md={6} lg={3} className="mb-3">
+            <div className="analytics-box">
+              <div className="analytics-box-title">Top Companies by Internship Count</div>
+              {topCompaniesByCount.length > 0 ? (
+                <div>
+                  {topCompaniesByCount.slice(0, 4).map((company, index) => (
+                    <div key={index} className="analytics-item">
+                      <div className="analytics-item-header">
+                        <span>{company.name}</span>
+                        <span className="analytics-badge bg-primary">{company.count}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted">No internship count data available</p>
-                )}
-              </Card.Body>
-            </Card>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="analytics-subtitle">No internship count data available</div>
+              )}
+            </div>
           </Col>
         </Row>
         
-        <div className="text-end">
-          <Button variant="outline-primary" size="sm" onClick={() => window.print()}>
+        <div className="text-end mt-2">
+          <Button className="btn-primary" onClick={() => window.print()}>
             Generate Report
           </Button>
         </div>
       </div>
 
       {/* Advanced Filters */}
-      <div className="filters-container row mb-4">
+      <div className="filter-container row">
         <div className="col-md-4">
           <Form.Group>
-            <Form.Label>Filter by Status</Form.Label>
+            <Form.Label className="filter-label">Filter by Status</Form.Label>
             <Form.Select 
+              className="filter-select"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
@@ -606,8 +585,9 @@ function FacultyReportsPage() {
         
         <div className="col-md-4">
           <Form.Group>
-            <Form.Label>Filter by Major</Form.Label>
+            <Form.Label className="filter-label">Filter by Major</Form.Label>
             <Form.Select 
+              className="filter-select"
               value={majorFilter}
               onChange={(e) => {
                 setMajorFilter(e.target.value);
@@ -615,8 +595,8 @@ function FacultyReportsPage() {
               }}
             >
               <option value="all">All Majors</option>
-              {Array.from(new Set(students.map(s => s.major))).map(major => (
-                <option key={major} value={major}>{major}</option>
+              {availableMajors.map((major, index) => (
+                <option key={index} value={major}>{major}</option>
               ))}
             </Form.Select>
           </Form.Group>
@@ -624,8 +604,7 @@ function FacultyReportsPage() {
         
         <div className="col-md-4 d-flex align-items-end">
           <Button 
-            variant="outline-secondary" 
-            className="mb-3"
+            className="btn-secondary mb-3"
             onClick={() => {
               setStatusFilter('all');
               setMajorFilter('all');
@@ -638,11 +617,11 @@ function FacultyReportsPage() {
         </div>
       </div>
       
-      <div className="mb-4">
-        <h4>Submitted Internship Reports & Evaluations</h4>
+      <div className="reports-table-container">
+        <h4 className="reports-table-title">Submitted Internship Reports & Evaluations</h4>
         
         {filteredReports.length > 0 ? (
-          <Table striped bordered hover responsive>
+          <Table className="reports-table" responsive>
             <thead>
               <tr>
                 <th>Student</th>
@@ -676,9 +655,9 @@ function FacultyReportsPage() {
                     <td>{report.title || 'Untitled Report'}</td>
                     <td>
                       {report.recommend ? (
-                        <Badge bg="success">Recommended</Badge>
+                        <Badge className="badge-recommended">Recommended</Badge>
                       ) : (
-                        <Badge bg="secondary">Not Recommended</Badge>
+                        <Badge className="badge-not-recommended">Not Recommended</Badge>
                       )}
                     </td>
                     <td>
@@ -694,35 +673,32 @@ function FacultyReportsPage() {
                       )}
                     </td>
                     <td>
-                      {report.status === 'pending' && <Badge bg="warning" text="dark">Pending</Badge>}
-                      {report.status === 'accepted' && <Badge bg="success">Accepted</Badge>}
-                      {report.status === 'rejected' && <Badge bg="danger">Rejected</Badge>}
-                      {report.status === 'flagged' && <Badge bg="info">Flagged</Badge>}
-                      {!report.status && <Badge bg="warning" text="dark">Pending</Badge>}
+                      {report.status === 'pending' && <Badge className="badge-pending">Pending</Badge>}
+                      {report.status === 'accepted' && <Badge className="badge-accepted">Accepted</Badge>}
+                      {report.status === 'rejected' && <Badge className="badge-rejected">Rejected</Badge>}
+                      {report.status === 'flagged' && <Badge className="badge-flagged">Flagged</Badge>}
+                      {!report.status && <Badge className="badge-pending">Pending</Badge>}
                     </td>
                     <td>{formatDate(report.submissionDate || report.date)}</td>
                     <td>
                       {matchingEval ? (
-                        <Badge bg="success">Available</Badge>
+                        <Badge className="badge-available">Available</Badge>
                       ) : (
-                        <Badge bg="secondary">Not Available</Badge>
+                        <Badge className="badge-not-available">Not Available</Badge>
                       )}
                     </td>
                     <td>
                       <div className="d-flex flex-wrap gap-1">
                         <Button 
-                          variant="primary" 
-                          size="sm" 
+                          className="btn-primary me-1"
                           onClick={() => handleViewDetails(report, 'report')}
-                          className="me-1"
                         >
                           View Student's Report
                         </Button>
                         
                         {matchingEval && (
                           <Button 
-                            variant="info" 
-                            size="sm" 
+                            className="btn-secondary"
                             onClick={() => handleViewDetails(matchingEval, 'companyEvaluation')}
                           >
                             Company Feedback
@@ -937,11 +913,11 @@ function FacultyReportsPage() {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
+          <Button className="btn-secondary" onClick={() => setShowDetailsModal(false)}>
             Close
           </Button>
           {selectedItem?.type === 'report' && (
-            <Button variant="primary" onClick={handleUpdateStatus}>
+            <Button className="btn-primary" onClick={handleUpdateStatus}>
               Update Status
             </Button>
           )}
