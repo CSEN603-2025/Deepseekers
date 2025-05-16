@@ -32,6 +32,10 @@ function InternshipsAppliedFor() {
         return 'danger';
       case 'finalized': 
         return 'info';
+      case 'current_intern':
+        return 'primary';
+      case 'internship_complete':
+        return 'success';
       case 'pending':
       default:
         return 'warning';
@@ -48,6 +52,10 @@ function InternshipsAppliedFor() {
         return 'Accepted';
       case 'rejected':
         return 'Not Selected';
+      case 'current_intern':
+        return 'Current Intern';
+      case 'internship_complete':
+        return 'Internship Complete';
       default:
         return status;
     }
@@ -63,6 +71,10 @@ function InternshipsAppliedFor() {
         return 'Congratulations! Your application has been accepted.';
       case 'rejected':
         return 'Thank you for your interest. This position has been filled.';
+      case 'current_intern':
+        return 'You are currently working as an intern at this company.';
+      case 'internship_complete':
+        return 'You have successfully completed this internship. Please add your evaluation and report.';
       default:
         return '';
     }
@@ -98,7 +110,7 @@ function InternshipsAppliedFor() {
                       >
                         {getStatusLabel(application.status)}
                       </Badge>
-                      <small className="status-description text-muted">
+                      <small className="status-description d-block mt-1">
                         {getStatusDescription(application.status)}
                       </small>
                     </div>

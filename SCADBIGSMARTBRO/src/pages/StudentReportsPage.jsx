@@ -547,11 +547,12 @@ function StudentReportsPage() {
                     <div className="status-badges">
                     
                       {report.isSubmitted ? (
-                        getStatusBadge(report.status) || (
+                        <>
                           <Badge bg="info" className="status-badge">
                             Submitted
                           </Badge>
-                        )
+                          {getStatusBadge(report.status)}
+                        </>
                       ) : report.isFinalized ? (
                         <Badge bg="warning" className="status-badge">
                           Ready to Submit
@@ -614,7 +615,7 @@ function StudentReportsPage() {
                         View Report
                       </Button>
 
-                      {report.isFinalized  && (
+                      {report.isFinalized && !report.isSubmitted && (
                         <>
                           <Button
                             variant="outline-success"

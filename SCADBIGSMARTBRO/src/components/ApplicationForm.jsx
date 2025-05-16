@@ -28,7 +28,6 @@ function ApplicationForm({ show, onHide, internship }) {
   });
 
   const [validationErrors, setValidationErrors] = useState({
-    coverLetter: false,
     whyApplying: false,
     relevantExperience: false,
     resume: false
@@ -133,18 +132,12 @@ function ApplicationForm({ show, onHide, internship }) {
   const validateForm = () => {
     let isValid = true;
     const newValidationErrors = {
-      coverLetter: false,
       whyApplying: false,
       relevantExperience: false,
       resume: false
     };
     
-    // Check text fields
-    if (!formData.coverLetter.trim()) {
-      newValidationErrors.coverLetter = true;
-      isValid = false;
-    }
-    
+    // Check text fields - Cover Letter is now optional
     if (!formData.whyApplying.trim()) {
       newValidationErrors.whyApplying = true;
       isValid = false;
@@ -316,7 +309,7 @@ function ApplicationForm({ show, onHide, internship }) {
           {/* Cover Letter */}
           <Form.Group className="mb-4">
             <Form.Label>
-              Cover Letter <span className="text-danger">*</span>
+              Cover Letter (Optional)
             </Form.Label>
             <Form.Control
               as="textarea"
@@ -325,12 +318,7 @@ function ApplicationForm({ show, onHide, internship }) {
               name="coverLetter"
               value={formData.coverLetter}
               onChange={handleInputChange}
-              required
-              isInvalid={validationErrors.coverLetter}
             />
-            <Form.Control.Feedback type="invalid">
-              Cover letter is required.
-            </Form.Control.Feedback>
           </Form.Group>
 
           {/* Why Applying */}
