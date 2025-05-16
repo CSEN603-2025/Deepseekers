@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Form, InputGroup, Row, Col, Badge, Modal } from "react-bootstrap";
+import { Card, Button, Form, InputGroup, Row, Col, Badge, Modal, Container, Table } from "react-bootstrap";
+import { FaSearch, FaFilter, FaCheckCircle, FaTimesCircle, FaEye } from "react-icons/fa";
 
-import "../css/scadHome.css"; // Assuming you have a CSS file for styling
+import "../css/scadHome.css";
+import "../css/FacultyReportsPage.css"; // Import the same styling used in Faculty pages
 
 const ScadCompanyApplications = () => {
   const [companies, setCompanies] = useState([]);
@@ -12,6 +14,8 @@ const ScadCompanyApplications = () => {
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
   const [companiesToShow, setCompaniesToShow] = useState([]);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   // Using the same industry list from CompanyRegister.jsx
   const industriesList = [
@@ -116,133 +120,228 @@ const ScadCompanyApplications = () => {
     }
   };
 
+  const handleViewCompanyDetails = (company) => {
+    setSelectedCompany(company);
+    setShowDetailsModal(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setShowDetailsModal(false);
+  };
+
   return (
     <div className="scad-home">
-      <h2>Registered Companies</h2>
+      <h2 className="page-title">Registered Companies</h2>
+      
+      <Card className="shadow-sm mb-4">
+        <Card.Body>
+          <Row className="mb-3">
+            <Col md={6}>
+              <InputGroup>
+                <InputGroup.Text><FaSearch /></InputGroup.Text>
+                <Form.Control
+                  type="text"
+                  placeholder="Search by company name"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </InputGroup>
+            </Col>
+            <Col md={6}>
+              <InputGroup>
+                <InputGroup.Text><FaFilter /></InputGroup.Text>
+                <Form.Select
+                  value={industryFilter}
+                  onChange={(e) => setIndustryFilter(e.target.value)}
+                >
+                  <option value="">All Industries</option>
+                  {industriesList.map((industry) => (
+                    <option key={industry} value={industry}>
+                      {industry}
+                    </option>
+                  ))}
+                </Form.Select>
+              </InputGroup>
+            </Col>
+          </Row>
   
-      <div className="filters">
-        <input
-          type="text"
-          placeholder="Search by company name"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <select value={industryFilter} onChange={(e) => setIndustryFilter(e.target.value)}>
-          <option value="">All Industries</option>
-          {industriesList.map((industry, i) => (
-            <option key={i} value={industry}>{industry}</option>
-          ))}
-        </select>
-      </div>
-  
-      <ul className="company-list">
-        {filteredCompanies.length === 0 ? (
-          <li>No companies found.</li>
-        ) : (
-          filteredCompanies.map((company, index) => (
-            <li key={index}>
-              <div className="company-card">
-                <div className="company-info">
-                  <h5>{company.companyName}</h5>
-                  <p><strong>Industry:</strong> {company.industry}</p>
-                  <p><strong>Status:</strong> <span className={`status-badge status-${company.status}`}>{company.status}</span></p>
-                </div>
-                <div className="company-actions">
-                  <button onClick={() => toggleCompanyDetails(index)}>
-                    {selectedCompanyId === index ? "Hide Details" : "View Details"}
-                  </button>
-                  <button
-                    className="accept-btn"
-                    onClick={() => handleStatusChange(index, "accepted")}
-                    disabled={company.status === "accepted"}
-                  >
-                    Accept
-                  </button>
-                  <button
-                    className="reject-btn"
-                    onClick={() => handleStatusChange(index, "rejected")}
-                    disabled={company.status === "rejected"}
-                  >
-                    Reject
-                  </button>
-                </div>
-              </div>
-              
-              {selectedCompanyId === index && (
-                <div className="company-detail-card">
-                  <h4>Company Details</h4>
-                  
-                  <div className="detail-content">
-                    <div className="company-details-info">
-                      <p><strong>Company Name:</strong> {company.companyName}</p>
-                      <p><strong>Email:</strong> {company.email}</p>
-                      <p><strong>Industry:</strong> {company.industry}</p>
-                      <p><strong>Size:</strong> {company.companySize}</p>
-                      <p><strong>Status:</strong> <span className={`status-badge status-${company.status}`}>{company.status}</span></p>
-                      {company.submissionDate && (
-                        <p><strong>Submission Date:</strong> {new Date(company.submissionDate).toLocaleDateString()}</p>
-                      )}
-                    </div>
-                    
-                    <div className="company-logo-container">
-                      <h5>Company Logo</h5>
-                      {company.logoBase64 ? (
-                        <div className="company-logo">
-                          <img 
-                            src={company.logoBase64} 
-                            alt={`${company.companyName} logo`}
-                          />
-                        </div>
-                      ) : (
-                        <div className="no-logo">No logo provided</div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="document-section">
-                    <h5>Verification Documents</h5>
-                    <div className="document-container">
-                      <div className="document-item">
-                        <span className="document-label">Tax Document:</span>
-                        {company.taxDocumentBase64 ? (
-                          <div className="document-actions">
-                            <span className="document-name">{company.taxDocumentName || "tax_document.pdf"}</span>
-                            <button 
-                              className="view-document-btn" 
-                              onClick={() => viewDocument(company.taxDocumentBase64, company.taxDocumentName)}
+          {filteredCompanies.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-muted">No companies found.</p>
+            </div>
+          ) : (
+            <Table responsive hover className="align-middle">
+              <thead>
+                <tr>
+                  <th>Company Name</th>
+                  <th>Industry</th>
+                  <th>Size</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCompanies.map((company, index) => (
+                  <tr key={index}>
+                    <td>{company.companyName}</td>
+                    <td>{company.industry}</td>
+                    <td>{company.companySize}</td>
+                    <td>
+                      <Badge className={`badge-${company.status === 'pending' ? 'pending' : company.status === 'accepted' ? 'accepted' : 'rejected'}`}>
+                        {company.status || 'Pending'}
+                      </Badge>
+                    </td>
+                    <td>
+                      <div className="d-flex flex-wrap gap-1">
+                        <Button 
+                          className="btn-primary me-1"
+                          onClick={() => handleViewCompanyDetails(company)}
+                        >
+                          <FaEye className="me-1" /> View Details
+                        </Button>
+                        {company.status === 'pending' && (
+                          <>
+                            <Button 
+                              className="btn-success me-1"
+                              onClick={() => handleStatusChange(index, "accepted")}
                             >
-                              View Document
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="no-document">No document provided</span>
+                              <FaCheckCircle className="me-1" /> Accept
+                            </Button>
+                            <Button 
+                              className="btn-danger"
+                              onClick={() => handleStatusChange(index, "rejected")}
+                            >
+                              <FaTimesCircle className="me-1" /> Reject
+                            </Button>
+                          </>
                         )}
                       </div>
-                      
-                      {company.businessLicenseBase64 && (
-                        <div className="document-item">
-                          <span className="document-label">Business License:</span>
-                          <div className="document-actions">
-                            <span className="document-name">{company.businessLicenseName || "business_license.pdf"}</span>
-                            <button 
-                              className="view-document-btn"
-                              onClick={() => viewDocument(company.businessLicenseBase64, company.businessLicenseName)}
-                            >
-                              View Document
-                            </button>
-                          </div>
-                        </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Company Details Modal */}
+      <Modal show={showDetailsModal} onHide={handleCloseDetailsModal} size="lg">
+        <Modal.Header closeButton className="bg-primary text-white">
+          <Modal.Title>Company Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedCompany && (
+            <>
+              <Row>
+                <Col md={8}>
+                  <h5 className="mb-3">Company Information</h5>
+                  <Table borderless size="sm">
+                    <tbody>
+                      <tr>
+                        <td width="30%"><strong>Company Name:</strong></td>
+                        <td>{selectedCompany.companyName}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Email:</strong></td>
+                        <td>{selectedCompany.email}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Industry:</strong></td>
+                        <td>{selectedCompany.industry}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Size:</strong></td>
+                        <td>{selectedCompany.companySize}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>
+                          <Badge className={`badge-${selectedCompany.status === 'pending' ? 'pending' : selectedCompany.status === 'accepted' ? 'accepted' : 'rejected'}`}>
+                            {selectedCompany.status || 'Pending'}
+                          </Badge>
+                        </td>
+                      </tr>
+                      {selectedCompany.submissionDate && (
+                        <tr>
+                          <td><strong>Submission Date:</strong></td>
+                          <td>{new Date(selectedCompany.submissionDate).toLocaleDateString()}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </Table>
+                </Col>
+                <Col md={4}>
+                  <h5 className="mb-3">Company Logo</h5>
+                  {selectedCompany.logoBase64 ? (
+                    <div className="text-center p-3 border rounded">
+                      <img 
+                        src={selectedCompany.logoBase64} 
+                        alt={`${selectedCompany.companyName} logo`}
+                        style={{ maxWidth: '100%', maxHeight: '150px' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-light text-center text-muted border rounded">
+                      No logo provided
+                    </div>
+                  )}
+                </Col>
+              </Row>
+              
+              <hr className="my-4" />
+              
+              <h5 className="mb-3">Verification Documents</h5>
+              <Card>
+                <Card.Body>
+                  <div className="mb-3">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <strong>Tax Document:</strong>
+                      {selectedCompany.taxDocumentBase64 ? (
+                        <Button 
+                          variant="outline-primary" 
+                          size="sm"
+                          onClick={() => viewDocument(selectedCompany.taxDocumentBase64, selectedCompany.taxDocumentName)}
+                        >
+                          View Document
+                        </Button>
+                      ) : (
+                        <span className="text-danger">Not provided</span>
                       )}
                     </div>
+                    {selectedCompany.taxDocumentBase64 && (
+                      <small className="text-muted">{selectedCompany.taxDocumentName || "tax_document.pdf"}</small>
+                    )}
                   </div>
-                </div>
-              )}
-            </li>
-          ))
-        )}
-      </ul>
+                  
+                  {selectedCompany.businessLicenseBase64 && (
+                    <div>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <strong>Business License:</strong>
+                        <Button 
+                          variant="outline-primary" 
+                          size="sm"
+                          onClick={() => viewDocument(selectedCompany.businessLicenseBase64, selectedCompany.businessLicenseName)}
+                        >
+                          View Document
+                        </Button>
+                      </div>
+                      <small className="text-muted">{selectedCompany.businessLicenseName || "business_license.pdf"}</small>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseDetailsModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-      {/* Modal for showing messages */}
+      {/* Status Change Modal */}
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>{modalTitle}</Modal.Title>

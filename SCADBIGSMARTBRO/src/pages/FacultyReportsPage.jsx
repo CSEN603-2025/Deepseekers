@@ -849,8 +849,10 @@ function FacultyReportsPage() {
                         </Button>
                         
                         <Button
-                          className="btn-outline-secondary me-1"
+                          variant="outline-secondary"
+                          size="sm"
                           onClick={() => handleDownloadReport(report)}
+                          className="me-1"
                           title="Download Report"
                         >
                           <FaDownload />
