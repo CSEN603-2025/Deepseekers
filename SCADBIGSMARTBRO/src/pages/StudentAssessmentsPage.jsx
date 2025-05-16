@@ -616,7 +616,7 @@ const StudentAssessmentsPage = () => {
       {/* Assessment Modal */}
       <Modal 
         show={showAssessmentModal} 
-        onHide={handleCloseModal}
+        onHide={handleCloseModal} 
         size="lg"
         centered
         backdrop="static"

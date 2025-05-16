@@ -327,7 +327,7 @@ function Post({ internship, isStudent = true, isScad = false }) {
         size="xl"
         centered
       >
-        <Modal.Header closeButton className="applications-modal-header">
+        <Modal.Header closeButton className="applications-modal-header" className="modal-header">
           <Modal.Title>
             {isScad ? 
               `Applications for ${internship.title}` : 
@@ -442,12 +442,11 @@ function Post({ internship, isStudent = true, isScad = false }) {
         onHide={() => setShowApplicationDetailsModal(false)}
         size="lg"
         centered
-        
       >
-        <Modal.Header closeButton className="applications-modal-header">
+        <Modal.Header closeButton className="modal-header">
           <Modal.Title>Application Details</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="applications-modal-body">
+        <Modal.Body>
           {selectedApplication && (
             <div className="application-details">
               <div className="application-header mb-4">
@@ -675,7 +674,7 @@ function ApplicationsTable({ applications, onViewDetails, onUpdateStatus, isScad
   };
 
   return (
-    <Table striped bordered hover responsive>
+    <Table striped bordered hover responsive className="applications-table">
       <thead>
         <tr>
           <th>Student Name</th>
@@ -748,8 +747,8 @@ function ApplicationStatusBadge({ status }) {
 // Helper component for status dropdown
 function StatusDropdown({ currentStatus, applicationId, onUpdateStatus }) {
   return (
-    <div className="d-inline-block">
-      <Dropdown>
+    <div >
+      <Dropdown className="d-inline-block">
         <Dropdown.Toggle variant="outline-secondary" size="sm">
           Change Status
         </Dropdown.Toggle>

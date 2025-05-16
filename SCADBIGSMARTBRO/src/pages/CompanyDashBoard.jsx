@@ -1037,7 +1037,7 @@ function CompanyDashBoard() {
             
             {/* All Applications Modal */}
             <Modal show={showAllApplicationsModal} onHide={() => setShowAllApplicationsModal(false)} size="xl" centered>
-                <Modal.Header closeButton className="applications-modal-header">
+                <Modal.Header closeButton className="applications-modal-header" className="modal-header">
                     <Modal.Title>All Applications</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="applications-modal-body">
@@ -1110,9 +1110,9 @@ function CompanyDashBoard() {
                 </Modal.Footer>
             </Modal>
             
-            {/* Application Details Modal (updated to match Post.jsx exactly) */}
+            {/* Application Details Modal */}
             <Modal show={showApplicationDetailsModal} onHide={() => setShowApplicationDetailsModal(false)} size="lg" centered>
-                <Modal.Header closeButton>
+                <Modal.Header closeButton className="modal-header">
                     <Modal.Title>Application Details</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

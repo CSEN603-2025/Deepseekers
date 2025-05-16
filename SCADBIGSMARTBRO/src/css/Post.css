@@ -383,10 +383,7 @@
 
 .applications-modal-body {
   padding: 20px;
-  max-height: 70vh;  /* or another suitable value */
-  overflow-y: auto;
 }
-
 
 .applications-modal .table {
     border-radius: 6px;
@@ -482,12 +479,26 @@
     margin-bottom: 10px;
 }
 
+/* Modal Header Styling */
 .modal-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e7e9ed;
+    background-color: #8ecae6 !important;
+    color: white !important;
+    border-bottom: none !important;
+    padding: 1rem;
 }
 
-.modal-title {
+.modal-header .close,
+.modal-header .btn-close {
+    color: white !important;
+    opacity: 1;
+}
+
+.modal-header .modal-title {
+    color: white !important;
     font-weight: 600;
-    color: #3c4257;
+}
+
+.modal-body {
+    background-color: white;
+    padding: 20px;
 } 
