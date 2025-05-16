@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Modal, Button, Form } from 'react-bootstrap';
 import InternshipsAppliedFor from './InternshipsAppliedFor';
@@ -220,7 +219,7 @@ function StudentInternshipTabs() {
       body: reportBody,
       helpfulCourses: selectedCourses,
       date: new Date().toISOString(),
-      isSubmitted: true,
+      isSubmitted: false, // Set to false initially
       // Preserve existing status information
       status: existingReport.status || 'pending',
       statusComment: existingReport.statusComment || '',
@@ -322,12 +321,14 @@ function StudentInternshipTabs() {
                       </div>                      <div className="completed-internship-actions">
                         {internship.status.toLowerCase() === 'internship_complete' && (
                           <>
-                            <button 
-                              className={`action-btn ${hasEvaluation(internship.id) ? 'edit' : 'add'}`}
-                              onClick={() => handleOpenEvaluation(internship)}
-                            >
-                              {hasEvaluation(internship.id) ? 'Edit Evaluation' : 'Add Evaluation'}
-                            </button>
+                            <div className="evaluation-actions">
+                              <button 
+                                className={`action-btn ${hasEvaluation(internship.id) ? 'edit' : 'add'}`}
+                                onClick={() => handleOpenEvaluation(internship)}
+                              >
+                                {hasEvaluation(internship.id) ? 'Edit Evaluation' : 'Add Evaluation'}
+                              </button>
+                            </div>
                             
                             <div className="report-actions">
                               <button 
@@ -369,6 +370,20 @@ function StudentInternshipTabs() {
                                 </div>
                               )}
                             </div>
+                            {hasEvaluation(internship.id) && hasReport(internship.id) && (
+                              <div className="finalization-message mt-3">
+                                <p className="text-info">
+                                  <i className="bi bi-info-circle me-2"></i>
+                                  Go to the Reports tab to view a finalized version of your report and submit it.
+                                </p>
+                                <button 
+                                  className="btn btn-primary mt-2"
+                                  onClick={() => window.location.href = '/student/reports'}
+                                >
+                                  Go to Reports
+                                </button>
+                              </div>
+                            )}
                           </>
                         )}
                         {internship.status.toLowerCase() !== 'internship_complete' && (

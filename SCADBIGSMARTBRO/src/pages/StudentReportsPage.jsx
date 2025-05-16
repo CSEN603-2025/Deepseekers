@@ -12,6 +12,8 @@ import {
 } from "react-bootstrap";
 import "../css/StudentReportsPage.css";
 import { coursesByMajor } from "../Data/UserData";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 function StudentReportsPage() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -25,7 +27,7 @@ function StudentReportsPage() {
   const [submissionMessage, setSubmissionMessage] = useState("");
   const [appealMessage, setAppealMessage] = useState("");
   const [appealText, setAppealText] = useState("");
-  
+
   // Filter state
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -39,19 +41,19 @@ function StudentReportsPage() {
     // Load evaluations and reports
     loadUserData();
   }, []);
-  
+
   // Filter reports when finalizedReports or statusFilter changes
   useEffect(() => {
     if (finalizedReports.length === 0) {
       setFilteredReports([]);
       return;
     }
-    
+
     if (statusFilter === "all") {
       setFilteredReports(finalizedReports);
       return;
     }
-    
+
     const filtered = finalizedReports.filter(report => report.status === statusFilter);
     setFilteredReports(filtered);
   }, [finalizedReports, statusFilter]);
@@ -169,29 +171,29 @@ function StudentReportsPage() {
     setShowSubmitModal(true);
     setSubmissionMessage("");
   };
-  
+
   const handleAppealReport = (item) => {
     setSelectedItem(item);
     setShowAppealModal(true);
     setAppealText("");
     setAppealMessage("");
   };
-  
+
   const submitAppeal = () => {
     if (!selectedItem || !appealText.trim()) return;
-    
+
     setIsSubmitting(true);
-    
+
     // Simulate submission (in a real app, this would be an API call)
     setTimeout(() => {
       // Update the report with appeal information
       const savedReports = localStorage.getItem("internshipReports") || "[]";
       const reports = JSON.parse(savedReports);
-      
+
       const reportIndex = reports.findIndex(
         (report) => report.id === selectedItem.reportId
       );
-      
+
       if (reportIndex >= 0) {
         reports[reportIndex] = {
           ...reports[reportIndex],
@@ -199,26 +201,26 @@ function StudentReportsPage() {
           appealText: appealText,
           appealDate: new Date().toISOString(),
         };
-        
+
         localStorage.setItem("internshipReports", JSON.stringify(reports));
-        
+
         // Update state
         setFinalizedReports((prev) =>
           prev.map((report) =>
             report.id === selectedItem.id
-              ? { 
-                  ...report, 
-                  hasAppeal: true, 
-                  appealText: appealText,
-                  appealDate: new Date().toISOString()
-                }
+              ? {
+                ...report,
+                hasAppeal: true,
+                appealText: appealText,
+                appealDate: new Date().toISOString()
+              }
               : report
           )
         );
-        
+
         setIsSubmitting(false);
         setAppealMessage("Your appeal has been successfully submitted.");
-        
+
         // Close modal after 2 seconds
         setTimeout(() => {
           setShowAppealModal(false);
@@ -283,10 +285,10 @@ function StudentReportsPage() {
       return course ? `${course.code}: ${course.name}` : "Unknown Course";
     });
   };
-  
+
   const getStatusBadge = (status) => {
     if (!status) return null;
-    
+
     switch (status) {
       case "pending":
         return <Badge bg="warning" text="dark">Pending Review</Badge>;
@@ -301,6 +303,194 @@ function StudentReportsPage() {
     }
   };
 
+  // Direct submit without confirmation
+  const handleDirectSubmit = (report) => {
+    // Mark the report as submitted in localStorage
+    const savedReports = localStorage.getItem("internshipReports") || "[]";
+    const reports = JSON.parse(savedReports);
+
+    const reportIndex = reports.findIndex(
+      (savedReport) => savedReport.id === report.reportId
+    );
+    
+    if (reportIndex >= 0) {
+      reports[reportIndex] = {
+        ...reports[reportIndex],
+        isSubmitted: true,
+        submissionDate: new Date().toISOString(),
+        status: "pending", // Add pending status for newly submitted reports
+      };
+      localStorage.setItem("internshipReports", JSON.stringify(reports));
+    }
+
+    // Update state
+    setFinalizedReports((prev) =>
+      prev.map((item) =>
+        item.id === report.id
+          ? { ...item, isSubmitted: true, status: "pending" }
+          : item
+      )
+    );
+
+    // Show temporary alert
+    const reportCard = document.getElementById(`report-card-${report.id}`);
+    if (reportCard) {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-success mt-2';
+      alert.innerHTML = 'Report submitted successfully!';
+      reportCard.querySelector('.card-body').appendChild(alert);
+      
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.parentNode.removeChild(alert);
+        }
+      }, 3000);
+    }
+  };
+
+  const handleDownloadReport = (report) => {
+    // Create a new PDF document
+    const doc = new jsPDF();
+    
+    // Set document properties
+    doc.setProperties({
+      title: `${report.reportTitle || report.companyName} - Internship Report`,
+      author: currentUser?.name || 'Student',
+      subject: 'Internship Report',
+      keywords: 'internship, report, evaluation',
+    });
+    
+    // Add title
+    doc.setFontSize(22);
+    doc.setTextColor(0, 102, 204);
+    doc.text('Internship Report', 105, 20, { align: 'center' });
+    
+    // Add student information section
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Student Information', 20, 35);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(70, 70, 70);
+    doc.text(`Name: ${currentUser?.name || 'N/A'}`, 20, 45);
+    doc.text(`ID: ${currentUser?.gucId || currentUser?.id || 'N/A'}`, 20, 52);
+    doc.text(`Major: ${currentUser?.major || 'N/A'}`, 20, 59);
+    doc.text(`Email: ${currentUser?.email || 'N/A'}`, 20, 66);
+    
+    // Add company info
+    doc.setFontSize(16);
+    doc.setTextColor(70, 70, 70);
+    doc.text(`Company: ${report.companyName}`, 20, 80, { align: 'left' });
+    
+    // Add horizontal line
+    doc.setDrawColor(220, 220, 220);
+    doc.line(20, 85, 190, 85);
+    
+    // Current position tracker
+    let yPosition = 95;
+    
+    // Matching the order in the modal:
+    
+    // 1. Company Evaluation (if exists)
+    if (report.hasEvaluation) {
+      // Recommendation
+      doc.setFontSize(12);
+      doc.setTextColor(0, 102, 204);
+      doc.text(`Recommend it to other interns: ${report.recommend ? 'YES' : 'NO'}`, 20, yPosition);
+      yPosition += 10;
+      
+      // Evaluation Text
+      doc.setFontSize(14);
+      doc.setTextColor(0, 102, 204);
+      doc.text('My Evaluation to the comopany', 20, yPosition);
+      yPosition += 7;
+      
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      
+      const evalLines = doc.splitTextToSize(report.evaluationText, 170);
+      doc.text(evalLines, 20, yPosition);
+      yPosition += (evalLines.length * 5) + 15;
+    }
+    
+    // 2. Report Introduction (if exists)
+    if (report.reportIntroduction) {
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.setFontSize(14);
+      doc.setTextColor(0, 102, 204);
+      doc.text('Introdcution', 20, yPosition);
+      yPosition += 7;
+      
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      
+      const introLines = doc.splitTextToSize(report.reportIntroduction, 170);
+      doc.text(introLines, 20, yPosition);
+      yPosition += (introLines.length * 5) + 15;
+    }
+    
+    // 3. Report Body
+    if (report.reportBody) {
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.setFontSize(14);
+      doc.setTextColor(0, 102, 204);
+      doc.text('Body', 20, yPosition);
+      yPosition += 7;
+      
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      
+      const bodyLines = doc.splitTextToSize(report.reportBody, 170);
+      doc.text(bodyLines, 20, yPosition);
+      yPosition += (bodyLines.length * 5) + 15;
+    }
+    
+    // 4. Helpful Courses (if exists)
+    if (report.helpfulCourses?.length > 0) {
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.setFontSize(14);
+      doc.setTextColor(0, 102, 204);
+      doc.text('Helpful Courses', 20, yPosition);
+      yPosition += 7;
+      
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      
+      const courseNames = getCourseNames(report.helpfulCourses);
+      courseNames.forEach(course => {
+        doc.text(`• ${course}`, 20, yPosition);
+        yPosition += 6;
+      });
+    }
+    
+    // Add footer with page numbers
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
+    }
+    
+    // Save the PDF
+    doc.save(`${currentUser?.name.replace(/\s+/g, '_')}_${report.companyName.replace(/\s+/g, '_')}_Report.pdf`);
+  };
+
   return (
     <>
       <Container className="student-reports-container">
@@ -308,14 +498,14 @@ function StudentReportsPage() {
         <p className="page-description">
           View and submit your internship reports with company evaluations.
         </p>
-        
+
         {/* Filter controls */}
         <div className="filter-container mb-4">
           <Row>
             <Col md={6} lg={4}>
               <Form.Group>
                 <Form.Label>Filter by Status</Form.Label>
-                <Form.Select 
+                <Form.Select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
@@ -328,8 +518,8 @@ function StudentReportsPage() {
               </Form.Group>
             </Col>
             <Col md={6} lg={4} className="d-flex align-items-end">
-              <Button 
-                variant="outline-secondary" 
+              <Button
+                variant="outline-secondary"
                 className="mb-3"
                 onClick={() => setStatusFilter("all")}
               >
@@ -344,10 +534,10 @@ function StudentReportsPage() {
             filteredReports.map((report) => (
               <Col md={6} lg={4} key={report.id} className="mb-4">
                 <Card
-                  className={`finalized-report-card ${
-                    report.isFinalized ? "complete" : "incomplete"
-                  } ${report.status === "rejected" ? "rejected" : ""} 
+                  className={`finalized-report-card ${report.isFinalized ? "complete" : "incomplete"
+                    } ${report.status === "rejected" ? "rejected" : ""} 
                     ${report.status === "flagged" ? "flagged" : ""}`}
+                  id={`report-card-${report.id}`}
                 >
                   <Card.Header>
                     <div>
@@ -355,11 +545,7 @@ function StudentReportsPage() {
                       <span className="company-name">{report.companyName}</span>
                     </div>
                     <div className="status-badges">
-                      {report.recommend && (
-                        <Badge bg="success" className="recommend-badge">
-                          Recommended
-                        </Badge>
-                      )}
+                    
                       {report.isSubmitted ? (
                         getStatusBadge(report.status) || (
                           <Badge bg="info" className="status-badge">
@@ -375,7 +561,7 @@ function StudentReportsPage() {
                           Incomplete
                         </Badge>
                       )}
-                      
+
                       {report.hasAppeal && (
                         <Badge bg="primary" className="status-badge ms-1">
                           Appealed
@@ -387,7 +573,7 @@ function StudentReportsPage() {
                     <p className="report-date">
                       Last Updated: {formatDate(report.date)}
                     </p>
-                    
+
                     {report.status === "rejected" || report.status === "flagged" ? (
                       <Alert variant={report.status === "rejected" ? "danger" : "info"} className="mb-3">
                         <small>
@@ -396,7 +582,7 @@ function StudentReportsPage() {
                         </small>
                       </Alert>
                     ) : null}
-                    
+
                     <div className="report-components">
                       <div className="component">
                         <span className="component-label">Report:</span>
@@ -428,15 +614,26 @@ function StudentReportsPage() {
                         View Report
                       </Button>
 
-                      {report.isFinalized && !report.isSubmitted && (
+                      {report.isFinalized  && (
+                        <>
+                          <Button
+                            variant="outline-success"
+                            onClick={() => handleSubmitReport(report)}
+                          >
+                            Submit
+                          </Button>
+                        </>
+                      )}
+
+                      {report.isFinalized && (
                         <Button
-                          variant="success"
-                          onClick={() => handleSubmitReport(report)}
+                          variant="outline-secondary"
+                          onClick={() => handleDownloadReport(report)}
                         >
-                          Submit Report
+                          Download PDF
                         </Button>
                       )}
-                      
+
                       {(report.status === "rejected" || report.status === "flagged") && !report.hasAppeal && (
                         <Button
                           variant="warning"
@@ -496,13 +693,13 @@ function StudentReportsPage() {
                 <span className="detail-label">Last Updated:</span>{" "}
                 {formatDate(selectedItem.date)}
               </div>
-              
+
               {/* Show report status if submitted */}
               {selectedItem.isSubmitted && (
                 <div className="detail-header">
                   <span className="detail-label">Status:</span>{" "}
                   {getStatusBadge(selectedItem.status)}
-                  
+
                   {/* Show review date if available */}
                   {selectedItem.reviewDate && (
                     <span className="ms-2 text-muted small">
@@ -511,7 +708,7 @@ function StudentReportsPage() {
                   )}
                 </div>
               )}
-              
+
               {/* Show faculty feedback if rejected or flagged */}
               {(selectedItem.status === "rejected" || selectedItem.status === "flagged") && selectedItem.statusComment && (
                 <div className="detail-content mt-3">
@@ -526,7 +723,7 @@ function StudentReportsPage() {
                   </div>
                 </div>
               )}
-              
+
               {/* Show appeal if exists */}
               {selectedItem.hasAppeal && (
                 <div className="detail-content mt-3">
@@ -614,7 +811,7 @@ function StudentReportsPage() {
           >
             Close
           </Button>
-          
+
           {/* Add appeal button in the modal footer */}
           {selectedItem && (selectedItem.status === "rejected" || selectedItem.status === "flagged") && !selectedItem.hasAppeal && (
             <Button
@@ -679,7 +876,7 @@ function StudentReportsPage() {
           )}
         </Modal.Footer>
       </Modal>
-      
+
       {/* Appeal Modal */}
       <Modal
         show={showAppealModal}
@@ -701,7 +898,7 @@ function StudentReportsPage() {
                 You are appealing the faculty's decision for your report on{" "}
                 <strong>{selectedItem?.companyName}</strong>.
               </p>
-              
+
               {selectedItem && (
                 <Alert variant={selectedItem.status === "rejected" ? "danger" : "info"} className="mb-3">
                   <strong>Decision:</strong> {selectedItem.status === "rejected" ? "Rejected" : "Flagged"}
@@ -712,7 +909,7 @@ function StudentReportsPage() {
                   )}
                 </Alert>
               )}
-              
+
               <Form.Group className="mb-3">
                 <Form.Label>Appeal Explanation</Form.Label>
                 <Form.Control

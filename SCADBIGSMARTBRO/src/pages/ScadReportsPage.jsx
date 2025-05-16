@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Modal, Table, Form, ProgressBar } from 'react-bootstrap';
+import { FaDownload } from 'react-icons/fa';
 import '../css/StudentReportsPage.css'; // Shared styling for reports
 import '../css/ScadReportsPage.css'; // Specific styling for SCAD reports page
 import { coursesByMajor, students as defaultStudents } from '../Data/UserData';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 function ScadReportsPage() {
   const [students, setStudents] = useState([]);
@@ -269,6 +272,157 @@ function ScadReportsPage() {
       setFilteredReports([]);
     }
   }, [submittedReports, statusFilter, majorFilter, students]);
+
+  // Add the download function
+  // Add the function to handle PDF download
+  const handleDownloadReport = (report) => {
+    // Find the student details
+    const student = students.find(s => s.id === report.studentId) || {
+      name: report.studentName || 'Unknown Student',
+      gucId: report.studentId || 'Unknown ID',
+      major: 'Unknown Major',
+      email: 'N/A'
+    };
+    
+    // Create a new PDF document
+    const doc = new jsPDF();
+    
+    // Set document properties
+    doc.setProperties({
+      title: `${report.reportTitle || report.companyName} - Internship Report`,
+      author: student.name,
+      subject: 'Internship Report',
+      keywords: 'internship, report, evaluation',
+    });
+    
+    // Add title
+    doc.setFontSize(22);
+    doc.setTextColor(0, 102, 204);
+    doc.text('Internship Report', 105, 20, { align: 'center' });
+    
+    // Add student information section
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Student Information', 20, 35);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(70, 70, 70);
+    doc.text(`Name: ${student.name}`, 20, 45);
+    doc.text(`ID: ${student.gucId}`, 20, 52);
+    doc.text(`Major: ${student.major}`, 20, 59);
+    doc.text(`Email: ${student.email || 'N/A'}`, 20, 66);
+    
+    // Add company info
+    doc.setFontSize(16);
+    doc.setTextColor(70, 70, 70);
+    doc.text(`Company: ${report.companyName}`, 20, 80, { align: 'left' });
+    
+    // Add horizontal line
+    doc.setDrawColor(220, 220, 220);
+    doc.line(20, 85, 190, 85);
+    
+    // Start position for report content
+    let yPosition = 95;
+    
+    // Matching the order in the modal - first company evaluation if exists
+    if (report.hasEvaluation) {
+      // Recommendation
+      doc.setFontSize(12);
+      doc.setTextColor(0, 102, 204);
+      doc.text(`Recommend it to other interns: ${report.recommend ? 'YES' : 'NO'}`, 20, yPosition);
+      yPosition += 10;
+      
+      // Evaluation Text
+      doc.setFontSize(14);
+      doc.setTextColor(0, 102, 204);
+      doc.text('My Evaluation to the company', 20, yPosition);
+      yPosition += 7;
+      
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      
+      const evalLines = doc.splitTextToSize(report.evaluationText, 170);
+      doc.text(evalLines, 20, yPosition);
+      yPosition += (evalLines.length * 5) + 15;
+    }
+    
+    // Report Introduction (if exists)
+    if (report.introduction) {
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.setFontSize(14);
+      doc.setTextColor(0, 102, 204);
+      doc.text('Introduction', 20, yPosition);
+      yPosition += 7;
+      
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      
+      const introLines = doc.splitTextToSize(report.introduction, 170);
+      doc.text(introLines, 20, yPosition);
+      yPosition += (introLines.length * 5) + 15;
+    }
+    
+    // Report Body
+    if (report.body) {
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.setFontSize(14);
+      doc.setTextColor(0, 102, 204);
+      doc.text('Body', 20, yPosition);
+      yPosition += 7;
+      
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      
+      const bodyLines = doc.splitTextToSize(report.body, 170);
+      doc.text(bodyLines, 20, yPosition);
+      yPosition += (bodyLines.length * 5) + 15;
+    }
+    
+    // Helpful Courses (if exists)
+    if (report.helpfulCourses?.length > 0) {
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.setFontSize(14);
+      doc.setTextColor(0, 102, 204);
+      doc.text('Helpful Courses', 20, yPosition);
+      yPosition += 7;
+      
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      
+      const courseNames = getCourseNames(report.helpfulCourses, report.studentId);
+      courseNames.forEach(course => {
+        doc.text(`• ${course}`, 20, yPosition);
+        yPosition += 6;
+      });
+    }
+    
+    // Add footer with page numbers
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
+    }
+    
+    // Save the PDF with a filename based on the student and company
+    doc.save(`${student.name.replace(/\s+/g, '_')}_${report.companyName.replace(/\s+/g, '_')}_Report.pdf`);
+  };
 
   return (
     <Container className="scad-reports-container mt-4">
@@ -553,6 +707,16 @@ function ScadReportsPage() {
                           className="me-1"
                         >
                           View Student's Report
+                        </Button>
+                        
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => handleDownloadReport(report)}
+                          className="me-1"
+                          title="Download Report"
+                        >
+                          <FaDownload />
                         </Button>
                         
                         {matchingEval && (
