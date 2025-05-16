@@ -1037,7 +1037,7 @@ function CompanyDashBoard() {
             
             {/* All Applications Modal */}
             <Modal show={showAllApplicationsModal} onHide={() => setShowAllApplicationsModal(false)} size="xl" centered>
-                <Modal.Header closeButton className="applications-modal-header" className="modal-header">
+                <Modal.Header closeButton className="modal-header">
                     <Modal.Title>All Applications</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="applications-modal-body">

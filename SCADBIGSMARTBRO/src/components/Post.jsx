@@ -327,7 +327,7 @@ function Post({ internship, isStudent = true, isScad = false }) {
         size="xl"
         centered
       >
-        <Modal.Header closeButton className="applications-modal-header" className="modal-header">
+        <Modal.Header closeButton  className="modal-header">
           <Modal.Title>
             {isScad ? 
               `Applications for ${internship.title}` : 
