@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
-import Profile from "../components/Profile";
-import LogoutButton from "../components/LogoutButton";
-import PostInternship from "../components/PostInternship";
-import Post from "../components/Post";
-import AcceptedApplicants from "../components/AcceptedApplicants";
-import NotificationButton from "../components/NotificationButton"; // Import the new component
-import { Container, Row, Col, Form, InputGroup, Button, Tabs, Tab, Accordion, Badge, Modal, Table, Dropdown } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import "../css/CompanyDashBoard.css";
+import React, { useState, useEffect } from 'react';
+import { Container, Tabs, Tab, Row, Col, Form, Button, InputGroup, Badge, Accordion, Modal, Table, Dropdown } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import CompanyNavigationBar from '../components/CompanyNavigationBar';
+import Profile from '../components/Profile';
+import Post from '../components/Post';
+import PostInternship from '../components/PostInternship';
+import AcceptedApplicants from '../components/AcceptedApplicants';
+import NotificationButton from "../components/NotificationButton";
 import { companies } from '../Data/UserData';
 
 function CompanyDashBoard() {
@@ -428,13 +427,15 @@ function CompanyDashBoard() {
     
     return (
         <div className="company-dashboard">
+            {/* Replace the existing logout container with the navigation bar */}
+            <CompanyNavigationBar />
+            
+            {/* Remove this div as it's now handled by the navigation bar
             <div className="logout-container" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
                 <LogoutButton />
-                <NotificationButton onViewApplication={(application) => {
-                    setSelectedApplication(application);
-                    setShowApplicationDetailsModal(true);
-                }} />
+                <NotificationButton onViewApplication={(application) => {…}} />
             </div>
+            */}
   
             <Profile 
                 name={currentUser.name} 

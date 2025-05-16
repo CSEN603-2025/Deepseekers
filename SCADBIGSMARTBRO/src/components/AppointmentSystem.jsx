@@ -57,7 +57,9 @@ const AppointmentSystem = ({ userType, studentId }) => {
           call.participants.includes(studentId) && 
           call.status === 'active' && 
           !call.rejected &&
-          !call.accepted
+          !call.accepted &&
+          typeof call.initiatedBy !== 'undefined' && // Ensure initiatedBy field exists
+          call.initiatedBy !== userType             // And the call was not initiated by the current user
         );
         
         if (incomingCalls.length > 0) {
@@ -70,8 +72,12 @@ const AppointmentSystem = ({ userType, studentId }) => {
             setIncomingCall({
               ...latestCall,
               purpose: appointment.purpose,
-              remoteUser: 'SCAD Officer'
+              remoteUser: 'SCAD Officer' // Assuming SCAD is always the other party for a student
             });
+          } else {
+            // If appointment details are not found for an otherwise valid incoming call,
+            // clear the incoming call state to prevent issues.
+            setIncomingCall(null);
           }
         } else {
           setIncomingCall(null);
@@ -182,35 +188,41 @@ const AppointmentSystem = ({ userType, studentId }) => {
 
   // Function to initiate a video call
   const initiateVideoCall = (appointment) => {
-    // Create a record of this call
-    const callHistory = JSON.parse(localStorage.getItem('callHistory') || '[]');
-    const newCall = {
-      id: Date.now(),
+    // Generate a unique call ID
+    const callId = `call-${Date.now()}`;
+    
+    // Create call data for the active call
+    const callData = {
+      id: callId,
       appointmentId: appointment.id,
+      purpose: appointment.purpose,
+      studentId: appointment.studentId,
+      studentName: appointment.studentName,
+      remoteUser: userType === 'student' ? 'SCAD Office' : appointment.studentName,
       startTime: new Date().toISOString(),
       participants: [appointment.studentId],
-      status: 'active',
-      initiator: userType // Add this to identify who started the call
+      initiatedBy: userType  // Add this field to track who started the call
     };
     
-    callHistory.push(newCall);
-    localStorage.setItem('callHistory', JSON.stringify(callHistory));
+    // Set active call data
+    setActiveCall(callData);
     
-    // Set active call data for the initiator (SCAD)
-    setActiveCall({
-      ...newCall,
-      remoteUser: appointment.studentName,
-      purpose: appointment.purpose
-    });
+    // Show video call modal (ONLY set this one, not incomingCall)
     setShowVideoCall(true);
     
-    // Also trigger a browser notification if supported
-    if (Notification.permission === "granted") {
-      new Notification("Video Call Initiated", {
-        body: `Call to ${appointment.studentName} has been initiated`,
-        icon: "/logo.png"
-      });
-    }
+    // Update call history
+    const callHistory = JSON.parse(localStorage.getItem('callHistory') || '[]');
+    callHistory.push({
+      ...callData,
+      status: 'active'
+    });
+    localStorage.setItem('callHistory', JSON.stringify(callHistory));
+    
+    // Ensure incomingCall is null to prevent the incoming call modal from appearing
+    setIncomingCall(null);
+    
+    // Create notification for the receiving party
+    createCallNotification(callData);
   };
   
   // Handle accepting an incoming call
@@ -263,199 +275,200 @@ const AppointmentSystem = ({ userType, studentId }) => {
     setActiveCall(null);
   };
 
-  return (
-    <Container className="appointment-system my-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4>Video Call Appointments</h4>
-        <Button variant="primary" onClick={() => setShowModal(true)}>
-          {userType === 'student' ? 'Request Appointment' : 'Schedule Meeting'}
-        </Button>
-      </div>
-
-      <Row className="appointments-list">
-        {appointments
-          .filter(apt => userType === 'scad' || apt.studentId === studentId)
-          .map(apt => (
-            <Col key={apt.id} xs={12} className="mb-3">
-              <div className="appointment-card">
-                <div className="appointment-info">
-                  <div className="d-flex justify-content-between align-items-start mb-2">
-                    <h5>{apt.purpose}</h5>
-                    {userType === 'student' ? (
-                      <Badge bg="info">SCAD</Badge>
-                    ) : (
-                      <div className="online-status-indicator">
-                        {onlineUsers[apt.studentId] ? (
-                          <Badge bg="success" className="d-flex align-items-center">
-                            <BsCircleFill className="me-1" size={8} /> Online
-                          </Badge>
-                        ) : (
-                          <Badge bg="secondary" className="d-flex align-items-center">
-                            <BsCircleFill className="me-1" size={8} /> Offline
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <p className="mb-2">Date: {apt.date} at {apt.time}</p>
-                  <p className="mb-2">
-                    {apt.requestedBy === 'student' 
-                      ? `Requested by: ${apt.studentName} (${apt.studentId})`
-                      : `Scheduled by SCAD for: ${apt.studentName} (${apt.studentId})`}
-                    {apt.studentId && students.find(s => s.gucId === apt.studentId)?.pro && (
-                      <Badge 
-                        className="ms-2 pro-badge"
-                        style={{ 
-                          backgroundColor: '#ffd700',
-                          color: '#000'
-                        }}
-                      >
-                        PRO
-                      </Badge>
-                    )}
-                  </p>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <Badge bg={getStatusBadgeVariant(apt.status)}>
-                      {apt.status.toUpperCase()}
-                    </Badge>
-                    
-                    {/* Video Call Button for approved appointments with online users */}
-                    {apt.status === 'approved' && 
-                     ((userType === 'student' && onlineUsers[studentId]) || 
-                      (userType === 'scad' && onlineUsers[apt.studentId])) && (
-                      <Button 
-                        variant="success" 
-                        size="sm" 
-                        className="video-call-button"
-                        onClick={() => initiateVideoCall(apt)}
-                      >
-                        <BsCameraVideoFill className="me-1" /> Start Video Call
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                {apt.status === 'pending' && apt.requestedBy !== userType && (
-                  <div className="appointment-actions">
-                    <Button 
-                      variant="success" 
-                      size="sm" 
-                      onClick={() => handleStatusChange(apt.id, 'approved')}
-                    >
-                      Approve
-                    </Button>
-                    <Button 
-                      variant="danger" 
-                      size="sm" 
-                      onClick={() => handleStatusChange(apt.id, 'rejected')}
-                    >
-                      Reject
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </Col>
-          ))}
-      </Row>
-
-      {/* Appointment Creation Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {userType === 'student' ? 'Request Appointment' : 'Schedule Meeting'}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleSubmit}>
-            {userType === 'scad' && (
-              <Form.Group className="mb-3">
-                <Form.Label>Student GUC ID</Form.Label>
-                <Form.Control
-                  type="text"
-                  required
-                  placeholder="Enter student GUC ID (e.g., 49-12345)"
-                  value={newAppointment.studentId}
-                  onChange={(e) => {
-                    const student = students.find(s => s.gucId === e.target.value);
-                    setNewAppointment({
-                      ...newAppointment,
-                      studentId: e.target.value,
-                      studentName: student?.name || ''
-                    });
-                  }}
-                />
-                {newAppointment.studentName && (
-                  <Form.Text className="text-success">
-                    Student found: {newAppointment.studentName}
-                  </Form.Text>
-                )}
-              </Form.Group>
-            )}
-
-            <Form.Group className="mb-3">
-              <Form.Label>Date</Form.Label>
-              <Form.Control
-                type="date"
-                required
-                value={newAppointment.date}
-                onChange={(e) => setNewAppointment({
-                  ...newAppointment,
-                  date: e.target.value
-                })}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Time</Form.Label>
-              <Form.Control
-                type="time"
-                required
-                value={newAppointment.time}
-                onChange={(e) => setNewAppointment({
-                  ...newAppointment,
-                  time: e.target.value
-                })}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Purpose</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                required
-                placeholder="Please describe the purpose of your appointment"
-                value={newAppointment.purpose}
-                onChange={(e) => setNewAppointment({
-                  ...newAppointment,
-                  purpose: e.target.value
-                })}
-              />
-            </Form.Group>
-
-            <Button variant="primary" type="submit">
-              Submit
+  const renderAppointment = (appointment, index) => {
+    const isScad = userType === 'scad';
+    
+    // HARDCODED: First appointment shows SCAD as online, second as offline
+    const isOnline = isScad 
+      ? onlineUsers[appointment.studentId] 
+      : (index === 0); // First appointment shows SCAD as online
+    
+    return (
+      <div className="appointment-card" key={appointment.id || index}>
+        <div className="appointment-info">
+          <h5>{appointment.purpose}</h5>
+          <p><strong>Date:</strong> {appointment.date} at {appointment.time}</p>
+          {isScad ? (
+            <p>
+              <strong>Requested by:</strong> {appointment.studentName} ({appointment.studentId})
+              {appointment.requestedBy === 'student' && <span className="ms-2 text-info">(Student initiated)</span>}
+            </p>
+          ) : (
+            <p>
+              <strong>With:</strong> <span className="scad-label">SCAD</span>
+              {appointment.requestedBy === 'scad' && <span className="ms-2 text-info">(SCAD initiated)</span>}
+            </p>
+          )}
+          <p><Badge bg={getStatusBadgeVariant(appointment.status)} className="text-uppercase">{appointment.status}</Badge></p>
+        </div>
+        <div className="appointment-actions">
+          {isOnline && (
+            <div className="online-status-indicator mb-2">
+              <BsCircleFill className="online-indicator" />
+              <span className="ms-1">Online</span>
+            </div>
+          )}
+          
+          {/* Approval/Rejection Buttons for SCAD */}
+          {isScad && appointment.status === 'pending' && (
+            <div className="status-buttons mb-2">
+              <Button 
+                variant="success" 
+                size="sm" 
+                className="me-2"
+                onClick={() => handleStatusChange(appointment.id, 'approved')}
+              >
+                Approve
+              </Button>
+              <Button 
+                variant="danger" 
+                size="sm"
+                onClick={() => handleStatusChange(appointment.id, 'rejected')}
+              >
+                Reject
+              </Button>
+            </div>
+          )}
+          
+          {appointment.status === 'approved' && (
+            <Button 
+              variant="success" 
+              size="sm" 
+              className="video-call-button"
+              onClick={() => initiateVideoCall(appointment)}
+            >
+              <BsCameraVideoFill className="me-1" /> Start Video Call
             </Button>
-          </Form>
-        </Modal.Body>
-      </Modal>
-      
-      {/* Video Call Component */}
-      <VideoCallComponent
-        isVisible={showVideoCall}
-        onHide={handleEndCall}
-        callData={activeCall}
-      />
-      
-      {/* Incoming Call Component */}
-      <VideoCallComponent
-        isVisible={incomingCall !== null}
-        onHide={handleRejectCall}
-        callData={incomingCall}
-        isIncoming={true}
-        onAccept={handleAcceptCall}
-        onReject={handleRejectCall}
-      />
-    </Container>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="appointment-system">
+      <Container>
+        <Row className="mb-4">
+          <Col>
+            <h2>Video Call Appointments</h2>
+          </Col>
+          <Col xs="auto">
+            <Button variant="primary" onClick={() => setShowModal(true)}>
+              {userType === 'student' ? 'Request Appointment' : 'Schedule Meeting'}
+            </Button>
+          </Col>
+        </Row>
+        
+        {appointments.length > 0 ? (
+          <div className="appointments-list">
+            {appointments.map((appointment, index) => renderAppointment(appointment, index))}
+          </div>
+        ) : (
+          <div className="no-appointments text-center py-5">
+            <p>No appointments scheduled yet.</p>
+          </div>
+        )}
+        
+        {/* Appointment Creation Modal */}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {userType === 'student' ? 'Request Appointment' : 'Schedule Meeting'}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleSubmit}>
+              {userType === 'scad' && (
+                <Form.Group className="mb-3">
+                  <Form.Label>Student GUC ID</Form.Label>
+                  <Form.Control
+                    type="text"
+                    required
+                    placeholder="Enter student GUC ID (e.g., 49-12345)"
+                    value={newAppointment.studentId}
+                    onChange={(e) => {
+                      const student = students.find(s => s.gucId === e.target.value);
+                      setNewAppointment({
+                        ...newAppointment,
+                        studentId: e.target.value,
+                        studentName: student?.name || ''
+                      });
+                    }}
+                  />
+                  {newAppointment.studentName && (
+                    <Form.Text className="text-success">
+                      Student found: {newAppointment.studentName}
+                    </Form.Text>
+                  )}
+                </Form.Group>
+              )}
+
+              <Form.Group className="mb-3">
+                <Form.Label>Date</Form.Label>
+                <Form.Control
+                  type="date"
+                  required
+                  value={newAppointment.date}
+                  onChange={(e) => setNewAppointment({
+                    ...newAppointment,
+                    date: e.target.value
+                  })}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Time</Form.Label>
+                <Form.Control
+                  type="time"
+                  required
+                  value={newAppointment.time}
+                  onChange={(e) => setNewAppointment({
+                    ...newAppointment,
+                    time: e.target.value
+                  })}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Purpose</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  required
+                  placeholder="Please describe the purpose of your appointment"
+                  value={newAppointment.purpose}
+                  onChange={(e) => setNewAppointment({
+                    ...newAppointment,
+                    purpose: e.target.value
+                  })}
+                />
+              </Form.Group>
+
+              <Button variant="primary" type="submit">
+                Submit
+              </Button>
+            </Form>
+          </Modal.Body>
+        </Modal>
+        
+        {/* Video Call Component */}
+        <VideoCallComponent
+          isVisible={showVideoCall}
+          onHide={handleEndCall}
+          callData={activeCall}
+        />
+        
+        {/* Incoming Call Component */}
+        <VideoCallComponent
+          isVisible={incomingCall !== null}
+          onHide={handleRejectCall}
+          callData={incomingCall}
+          isIncoming={true}
+          onAccept={handleAcceptCall}
+          onReject={handleRejectCall}
+        />
+      </Container>
+    </div>
   );
 };
 

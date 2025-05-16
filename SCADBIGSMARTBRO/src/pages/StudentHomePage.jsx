@@ -506,7 +506,7 @@ const StudentHomePage = () => {
           </Tab>
 
           <Tab eventKey="internshipRequirements" title="Internship Requirements Video">
-            <div className="video-container text-center py-5">
+            <div className="video-container text-center py-5" style={{ background: 'transparent' }}>
               <h5>Internship Requirements for {studentMajor}</h5>
               <iframe
                 width="560"
