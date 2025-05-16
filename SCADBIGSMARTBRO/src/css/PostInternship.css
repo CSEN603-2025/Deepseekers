@@ -65,6 +65,29 @@
     border-color: #388E3C;
 }
 
+/* Improved Checkbox Styling */
+.form-check-input {
+    width: 18px !important;
+    height: 18px !important;
+    background-color: #fff !important;
+    border: 1.5px solid #adb5bd !important;
+    margin-top: 0.25em !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+}
+
+.form-check-input:checked {
+    background-color: #0074b7 !important;
+    border-color: #0074b7 !important;
+}
+
+.form-check-label {
+    font-size: 16px;
+    font-weight: 500;
+    padding-left: 4px;
+    color: #495057;
+}
+
 /* Form styling */
 .form-label {
     font-weight: 500;
@@ -124,3 +147,17 @@ textarea.form-control {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Paid internship section styling */
+.paid-internship-section {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+    padding: 15px !important;
+}
+
+.paid-internship-section .form-check-input {
+    opacity: 1 !important;
+}
+
+

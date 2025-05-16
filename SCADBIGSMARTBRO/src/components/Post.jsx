@@ -324,10 +324,10 @@ function Post({ internship, isStudent = true, isScad = false }) {
       <Modal 
         show={showApplicationsModal} 
         onHide={() => setShowApplicationsModal(false)}
-        size="lg"
+        size="xl"
         centered
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton className="applications-modal-header">
           <Modal.Title>
             {isScad ? 
               `Applications for ${internship.title}` : 
@@ -335,7 +335,7 @@ function Post({ internship, isStudent = true, isScad = false }) {
             }
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="applications-modal-body">
           {/* Permission denied message */}
           {!hasPermission && (
             <Alert variant="danger" className="mb-0">
@@ -442,11 +442,12 @@ function Post({ internship, isStudent = true, isScad = false }) {
         onHide={() => setShowApplicationDetailsModal(false)}
         size="lg"
         centered
+        
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton className="applications-modal-header">
           <Modal.Title>Application Details</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="applications-modal-body">
           {selectedApplication && (
             <div className="application-details">
               <div className="application-header mb-4">

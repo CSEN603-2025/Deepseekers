@@ -116,11 +116,6 @@ function Profile({
                                     Edit Profile
                                 </Button>
                             )}
-                            {profileType === "company" && navigateTo !== "#" && (
-                                <Link to={navigateTo} className="edit-button">
-                                    Post Internship
-                                </Link>
-                            )}
                         </div>
                     </div>
                     

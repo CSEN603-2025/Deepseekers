@@ -498,21 +498,24 @@ function CompanyDashBoard() {
                                                 <Accordion.Item eventKey="0">
                                                     <Accordion.Header>Payment Type</Accordion.Header>
                                                     <Accordion.Body>
-                                                        <Form.Check 
-                                                            type="checkbox"
-                                                            id="paid-filter-all"
-                                                            label="Paid"
-                                                            checked={filterPaid}
-                                                            onChange={(e) => setFilterPaid(e.target.checked)}
-                                                            className="mb-2"
-                                                        />
-                                                        <Form.Check 
-                                                            type="checkbox"
-                                                            id="unpaid-filter-all"
-                                                            label="Unpaid"
-                                                            checked={filterUnpaid}
-                                                            onChange={(e) => setFilterUnpaid(e.target.checked)}
-                                                        />
+                                                        <div className="payment-filter-options">
+                                                            <Form.Check 
+                                                                type="checkbox"
+                                                                id="paid-filter-all"
+                                                                label="Paid"
+                                                                checked={filterPaid}
+                                                                onChange={(e) => setFilterPaid(e.target.checked)}
+                                                                className="mb-2 payment-filter-option"
+                                                            />
+                                                            <Form.Check 
+                                                                type="checkbox"
+                                                                id="unpaid-filter-all"
+                                                                label="Unpaid"
+                                                                checked={filterUnpaid}
+                                                                onChange={(e) => setFilterUnpaid(e.target.checked)}
+                                                                className="payment-filter-option"
+                                                            />
+                                                        </div>
                                                     </Accordion.Body>
                                                 </Accordion.Item>
                                                 
@@ -520,17 +523,19 @@ function CompanyDashBoard() {
                                                 <Accordion.Item eventKey="1">
                                                     <Accordion.Header>Industry</Accordion.Header>
                                                     <Accordion.Body className="industry-filters">
-                                                        {industries.map(industry => (
-                                                            <Form.Check 
-                                                                key={industry}
-                                                                type="checkbox"
-                                                                id={`industry-${industry}-all`}
-                                                                label={industry}
-                                                                checked={selectedIndustries.includes(industry)}
-                                                                onChange={() => handleIndustryChange(industry)}
-                                                                className="mb-2"
-                                                            />
-                                                        ))}
+                                                        <div className="payment-filter-options">
+                                                            {industries.map(industry => (
+                                                                <Form.Check 
+                                                                    key={industry}
+                                                                    type="checkbox"
+                                                                    id={`industry-${industry}-all`}
+                                                                    label={industry}
+                                                                    checked={selectedIndustries.includes(industry)}
+                                                                    onChange={() => handleIndustryChange(industry)}
+                                                                    className="mb-2 payment-filter-option"
+                                                                />
+                                                            ))}
+                                                        </div>
                                                     </Accordion.Body>
                                                 </Accordion.Item>
                                                 
@@ -606,7 +611,7 @@ function CompanyDashBoard() {
                                         <div className="filters-container">
                                             <div className="search-box mb-4">
                                                 <label htmlFor="search-input-company" className="fw-bold mb-2">Search My Internships</label>
-                                                <InputGroup>
+                                                <InputGroup className="search-input-group">
                                                     <InputGroup.Text id="search-addon-company">
                                                         <i className="bi bi-search"></i>
                                                     </InputGroup.Text>
@@ -615,6 +620,8 @@ function CompanyDashBoard() {
                                                         placeholder="Search by job title"
                                                         onChange={(e) => setSearchTerm(e.target.value)}
                                                         value={searchTerm}
+                                                        aria-label="Search my internships"
+                                                        aria-describedby="search-addon-company"
                                                     />
                                                 </InputGroup>
                                             </div>
@@ -644,21 +651,24 @@ function CompanyDashBoard() {
                                                     <Accordion.Item eventKey="0">
                                                         <Accordion.Header>Payment Type</Accordion.Header>
                                                         <Accordion.Body>
-                                                            <Form.Check 
-                                                                type="checkbox"
-                                                                id="paid-filter-company"
-                                                                label="Paid"
-                                                                checked={filterPaid}
-                                                                onChange={(e) => setFilterPaid(e.target.checked)}
-                                                                className="mb-2"
-                                                            />
-                                                            <Form.Check 
-                                                                type="checkbox"
-                                                                id="unpaid-filter-company"
-                                                                label="Unpaid"
-                                                                checked={filterUnpaid}
-                                                                onChange={(e) => setFilterUnpaid(e.target.checked)}
-                                                            />
+                                                            <div className="payment-filter-options">
+                                                                <Form.Check 
+                                                                    type="checkbox"
+                                                                    id="paid-filter-company"
+                                                                    label="Paid"
+                                                                    checked={filterPaid}
+                                                                    onChange={(e) => setFilterPaid(e.target.checked)}
+                                                                    className="mb-2 payment-filter-option"
+                                                                />
+                                                                <Form.Check 
+                                                                    type="checkbox"
+                                                                    id="unpaid-filter-company"
+                                                                    label="Unpaid"
+                                                                    checked={filterUnpaid}
+                                                                    onChange={(e) => setFilterUnpaid(e.target.checked)}
+                                                                    className="payment-filter-option"
+                                                                />
+                                                            </div>
                                                         </Accordion.Body>
                                                     </Accordion.Item>
                                                     
@@ -1026,11 +1036,11 @@ function CompanyDashBoard() {
             </Modal>
             
             {/* All Applications Modal */}
-            <Modal show={showAllApplicationsModal} onHide={() => setShowAllApplicationsModal(false)} size="lg" centered>
-                <Modal.Header closeButton>
+            <Modal show={showAllApplicationsModal} onHide={() => setShowAllApplicationsModal(false)} size="xl" centered>
+                <Modal.Header closeButton className="applications-modal-header">
                     <Modal.Title>All Applications</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body className="applications-modal-body">
                     <div className="mb-3">
                         <Form.Label>Filter by Position Title</Form.Label>
                         <Form.Select 
@@ -1046,7 +1056,7 @@ function CompanyDashBoard() {
                         </Form.Select>
                     </div>
                     
-                    <Table striped bordered hover responsive>
+                    <Table striped bordered hover responsive className="applications-table">
                         <thead>
                             <tr>
                                 <th>Student Name</th>
@@ -1083,9 +1093,9 @@ function CompanyDashBoard() {
                                                     <Dropdown.Toggle variant="outline-secondary" size="sm">Change Status</Dropdown.Toggle>
                                                     <Dropdown.Menu>
                                                         <Dropdown.Item onClick={() => handleUpdateStatus(application.id, 'pending')} disabled={application.status === 'pending'}>Pending</Dropdown.Item>
-                                                        <Dropdown.Item onClick={() => handleUpdateStatus(application.id, 'finalized')} disabled={application.status === 'finalized'}>Finalized</Dropdown.Item>
-                                                        <Dropdown.Item onClick={() => handleUpdateStatus(application.id, 'accepted')} disabled={application.status === 'accepted'}>Accept</Dropdown.Item>
-                                                        <Dropdown.Item onClick={() => handleUpdateStatus(application.id, 'rejected')} disabled={application.status === 'rejected'}>Reject</Dropdown.Item>
+                                                        <Dropdown.Item className="text-info" onClick={() => handleUpdateStatus(application.id, 'finalized')} disabled={application.status === 'finalized'}>Finalized</Dropdown.Item>
+                                                        <Dropdown.Item className="text-success" onClick={() => handleUpdateStatus(application.id, 'accepted')} disabled={application.status === 'accepted'}>Accept</Dropdown.Item>
+                                                        <Dropdown.Item className="text-danger" onClick={() => handleUpdateStatus(application.id, 'rejected')} disabled={application.status === 'rejected'}>Reject</Dropdown.Item>
                                                     </Dropdown.Menu>
                                                 </Dropdown>
                                             </td>
@@ -1275,10 +1285,7 @@ function CompanyDashBoard() {
                 <Modal.Footer>
                     <div className="d-flex justify-content-between w-100">
                         <div>
-                            <Button 
-                                variant="secondary" 
-                                onClick={() => setShowApplicationDetailsModal(false)}
-                            >
+                            <Button variant="secondary" onClick={() => setShowApplicationDetailsModal(false)}>
                                 Close
                             </Button>
                         </div>
