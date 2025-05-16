@@ -50,6 +50,10 @@ const CompanyRegister = () => {
 
   const navigate = useNavigate();
 
+  const handleNavigateToLogin = () => {
+    navigate('/login');
+  };
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setValidationError('');
@@ -231,7 +235,16 @@ const CompanyRegister = () => {
   return (
     <div className="company-register-container">
       <div className="company-register-form">
-        <h2>Company Registration</h2>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2>Company Registration</h2>
+          <Button 
+            variant="outline-secondary" 
+            onClick={handleNavigateToLogin}
+            className="back-button"
+          >
+            Back to Login
+          </Button>
+        </div>
 
         {validationError && <Alert variant="danger">{validationError}</Alert>}
 

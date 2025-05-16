@@ -16,11 +16,11 @@ const LogoutButton = () => {
 
   return (
     <Button 
-      variant="outline-danger" 
+      variant="outline-light" 
+      className="logout-btn ms-3" 
       onClick={handleLogout}
-      className="logout-button"
     >
-      Logout
+      Log out
     </Button>
   );
 };
