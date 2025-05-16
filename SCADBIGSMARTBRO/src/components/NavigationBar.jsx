@@ -1,19 +1,23 @@
 // /components/NavigationBar.jsx
 import React from 'react';
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Nav, Container, Image } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import '../css/navigationBar.css';
 import LogoutButton from './LogoutButton';
 import NotificationButton from './NotificationButton';
 import ProfileViewsButton from './ProfileViewsButton';
+import SCADLogo from '../assets/SCAD_Logo2.png';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
-
   return (
-    <Navbar expand="lg" className="custom-navbar" variant="dark">
-      <Container fluid className="px-4">
-        <Navbar.Brand className="brand-text me-5">GUC Internship System</Navbar.Brand>
+    <Navbar expand="lg" className="custom-navbar" variant="dark">      <Container fluid className="px-4">
+        <div className="d-flex align-items-center">
+          <Navbar.Brand className="navbar-brand-container">
+            <Image src={SCADLogo} alt="SCAD Logo" className="navbar-logo" />
+          </Navbar.Brand>
+          <span className="faculty-text">GUC Internship System</span>
+        </div>
         <Navbar.Toggle aria-controls="navbar-nav" />
         <Navbar.Collapse id="navbar-nav">
           <Nav className="me-auto align-items-center">

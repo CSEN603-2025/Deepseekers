@@ -806,14 +806,7 @@ function StudentReportsPage() {
           )}
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-between">
-          <Button
-            variant="secondary"
-            onClick={() => setShowDetailsModal(false)}
-          >
-            Close
-          </Button>
-
-          {/* Add appeal button in the modal footer */}
+          {/* Move the Appeal button to the left */}
           {selectedItem && (selectedItem.status === "rejected" || selectedItem.status === "flagged") && !selectedItem.hasAppeal && (
             <Button
               variant="warning"
@@ -825,6 +818,19 @@ function StudentReportsPage() {
               Appeal Decision
             </Button>
           )}
+          
+          {/* Show empty div as a spacer when appeal button isn't visible */}
+          {(!selectedItem || 
+           !(selectedItem.status === "rejected" || selectedItem.status === "flagged") || 
+           selectedItem.hasAppeal) && <div></div>}
+          
+          {/* Move the Close button to the right */}
+          <Button
+            variant="secondary"
+            onClick={() => setShowDetailsModal(false)}
+          >
+            Close
+          </Button>
         </Modal.Footer>
       </Modal>
 

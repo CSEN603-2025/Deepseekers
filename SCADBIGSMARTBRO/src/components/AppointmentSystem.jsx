@@ -444,9 +444,11 @@ const AppointmentSystem = ({ userType, studentId }) => {
                 />
               </Form.Group>
 
-              <Button variant="primary" type="submit">
-                Submit
-              </Button>
+              <div className="d-flex justify-content-end">
+                <Button variant="primary" type="submit">
+                  Submit
+                </Button>
+              </div>
             </Form>
           </Modal.Body>
         </Modal>

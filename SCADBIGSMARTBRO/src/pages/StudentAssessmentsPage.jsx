@@ -10,7 +10,7 @@ const StudentAssessmentsPage = () => {
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [shareOnProfile, setShareOnProfile] = useState(true);
+  const [shareOnProfile, setShareOnProfile] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   // Enhanced sample assessment data with more questions
@@ -426,6 +426,22 @@ const StudentAssessmentsPage = () => {
     localStorage.setItem('completedAssessments', JSON.stringify(updatedAssessments));
   };
 
+  // Add function to toggle recent assessment sharing status
+  const handleToggleRecentAssessmentSharing = (isShared) => {
+    // Find the most recent assessment
+    if (completedAssessments.length > 0 && currentAssessment) {
+      // Find the assessment we just completed
+      const recentAssessment = completedAssessments.find(
+        assessment => assessment.assessmentId === currentAssessment.id && 
+                      assessment.studentId === currentUser?.id
+      );
+      
+      if (recentAssessment) {
+        handleToggleSharing(recentAssessment.id, isShared);
+      }
+    }
+  };
+
   const handleCloseModal = () => {
     setShowAssessmentModal(false);
     setCurrentAssessment(null);
@@ -579,11 +595,11 @@ const StudentAssessmentsPage = () => {
                             >
                               {assessment.sharedOnProfile ? (
                                 <>
-                                  <i className="bi bi-eye-fill me-1"></i> Share
+                                  <i className="bi bi-eye-fill me-1"></i> Unshare
                                 </>
                               ) : (
                                 <>
-                                  <i className="bi bi-eye-slash me-1"></i> Shared
+                                  <i className="bi bi-eye-slash me-1"></i> Share on Profile
                                 </>
                               )}
                             </Button>
@@ -757,21 +773,31 @@ const StudentAssessmentsPage = () => {
         <Modal.Footer className="d-flex justify-content-between align-items-center">
           {score !== null && (
             <>
-              <div className="share-toggle-container">
+              <Button variant="secondary" onClick={handleCloseModal}>
+                Close
+              </Button>              <div className="share-toggle-container">
                 <div className="sharing-button-wrapper">
                   <Button 
-                    variant={shareOnProfile ? "primary" : "outline-primary"} 
+                    variant={shareOnProfile ? "outline-info" : "outline-secondary"} 
                     className="share-profile-btn"
-                    onClick={() => setShareOnProfile(!shareOnProfile)}
+                    onClick={() => {
+                      const newShareState = !shareOnProfile;
+                      setShareOnProfile(newShareState);
+                      handleToggleRecentAssessmentSharing(newShareState);
+                    }}
                   >
-                    <i className={`bi ${shareOnProfile ? 'bi-eye' : 'bi-eye-slash'} me-2`}></i>
-                    {shareOnProfile ? 'Visible on Profile' : 'Hidden from Profile'}
+                    {shareOnProfile ? (
+                      <>
+                        <i className="bi bi-eye-fill me-1"></i> Unshare
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-eye-slash me-1"></i> Share on Profile
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
-              <Button variant="secondary" onClick={handleCloseModal}>
-                Close
-              </Button>
             </>
           )}
         </Modal.Footer>
